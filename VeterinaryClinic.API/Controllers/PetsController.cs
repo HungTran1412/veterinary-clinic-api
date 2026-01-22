@@ -6,7 +6,9 @@ using VeterinaryClinic.Shared;
 namespace VeterinaryClinic.API.Controllers
 {
  
-    [Route("api/[controller]")]
+    [ApiController]
+    [Route("veterinary-clinic/v1/pet")]
+    [ApiExplorerSettings(GroupName = "01. Pet (Quản lý thú cưng)")]
     public class PetsController : ApiControllerBase
     {
         private readonly IMediator _mediator;
@@ -16,7 +18,7 @@ namespace VeterinaryClinic.API.Controllers
             _mediator = mediator;
         }
 
-        [HttpGet]
+        [HttpGet, Route("get-all")]
         public async Task<IActionResult> GetAll()
         {
             return await ExecuteFunction(async () => 

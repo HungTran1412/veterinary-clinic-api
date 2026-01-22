@@ -7,13 +7,36 @@ using VeterinaryClinic.Business.Services;
 using VeterinaryClinic.Data;
 using VeterinaryClinic.Infrastructure.Services;
 using System.Reflection;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+// Cấu hình Swagger
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Veterinary Clinic API", Version = "v1" });
+    
+    // Cho phép hiển thị Controller có GroupName trong document v1
+    c.DocInclusionPredicate((docName, apiDesc) => true);
+    
+    // Nếu bạn muốn chia nhỏ Swagger theo GroupName thì dùng TagActionsBy
+    c.TagActionsBy(api =>
+    {
+        if (api.GroupName != null)
+        {
+            return new[] { api.GroupName };
+        }
+        if (api.ActionDescriptor is Microsoft.AspNetCore.Mvc.Controllers.ControllerActionDescriptor controllerActionDescriptor)
+        {
+            return new[] { controllerActionDescriptor.ControllerName };
+        }
+        return new[] { "Uncategorized" };
+    });
+});
 
 // 1. Đăng ký DbContext sử dụng SQL Server
 builder.Services.AddDbContext<VeterinaryClinicDbContext>(options =>
@@ -63,10 +86,22 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Veterinary Clinic API v1");
+        c.DisplayRequestDuration(); // Hiển thị thời gian phản hồi
+        c.EnableDeepLinking();      // Cho phép copy link trực tiếp đến từng endpoint trên thanh địa chỉ trình duyệt
+        c.ShowExtensions();
+        
+        // Inject file JS tùy chỉnh để thêm nút Copy
+        c.InjectJavascript("/js/custom-swagger.js");
+    });
 }
 
 app.UseHttpsRedirection();
+
+// Quan trọng: Phải có UseStaticFiles để load được file js/custom-swagger.js
+app.UseStaticFiles();
 
 app.UseRequestLocalization();
 

@@ -15,6 +15,18 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
+// Cấu hình CORS: Cho phép mọi nguồn (Dùng cho Dev)
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                   .AllowAnyMethod()
+                   .AllowAnyHeader();
+        });
+});
+
 // Cấu hình Swagger
 builder.Services.AddSwaggerGen(c =>
 {
@@ -38,9 +50,9 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// 1. Đăng ký DbContext sử dụng SQL Server
+// 1. Đăng ký DbContext sử dụng In-Memory Database (Để chạy demo ngay)
 builder.Services.AddDbContext<VeterinaryClinicDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseInMemoryDatabase("VeterinaryClinicDb_Demo"));
 
 // 2. Đăng ký MediatR
 // Scan assembly chứa các Command/Query Handler (nằm trong project Business)
@@ -97,6 +109,9 @@ if (app.Environment.IsDevelopment())
         c.InjectJavascript("/js/custom-swagger.js");
     });
 }
+
+// Kích hoạt CORS (Phải đặt trước UseAuthorization và sau UseHttpsRedirection nếu có)
+app.UseCors("AllowAll");
 
 app.UseHttpsRedirection();
 

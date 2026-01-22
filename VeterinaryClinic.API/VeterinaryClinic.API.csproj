@@ -20,6 +20,7 @@
   <ItemGroup>
     <ProjectReference Include="..\VeterinaryClinic.Business\VeterinaryClinic.Business.csproj" />
     <ProjectReference Include="..\VeterinaryClinic.Shared\VeterinaryClinic.Shared.csproj" />
+    <ProjectReference Include="..\VeterinaryClinic.Infrastructure\VeterinaryClinic.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

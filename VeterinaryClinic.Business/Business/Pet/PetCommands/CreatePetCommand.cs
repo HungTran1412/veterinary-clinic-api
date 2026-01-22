@@ -14,13 +14,13 @@ namespace VeterinaryClinic.Business
 {
     public class CreatePetCommand : IRequest<Unit>
     {
-        public CreatePetModel Model { get; }
+        public CreatePetModal Model { get; set; }
 
         /// <summary>
         /// Thêm mới thú cưng
         /// </summary>
         /// <param name="model">Thông tin thú cưng cần thêm mới</param>
-        public CreatePetCommand(CreatePetModel model)
+        public CreatePetCommand(CreatePetModal model)
         {
             Model = model;
         }
@@ -45,7 +45,7 @@ namespace VeterinaryClinic.Business
                 Log.Information($"Create Pet: " + JsonSerializer.Serialize(model));
 
                 // Map từ Model sang Entity
-                var entity = AutoMapperUtils.AutoMap<CreatePetModel, Pet>(model);
+                var entity = AutoMapperUtils.AutoMap<CreatePetModal, Pet>(model);
 
                 // Validate logic (ví dụ: check trùng tên và chủ sở hữu)
                 var checkExist = await _dataContext.Pets.AnyAsync(x => x.Name == entity.Name && x.OwnerName == entity.OwnerName, cancellationToken);

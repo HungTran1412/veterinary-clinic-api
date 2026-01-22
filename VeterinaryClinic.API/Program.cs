@@ -3,7 +3,9 @@ using Askmethat.Aspnet.JsonLocalizer.Extensions;
 using System.Globalization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
+using VeterinaryClinic.Business.Services;
 using VeterinaryClinic.Data;
+using VeterinaryClinic.Infrastructure.Services;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,9 +15,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// 1. Đăng ký DbContext sử dụng In-Memory Database (Thay vì SQL Server)
+// 1. Đăng ký DbContext sử dụng SQL Server
 builder.Services.AddDbContext<VeterinaryClinicDbContext>(options =>
-    options.UseInMemoryDatabase("VeterinaryClinicDb"));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // 2. Đăng ký MediatR
 // Scan assembly chứa các Command/Query Handler (nằm trong project Business)
@@ -24,7 +26,10 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Creat
 // 3. Đăng ký Cache Service
 builder.Services.AddScoped<ICacheService, RedisCacheService>();
 
-// 4. Cấu hình Redis Cache
+// 4. Đăng ký Email Service (Infrastructure)
+builder.Services.AddScoped<IEmailService, EmailService>();
+
+// 5. Cấu hình Redis Cache
 // Lưu ý: Nếu không có Redis thật, bạn có thể gặp lỗi khi chạy. 
 // Nếu muốn test mà không cần Redis, hãy set "AppSettings:EnableCache" = "false" trong appsettings.json
 builder.Services.AddStackExchangeRedisCache(options =>
@@ -33,7 +38,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.InstanceName = "VeterinaryClinic_";
 });
 
-// 5. Cấu hình JSON Localization
+// 6. Cấu hình JSON Localization
 builder.Services.AddJsonLocalization(options =>
 {
     options.ResourcesPath = "wwwroot/Localization";

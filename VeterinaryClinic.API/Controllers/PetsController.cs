@@ -3,31 +3,33 @@ using Microsoft.AspNetCore.Mvc;
 using VeterinaryClinic.Business;
 using VeterinaryClinic.Shared;
 
-namespace VeterinaryClinic.API.Controllers;
-
-[Route("api/[controller]")]
-public class PetsController : ApiControllerBase
+namespace VeterinaryClinic.API.Controllers
 {
-    private readonly IMediator _mediator;
-
-    public PetsController(IMediator mediator)
+ 
+    [Route("api/[controller]")]
+    public class PetsController : ApiControllerBase
     {
-        _mediator = mediator;
-    }
+        private readonly IMediator _mediator;
 
-    [HttpGet]
-    public async Task<IActionResult> GetAll()
-    {
-        return await ExecuteFunction(async () => 
-            await _mediator.Send(new GetAllPetQuery())
-        );
-    }
+        public PetsController(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
 
-    [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreatePetModel model)
-    {
-        return await ExecuteFunction(async () => 
-            await _mediator.Send(new CreatePetCommand(model))
-        );
-    }
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            return await ExecuteFunction(async () => 
+                await _mediator.Send(new GetAllPetQuery())
+            );
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreatePetModal model)
+        {
+            return await ExecuteFunction(async () => 
+                await _mediator.Send(new CreatePetCommand(model))
+            );
+        }
+    }   
 }

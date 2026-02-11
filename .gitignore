@@ -148,7 +148,6 @@ ServiceFabricBackup/
 # System Configuration Files (Requested)
 appsettings.json
 appsettings.*.json
-launchSettings.json
 web.config
 app.config
 *.pubxml

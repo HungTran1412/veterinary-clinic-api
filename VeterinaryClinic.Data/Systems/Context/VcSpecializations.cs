@@ -15,6 +15,12 @@ namespace VeterinaryClinic.Data
         }
         
         /// <summary>
+        /// Mã định danh (tự sinh hoặc theo quy tắc)
+        /// </summary>
+        [Column("code"), MaxLength(100)]
+        public string Code { get; set; }
+        
+        /// <summary>
         /// Ten chuyen nganh
         /// </summary>
         [Column("name"), MaxLength(150)]

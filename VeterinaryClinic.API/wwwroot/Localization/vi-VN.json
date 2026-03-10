@@ -1,3 +1,8 @@
 {
-  "Hello": "Xin chào"
+  "Hello": "Xin chào",
+
+  "data.not-found": "Dữ liệu không tồn tại",
+  
+  "specialization.code.required": "Mã chuyên ngành không được để trống",
+  "specialization.name.required": "Tên chuyên ngành không được để trống"
 }

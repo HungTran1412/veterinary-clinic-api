@@ -21,6 +21,12 @@ namespace VeterinaryClinic.Data
         public int CustomerId { get; set; }
         
         /// <summary>
+        /// Mã định danh (tự sinh hoặc theo quy tắc)
+        /// </summary>
+        [Column("code"), MaxLength(100)]
+        public string Code { get; set; }
+        
+        /// <summary>
         /// id thu cung
         /// </summary>
         [Column("pet_id")]

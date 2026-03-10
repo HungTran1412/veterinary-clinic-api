@@ -21,6 +21,12 @@ namespace VeterinaryClinic.Data
         public int AppointmentId { get; set; }
         
         /// <summary>
+        /// Mã định danh (tự sinh hoặc theo quy tắc)
+        /// </summary>
+        [Column("code"), MaxLength(100)]
+        public string Code { get; set; }
+        
+        /// <summary>
         /// Tong tien
         /// </summary>
         [Column("total_amount", TypeName = "decimal(12,2)")]

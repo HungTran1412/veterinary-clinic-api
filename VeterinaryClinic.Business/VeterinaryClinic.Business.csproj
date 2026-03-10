@@ -23,4 +23,8 @@
     <ProjectReference Include="..\VeterinaryClinic.Shared\VeterinaryClinic.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Business\" />
+  </ItemGroup>
+
 </Project>

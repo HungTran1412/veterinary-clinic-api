@@ -1,0 +1,38 @@
+﻿{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=.;Database=VeterinaryClinicDb;User Id=sa;Password=your_password;MultipleActiveResultSets=true;TrustServerCertificate=True",
+    "Redis": "localhost:6379"
+  },
+  "AppSettings": {
+    "EnableCache": true
+  },
+  "EmailSettings": {
+    "SmtpServer": "smtp.example.com",
+    "SmtpPort": 587,
+    "SmtpUser": "user@example.com",
+    "SmtpPass": "password",
+    "SenderName": "Veterinary Clinic",
+    "SenderEmail": "noreply@veterinaryclinic.com"
+  },
+  "CloudinarySettings": {
+    "CloudName": "your_cloud_name",
+    "ApiKey": "your_api_key",
+    "ApiSecret": "your_api_secret"
+  },
+  "VnPaySettings": {
+    "TmnCode": "your_tmn_code",
+    "HashSecret": "your_hash_secret",
+    "BaseUrl": "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html",
+    "Command": "pay",
+    "CurrCode": "VND",
+    "Version": "2.1.0",
+    "Locale": "vn"
+  }
+}

@@ -8,12 +8,14 @@ using VeterinaryClinic.Data;
 using VeterinaryClinic.Infrastructure.Services;
 using System.Reflection;
 using Microsoft.OpenApi.Models;
+using VeterinaryClinic.Shared.ContextAccessor;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddHttpContextAccessor();
 
 // Cấu hình CORS: Cho phép mọi nguồn (Dùng cho Dev)
 builder.Services.AddCors(options =>
@@ -50,13 +52,16 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// 1. Đăng ký DbContext sử dụng In-Memory Database (Để chạy demo ngay)
-builder.Services.AddDbContext<VeterinaryClinicDbContext>(options =>
-    options.UseInMemoryDatabase("VeterinaryClinicDb_Demo"));
+// 1. Đăng ký DbContext
+builder.Services.AddDbContext<VeterinaryClinicDataContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddDbContext<VeterinaryClinicReadDataContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // 2. Đăng ký MediatR
 // Scan assembly chứa các Command/Query Handler (nằm trong project Business)
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreatePetCommand).Assembly));
+// builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreatePetCommand).Assembly));
 
 // 3. Đăng ký Cache Service
 builder.Services.AddScoped<ICacheService, RedisCacheService>();
@@ -64,7 +69,10 @@ builder.Services.AddScoped<ICacheService, RedisCacheService>();
 // 4. Đăng ký Email Service (Infrastructure)
 builder.Services.AddScoped<IEmailService, EmailService>();
 
-// 5. Cấu hình Redis Cache
+// 5. Đăng ký Context Accessor
+builder.Services.AddScoped<IContextAccessor, HttpContextAccessorWrapper>();
+
+// 6. Cấu hình Redis Cache
 // Lưu ý: Nếu không có Redis thật, bạn có thể gặp lỗi khi chạy. 
 // Nếu muốn test mà không cần Redis, hãy set "AppSettings:EnableCache" = "false" trong appsettings.json
 builder.Services.AddStackExchangeRedisCache(options =>
@@ -73,7 +81,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.InstanceName = "VeterinaryClinic_";
 });
 
-// 6. Cấu hình JSON Localization
+// 7. Cấu hình JSON Localization
 builder.Services.AddJsonLocalization(options =>
 {
     options.ResourcesPath = "wwwroot/Localization";

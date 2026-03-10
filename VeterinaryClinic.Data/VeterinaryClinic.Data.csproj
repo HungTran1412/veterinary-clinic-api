@@ -17,8 +17,4 @@
     <ProjectReference Include="..\VeterinaryClinic.Shared\VeterinaryClinic.Shared.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Systems\Context\" />
-  </ItemGroup>
-
 </Project>

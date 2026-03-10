@@ -1,4 +1,5 @@
 using MailKit.Net.Smtp;
+using Microsoft.Extensions.Configuration;
 using MimeKit;
 using VeterinaryClinic.Business.Services;
 
@@ -6,16 +7,24 @@ namespace VeterinaryClinic.Infrastructure.Services;
 
 public class EmailService : IEmailService
 {
-    // Trong thực tế, bạn nên inject IConfiguration để lấy thông tin SMTP từ appsettings.json
-    private readonly string _smtpServer = "smtp.example.com";
-    private readonly int _smtpPort = 587;
-    private readonly string _smtpUser = "user@example.com";
-    private readonly string _smtpPass = "password";
+    private readonly IConfiguration _configuration;
+
+    public EmailService(IConfiguration configuration)
+    {
+        _configuration = configuration;
+    }
 
     public async Task SendEmailAsync(string to, string subject, string body)
     {
+        var smtpServer = _configuration["EmailSettings:SmtpServer"];
+        var smtpPort = int.Parse(_configuration["EmailSettings:SmtpPort"] ?? "587");
+        var smtpUser = _configuration["EmailSettings:SmtpUser"];
+        var smtpPass = _configuration["EmailSettings:SmtpPass"];
+        var senderName = _configuration["EmailSettings:SenderName"];
+        var senderEmail = _configuration["EmailSettings:SenderEmail"];
+
         var message = new MimeMessage();
-        message.From.Add(new MailboxAddress("Veterinary Clinic", _smtpUser));
+        message.From.Add(new MailboxAddress(senderName, senderEmail));
         message.To.Add(new MailboxAddress("", to));
         message.Subject = subject;
 
@@ -24,9 +33,9 @@ public class EmailService : IEmailService
             Text = body
         };
 
-        using var client = new SmtpClient();
-        // client.Connect(_smtpServer, _smtpPort, false);
-        // client.Authenticate(_smtpUser, _smtpPass);
+        // using var client = new SmtpClient();
+        // await client.ConnectAsync(smtpServer, smtpPort, false);
+        // await client.AuthenticateAsync(smtpUser, smtpPass);
         // await client.SendAsync(message);
         // await client.DisconnectAsync(true);
         

@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Systems\Context\VeterinaryClinic\" />
+    <Folder Include="Systems\Context\" />
   </ItemGroup>
 
 </Project>

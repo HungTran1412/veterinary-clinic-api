@@ -10,6 +10,7 @@ using System.Reflection;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using VeterinaryClinic.Shared.ContextAccessor;
+using Swashbuckle.AspNetCore.SwaggerUI;
 
 // Cấu hình Serilog tối thiểu để ghi ra Console
 Log.Logger = new LoggerConfiguration()
@@ -43,6 +44,14 @@ builder.Services.AddCors(options =>
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Veterinary Clinic API", Version = "v1" });
+    
+    // Thêm comment XML vào Swagger (nếu file tồn tại)
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (File.Exists(xmlPath))
+    {
+        c.IncludeXmlComments(xmlPath);
+    }
     
     c.DocInclusionPredicate((docName, apiDesc) => true);
     
@@ -120,7 +129,8 @@ if (app.Environment.IsDevelopment())
         c.EnableDeepLinking();      
         c.ShowExtensions();
         
-        // c.InjectJavascript("/js/custom-swagger.js");
+        // Inject file JS để thêm nút Copy
+        c.InjectJavascript("/js/custom-swagger.js");
     });
 }
 

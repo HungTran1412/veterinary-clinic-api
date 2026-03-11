@@ -3,6 +3,15 @@
 
   "data.not-found": "Dữ liệu không tồn tại",
   
+  
+  
   "specialization.code.required": "Mã chuyên ngành không được để trống",
-  "specialization.name.required": "Tên chuyên ngành không được để trống"
+  "specialization.name.required": "Tên chuyên ngành không được để trống",
+  
+  "service.code.required": "Mã dịch vụ không được để trống",
+  "service.name.required": "Tên dịch vụ không được để trống",
+  "service.price.required": "Giá dịch vụ không được để trống",
+  "service.duration_minutes.required": "Thời gian thực hiện không được để trống",
+  "service.specialization_id.required": "Chuyên ngành không được để trống",
+  "service.is_available.required": "Trạng thái cung cấp không được để trống"
 }

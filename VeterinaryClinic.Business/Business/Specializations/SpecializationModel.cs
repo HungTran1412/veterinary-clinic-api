@@ -39,7 +39,6 @@ namespace VeterinaryClinic.Business
 
         public void UpdateEntity(VcSpecializations entity)
         {
-            entity.Code = this.Code;
             entity.Name = this.Name;
             entity.Description = this.Description;
             entity.IsActive = this.IsActive;

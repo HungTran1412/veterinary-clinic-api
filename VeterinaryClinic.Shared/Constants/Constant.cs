@@ -7,6 +7,7 @@
     {
         public const string LIST_SELECT = "list-select";
         public const string SPECIALIZATION = "specialization";
+        public const string SERVICE = "service";
         public const string PET = "pettest";
     }   
 

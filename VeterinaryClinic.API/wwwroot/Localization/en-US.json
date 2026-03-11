@@ -1,3 +1,15 @@
 {
-  "Hello": "Hello"
+  "Hello": "Hello",
+  
+  "data.not-found": "Data not found",
+  
+  "specialization.code.required": "Specialization code is required",
+  "specialization.name.required": "Specialization name is required",
+  
+  "service.code.required": "Service code is required",
+  "service.name.required": "Service name is required",
+  "service.price.required": "Service price is required",
+  "service.duration_minutes.required": "Duration is required",
+  "service.specialization_id.required": "Specialization is required",
+  "service.is_available.required": "Availability status is required"
 }

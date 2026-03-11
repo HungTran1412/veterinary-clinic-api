@@ -13,10 +13,6 @@ namespace VeterinaryClinic.Business
     {
         public CreateSpecializationModel Model { get; }
 
-        /// <summary>
-        /// Thêm mới chuyên ngành
-        /// </summary>
-        /// <param name="model">Thông tin chuyên ngành cần thêm mới</param>
         public CreateSpecializationCommand(CreateSpecializationModel model)
         {
             Model = model;
@@ -40,10 +36,16 @@ namespace VeterinaryClinic.Business
             public async Task<Unit> Handle(CreateSpecializationCommand request, CancellationToken cancellationToken)
             {
                 var model = request.Model;
-                Log.Information($"Create {SpecializationConstant.CachePrefix}: " + JsonSerializer.Serialize(model));
+                Log.Information($"Create Specialization: " + JsonSerializer.Serialize(model));
                 
                 //map du lieu
                 var entity = AutoMapperUtils.AutoMap<CreateSpecializationModel, VcSpecializations>(model);
+                
+                // Validation cơ bản
+                if (entity == null)
+                {
+                    throw new ArgumentException("Failed to map data.");
+                }
 
                 //kiem tra ma trung
                 var checkCode = await _dataContext.VcSpecializations.AnyAsync(x => x.Code == entity.Code, cancellationToken);
@@ -56,8 +58,9 @@ namespace VeterinaryClinic.Business
                 await _dataContext.VcSpecializations.AddAsync(entity, cancellationToken);
                 await _dataContext.SaveChangesAsync(cancellationToken);
                 
-                // Khôi phục lại các hằng số ban đầu
-                _cacheService.Remove(SpecializationConstant.BuildCacheKey());
+                //xoa cache
+                // Thay thế bằng hằng số của bạn sau này: SpecializationConstant.BuildCacheKey()
+                _cacheService.Remove("Specializations");
                 
                 return Unit.Value;
             }

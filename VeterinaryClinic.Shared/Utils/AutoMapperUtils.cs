@@ -1,45 +1,104 @@
-using System.Collections;
 using AutoMapper;
+using AutoMapper.EquivalencyExpression;
+using System.Collections.Generic;
 
-namespace VeterinaryClinic.Shared;
-
-public static class AutoMapperUtils
+namespace VeterinaryClinic.Shared
 {
-    private static IMapper _mapper;
-
-    public static void Configure(IMapper mapper)
+    public static class AutoMapperUtils
     {
-        _mapper = mapper;
-    }
-
-    public static TDestination AutoMap<TSource, TDestination>(TSource source)
-    {
-        // Nếu TSource và TDestination là danh sách, ta cần map kiểu phần tử bên trong
-        var sourceType = typeof(TSource);
-        var destType = typeof(TDestination);
-
-        if (typeof(IEnumerable).IsAssignableFrom(sourceType) && sourceType != typeof(string) &&
-            typeof(IEnumerable).IsAssignableFrom(destType) && destType != typeof(string))
+        private static IMapper GetMapper<TSource, TDestination>()
         {
-            var sourceElementType = sourceType.IsArray 
-                ? sourceType.GetElementType() 
-                : sourceType.GetGenericArguments().FirstOrDefault();
-                
-            var destElementType = destType.IsArray 
-                ? destType.GetElementType() 
-                : destType.GetGenericArguments().FirstOrDefault();
-
-            if (sourceElementType != null && destElementType != null)
-            {
-                var config = new MapperConfiguration(cfg => cfg.CreateMap(sourceElementType, destElementType));
-                var mapper = config.CreateMapper();
-                return mapper.Map<TDestination>(source);
-            }
+            var config = new MapperConfiguration(cfg => {
+                cfg.AddCollectionMappers();
+                cfg.AllowNullCollections = true;
+                cfg.AllowNullDestinationValues = true;
+                cfg.CreateMap<TSource, TDestination>(MemberList.None);
+            });
+             
+            IMapper mapper = new Mapper(config);
+            return mapper;
+        }
+        
+        private static IMapper GetMapper<TSource, TDestination>(string idString)
+        {
+            var config = new MapperConfiguration(cfg => {
+                cfg.AddCollectionMappers();
+                cfg.AllowNullCollections = true;
+                cfg.AllowNullDestinationValues = true;
+                cfg.CreateMap<TSource, TDestination>(MemberList.None)
+                   .ForSourceMember(idString, s => s.DoNotValidate())
+                   .ForMember(idString, s => s.Ignore());
+            });
+            IMapper mapper = new Mapper(config);
+            return mapper;
         }
 
-        // Trường hợp object đơn lẻ
-        var configSingle = new MapperConfiguration(cfg => cfg.CreateMap<TSource, TDestination>());
-        var mapperSingle = configSingle.CreateMapper();
-        return mapperSingle.Map<TDestination>(source);
+        #region Single
+        public static TDestination AutoMap<TSource, TDestination>(TSource source)
+        {
+            if (source == null) return default;
+            var mapper = GetMapper<TSource, TDestination>();
+            TDestination dest = mapper.Map<TDestination>(source);
+            return dest;
+        }
+
+        public static TDestination AutoMap<TSource, TDestination>(TSource source, string idString)
+        {
+            if (source == null) return default;
+            var mapper = GetMapper<TSource, TDestination>(idString);
+            TDestination dest = mapper.Map<TDestination>(source);
+            return dest;
+        }
+        
+        public static TDestination AutoMap<TSource, TDestination>(TSource source, TDestination dest)
+        {
+            if (source == null) return dest;
+            var mapper = GetMapper<TSource, TDestination>();
+            dest = mapper.Map(source, dest);
+            return dest;
+        }
+
+        public static TDestination AutoMap<TSource, TDestination>(TSource source, TDestination dest, string idString)
+        {
+            if (source == null) return dest;
+            var mapper = GetMapper<TSource, TDestination>(idString);
+            dest = mapper.Map(source, dest);
+            return dest;
+        }
+        #endregion
+
+        #region List
+        public static List<TDestination> AutoMap<TSource, TDestination>(List<TSource> source)
+        {
+            if (source == null) return new List<TDestination>();
+            var mapper = GetMapper<TSource, TDestination>();
+            List<TDestination> dest = mapper.Map<List<TDestination>>(source);
+            return dest;
+        }
+
+        public static List<TDestination> AutoMap<TSource, TDestination>(List<TSource> source, string idString)
+        {
+            if (source == null) return new List<TDestination>();
+            var mapper = GetMapper<TSource, TDestination>(idString);
+            List<TDestination> dest = mapper.Map<List<TDestination>>(source);
+            return dest;
+        }
+        
+        public static List<TDestination> AutoMap<TSource, TDestination>(List<TSource> source, List<TDestination> dest)
+        {
+            if (source == null) return dest;
+            var mapper = GetMapper<TSource, TDestination>();
+            dest = mapper.Map(source, dest);
+            return dest;
+        }
+
+        public static List<TDestination> AutoMap<TSource, TDestination>(List<TSource> source, List<TDestination> dest, string idString)
+        {
+            if (source == null) return dest;
+            var mapper = GetMapper<TSource, TDestination>(idString);
+            dest = mapper.Map(source, dest);
+            return dest;
+        }
+        #endregion
     }
 }

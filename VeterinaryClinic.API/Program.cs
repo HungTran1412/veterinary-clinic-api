@@ -89,6 +89,9 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IContextAccessor, HttpContextAccessorWrapper>();
 builder.Services.AddScoped<Func<IContextAccessor>>(sp => () => sp.GetRequiredService<IContextAccessor>());
 
+// Đăng ký Password Hasher
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+
 
 // 6. Cấu hình Redis Cache
 builder.Services.AddStackExchangeRedisCache(options =>

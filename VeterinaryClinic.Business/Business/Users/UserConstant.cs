@@ -2,9 +2,9 @@
 
 namespace VeterinaryClinic.Business
 {
-    public class ServiceConstant
+    public class UserConstant
     {
-        public const string CachePrefix = VeterinaryClinicCacheConstants.SERVICE; 
+        public const string CachePrefix = VeterinaryClinicCacheConstants.USER;
         public const string SelectItemCacheSubfix = VeterinaryClinicCacheConstants.LIST_SELECT;
         
         public static string BuildCacheKey(string id = "")
@@ -20,5 +20,6 @@ namespace VeterinaryClinic.Business
                 return $"{CachePrefix}-{id}";
             }
         }
-    }
+    }  
 }
+

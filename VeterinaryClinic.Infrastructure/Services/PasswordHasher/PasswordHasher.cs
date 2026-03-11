@@ -8,7 +8,7 @@ namespace VeterinaryClinic.Infrastructure.Services
         {
             // Sử dụng BCrypt để mã hóa mật khẩu.
             // Hàm này tự động sinh ra Salt và hash mật khẩu.
-            return BCrypt.Net.BCrypt.HashPassword(password);
+            return BCrypt.Net.BCrypt.HashPassword(password, 10);
         }
 
         public bool VerifyPassword(string password, string hashedPassword)

@@ -13,6 +13,10 @@ namespace VeterinaryClinic.Business
     {
         public CreateSpecializationModel Model { get; }
 
+        /// <summary>
+        /// Them chuyen nganh
+        /// </summary>
+        /// <param name="model">Thong tin chuyen nganh can them</param>
         public CreateSpecializationCommand(CreateSpecializationModel model)
         {
             Model = model;

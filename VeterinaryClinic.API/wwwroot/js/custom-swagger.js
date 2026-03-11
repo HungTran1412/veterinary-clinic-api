@@ -67,6 +67,6 @@
                 observer.observe(targetNode, { childList: true, subtree: true });
             }
 
-        }, 1000); // Đợi 1 giây để Swagger render xong
+        }, 1000);
     });
 })();

@@ -8,9 +8,19 @@ using VeterinaryClinic.Data;
 using VeterinaryClinic.Infrastructure.Services;
 using System.Reflection;
 using Microsoft.OpenApi.Models;
+using Serilog;
 using VeterinaryClinic.Shared.ContextAccessor;
 
+// Cấu hình Serilog tối thiểu để ghi ra Console
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Thêm Serilog vào pipeline của host
+builder.Host.UseSerilog();
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -34,10 +44,8 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Veterinary Clinic API", Version = "v1" });
     
-    // Cho phép hiển thị Controller có GroupName trong document v1
     c.DocInclusionPredicate((docName, apiDesc) => true);
     
-    // Nếu bạn muốn chia nhỏ Swagger theo GroupName thì dùng TagActionsBy
     c.TagActionsBy(api =>
     {
         if (api.GroupName != null)
@@ -60,8 +68,7 @@ builder.Services.AddDbContext<VeterinaryClinicReadDataContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // 2. Đăng ký MediatR
-// Scan assembly chứa các Command/Query Handler (nằm trong project Business)
-// builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreatePetCommand).Assembly));
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateSpecializationCommand).Assembly));
 
 // 3. Đăng ký Cache Service
 builder.Services.AddScoped<ICacheService, RedisCacheService>();
@@ -71,10 +78,10 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 
 // 5. Đăng ký Context Accessor
 builder.Services.AddScoped<IContextAccessor, HttpContextAccessorWrapper>();
+builder.Services.AddScoped<Func<IContextAccessor>>(sp => () => sp.GetRequiredService<IContextAccessor>());
+
 
 // 6. Cấu hình Redis Cache
-// Lưu ý: Nếu không có Redis thật, bạn có thể gặp lỗi khi chạy. 
-// Nếu muốn test mà không cần Redis, hãy set "AppSettings:EnableCache" = "false" trong appsettings.json
 builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
@@ -109,21 +116,18 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Veterinary Clinic API v1");
-        c.DisplayRequestDuration(); // Hiển thị thời gian phản hồi
-        c.EnableDeepLinking();      // Cho phép copy link trực tiếp đến từng endpoint trên thanh địa chỉ trình duyệt
+        c.DisplayRequestDuration(); 
+        c.EnableDeepLinking();      
         c.ShowExtensions();
         
-        // Inject file JS tùy chỉnh để thêm nút Copy
-        c.InjectJavascript("/js/custom-swagger.js");
+        // c.InjectJavascript("/js/custom-swagger.js");
     });
 }
 
-// Kích hoạt CORS (Phải đặt trước UseAuthorization và sau UseHttpsRedirection nếu có)
 app.UseCors("AllowAll");
 
 app.UseHttpsRedirection();
 
-// Quan trọng: Phải có UseStaticFiles để load được file js/custom-swagger.js
 app.UseStaticFiles();
 
 app.UseRequestLocalization();

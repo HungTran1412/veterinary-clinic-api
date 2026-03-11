@@ -8,13 +8,9 @@ namespace VeterinaryClinic.Data
     {
         private readonly IContextAccessor _contextAccessor;
 
-        protected VeterinaryClinicDataContext(Func<IContextAccessor> contextAccessorFactory)
+        public VeterinaryClinicDataContext(DbContextOptions<VeterinaryClinicDataContext> options, Func<IContextAccessor> contextAccessorFactory) : base(options)
         {
-            _contextAccessor = contextAccessorFactory();
-        }
-
-        public VeterinaryClinicDataContext(DbContextOptions<VeterinaryClinicDataContext> options) : base(options)
-        {
+            _contextAccessor = contextAccessorFactory?.Invoke();
         }
 
         public DbSet<VcPets> VcPets { get; set; }
@@ -32,14 +28,10 @@ namespace VeterinaryClinic.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            OnModelCreatingPartial(modelBuilder);
-        }
-
-        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
-        
-        public override int SaveChanges()
-        {
-            return SaveChangesAsync().Result;
+            base.OnModelCreating(modelBuilder);
+            
+            modelBuilder.Entity<VcDoctorSpecializations>()
+                .HasKey(ds => new { ds.DoctorId, ds.SpecializationId });
         }
         
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -49,17 +41,25 @@ namespace VeterinaryClinic.Data
             {
                 if (entry.Entity is TrackedChangeEntity entity)
                 {
+                    var userId = _contextAccessor?.UserId ?? 0;
+                    var userName = _contextAccessor?.UserName ?? "System";
+
                     switch (entry.State)
                     {
                         case EntityState.Added:
                             entity.CreatedDate = DateTime.Now;
-                            entity.CreatedUserId = _contextAccessor.UserId;
-                            entity.CreatedUserName = _contextAccessor.UserName;
+                            entity.CreatedUserId = userId;
+                            entity.CreatedUserName = userName;
+                            
+                            // Gán cả thông tin sửa đổi ban đầu để tránh lỗi NOT NULL trong DB
+                            entity.ModifiedDate = DateTime.Now;
+                            entity.ModifiedUserId = userId;
+                            entity.ModifiedUserName = userName;
                             break;
                         case EntityState.Modified:
                             entity.ModifiedDate = DateTime.Now;
-                            entity.ModifiedUserId = _contextAccessor.UserId;
-                            entity.ModifiedUserName = _contextAccessor.UserName;
+                            entity.ModifiedUserId = userId;
+                            entity.ModifiedUserName = userName;
                             break;
                     }
                 }

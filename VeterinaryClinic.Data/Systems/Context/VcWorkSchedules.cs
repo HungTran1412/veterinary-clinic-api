@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using VeterinaryClinic.Shared;
 
 namespace VeterinaryClinic.Data
@@ -12,6 +13,12 @@ namespace VeterinaryClinic.Data
         public VcWorkSchedules()
         {
         }
+        
+        /// <summary>
+        /// Mã định danh (tự sinh hoặc theo quy tắc)
+        /// </summary>
+        [Column("code"), MaxLength(100)]
+        public string Code { get; set; }
         
         /// <summary>
         /// id bac si, le tan. FK → Users(id)

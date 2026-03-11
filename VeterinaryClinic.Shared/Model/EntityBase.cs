@@ -42,6 +42,7 @@ namespace VeterinaryClinic.Shared
     
     public class BaseEntity: TrackedChangeEntity
     {
+        
         [Column("order", Order = 100)]
         public int Order { get; set; } = 0;
 

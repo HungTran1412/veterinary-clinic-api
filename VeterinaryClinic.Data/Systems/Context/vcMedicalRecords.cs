@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using VeterinaryClinic.Shared;
 
@@ -25,6 +26,12 @@ namespace VeterinaryClinic.Data
         /// </summary>
         [Column("doctor_id")]
         public int DoctorId { get; set; }
+        
+        /// <summary>
+        /// Mã định danh (tự sinh hoặc theo quy tắc)
+        /// </summary>
+        [Column("code"), MaxLength(100)]
+        public string Code { get; set; }
         
         /// <summary>
         /// Trieu chung

@@ -24,6 +24,10 @@
   "user.existed.code": "User code already exists",
   "user.existed.username": "Username already exists",
   "user.existed.email": "Email already exists",
+  "user.existed.phone-number": "Phone number already exists",
   "user.invalid.email_format": "Invalid email format",
-  "user.invalid.password_complexity": "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
+  "user.invalid.password_complexity": "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+  "user.password.mismatch": "Confirm password does not match",
+  "user.password.incorrect": "Incorrect old password",
+  "user.unauthorized": "User not found or not logged in"
 }

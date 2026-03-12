@@ -18,9 +18,6 @@ namespace VeterinaryClinic.Business
         [Required(ErrorMessage = "user.email.required")]
         public string Email { get; set; }
         
-        [Required(ErrorMessage = "user.password.required")]
-        public string Password { get; set; }
-        
         [Required(ErrorMessage = "user.full_name.required")]
         public string FullName { get; set; }
         
@@ -36,11 +33,11 @@ namespace VeterinaryClinic.Business
 
         public int Order { get; set; }
         public DateTime? CreatedDate { get; set; }
-        
     }
     public class UserModel : UserBaseModel
     {
-    
+        [Required(ErrorMessage = "user.password.required")]
+        public string Password { get; set; }
     }
     
     public class CreateUserModel : UserModel
@@ -48,7 +45,7 @@ namespace VeterinaryClinic.Business
         public int? CreatedUserId { get; set; }
     }
 
-    public class UpdateUserModel : UserModel
+    public class UpdateUserModel : UserBaseModel
     {
         public int? ModifiedUserId { get; set; }
 
@@ -59,13 +56,22 @@ namespace VeterinaryClinic.Business
             entity.PhoneNumber = this.PhoneNumber;
             entity.AvatarUrl = this.AvatarUrl;
             entity.Order = this.Order;
-            entity.ModifiedUserId = entity.ModifiedUserId;
+            entity.ModifiedUserId = this.ModifiedUserId;
         }
     }
 
-    public class UserSelectItemModel : SelectItemModel
+    public class UpdatePasswordUserModel
     {
-        
+        public int? ModifiedUserId { get; set; }
+        public string OldPassword { get; set; }
+        public string NewPassword { get; set; }
+        public string ConfirmPassword { get; set; }
+
+        public void UpdatePassword(VcUsers entity)
+        {
+            entity.Password = this.NewPassword;
+            entity.ModifiedUserId = this.ModifiedUserId;
+        }
     }
 
     public class UserFilterModel : BaseQueryFilterModel

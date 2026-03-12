@@ -12,7 +12,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Askmethat.Aspnet.JsonLocalizer" Version="4.0.1" />
+    <!-- Đã xóa Askmethat.Aspnet.JsonLocalizer -->
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.2" />
@@ -25,6 +25,7 @@
     <ProjectReference Include="..\VeterinaryClinic.Shared\VeterinaryClinic.Shared.csproj" />
     <ProjectReference Include="..\VeterinaryClinic.Infrastructure\VeterinaryClinic.Infrastructure.csproj" />
   </ItemGroup>
+
   <ItemGroup>
     <Content Update="wwwroot\Localization\*.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

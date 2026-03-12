@@ -96,11 +96,16 @@ namespace VeterinaryClinic.Business
                 {
                     throw new ArgumentException($"{_localizer["user.existed.email"]}");
                 }
-
+                
+                var checkPhoneNumber = await _dataContext.VcUsers.AnyAsync(x => x.PhoneNumber == entity.PhoneNumber, cancellationToken);
+                if(checkPhoneNumber)
+                {
+                    throw new ArgumentException($"{_localizer["user.existed.phone-number"]}");
+                }
                 #endregion
 
-                string plainPassword = model.Password;
-                entity.Password = _passwordHasher.HashPassword(plainPassword);
+                string password = model.Password;
+                entity.Password = _passwordHasher.HashPassword(password);
 
                 await _dataContext.VcUsers.AddAsync(entity, cancellationToken);
                 await _dataContext.SaveChangesAsync(cancellationToken);
@@ -111,7 +116,7 @@ namespace VeterinaryClinic.Business
                     string body = EmailTemplates.GetAccountCreatedEmail(
                         entity.FullName, 
                         entity.Username, 
-                        plainPassword, 
+                        password, 
                         entity.Role
                     );
 

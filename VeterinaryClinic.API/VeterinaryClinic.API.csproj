@@ -25,5 +25,10 @@
     <ProjectReference Include="..\VeterinaryClinic.Shared\VeterinaryClinic.Shared.csproj" />
     <ProjectReference Include="..\VeterinaryClinic.Infrastructure\VeterinaryClinic.Infrastructure.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Update="wwwroot\Localization\*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
 </Project>

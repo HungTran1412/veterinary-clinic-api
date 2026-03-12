@@ -1,17 +1,29 @@
 {
   "Hello": "Xin chào",
-
   "data.not-found": "Dữ liệu không tồn tại",
-  
-  
-  
+
   "specialization.code.required": "Mã chuyên ngành không được để trống",
   "specialization.name.required": "Tên chuyên ngành không được để trống",
-  
+  "Specialization.existed.code;": "Mã chuyên ngành đã tồn tại",
+
   "service.code.required": "Mã dịch vụ không được để trống",
   "service.name.required": "Tên dịch vụ không được để trống",
   "service.price.required": "Giá dịch vụ không được để trống",
   "service.duration_minutes.required": "Thời gian thực hiện không được để trống",
   "service.specialization_id.required": "Chuyên ngành không được để trống",
-  "service.is_available.required": "Trạng thái cung cấp không được để trống"
+  "service.is_available.required": "Trạng thái cung cấp không được để trống",
+  "service.existed.code": "Mã dịch vụ đã tồn tại",
+
+  "user.code.required": "Mã người dùng không được để trống",
+  "user.username.required": "Tên đăng nhập không được để trống",
+  "user.email.required": "Email không được để trống",
+  "user.password.required": "Mật khẩu không được để trống",
+  "user.full_name.required": "Họ và tên không được để trống",
+  "user.phone_number.required": "Số điện thoại không được để trống",
+  "user.role.required": "Vai trò không được để trống",
+  "user.existed.code": "Mã người dùng đã tồn tại",
+  "user.existed.username": "Tên đăng nhập đã tồn tại",
+  "user.existed.email": "Email đã tồn tại",
+  "user.invalid.email_format": "Định dạng email không hợp lệ",
+  "user.invalid.password_complexity": "Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt"
 }

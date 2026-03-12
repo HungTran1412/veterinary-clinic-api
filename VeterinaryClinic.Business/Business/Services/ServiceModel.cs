@@ -61,7 +61,6 @@ namespace VeterinaryClinic.Business
             entity.ImageUrl = this.ImageUrl;
             entity.IsAvailable = this.IsAvailable;
             entity.Description = this.Description;
-            entity.IsActive = this.IsActive;
             entity.Order = this.Order;
             entity.ModifiedUserId = entity.ModifiedUserId;
         }

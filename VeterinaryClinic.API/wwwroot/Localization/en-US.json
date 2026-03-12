@@ -1,15 +1,29 @@
 {
   "Hello": "Hello",
-  
   "data.not-found": "Data not found",
-  
+
   "specialization.code.required": "Specialization code is required",
   "specialization.name.required": "Specialization name is required",
-  
+  "Specialization.existed.code;": "Specialization code already exists",
+
   "service.code.required": "Service code is required",
   "service.name.required": "Service name is required",
   "service.price.required": "Service price is required",
   "service.duration_minutes.required": "Duration is required",
   "service.specialization_id.required": "Specialization is required",
-  "service.is_available.required": "Availability status is required"
+  "service.is_available.required": "Availability status is required",
+  "service.existed.code": "Service code already exists",
+
+  "user.code.required": "User code is required",
+  "user.username.required": "Username is required",
+  "user.email.required": "Email is required",
+  "user.password.required": "Password is required",
+  "user.full_name.required": "Full name is required",
+  "user.phone_number.required": "Phone number is required",
+  "user.role.required": "Role is required",
+  "user.existed.code": "User code already exists",
+  "user.existed.username": "Username already exists",
+  "user.existed.email": "Email already exists",
+  "user.invalid.email_format": "Invalid email format",
+  "user.invalid.password_complexity": "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
 }

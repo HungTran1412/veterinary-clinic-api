@@ -3,14 +3,15 @@ using Askmethat.Aspnet.JsonLocalizer.Extensions;
 using System.Globalization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
-using VeterinaryClinic.Business.Services;
+using VeterinaryClinic.Business.Services; // Using Interface
 using VeterinaryClinic.Data;
-using VeterinaryClinic.Infrastructure.Services;
+using VeterinaryClinic.Infrastructure.Services; // Using Implementation
 using System.Reflection;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using VeterinaryClinic.Shared.ContextAccessor;
 using Swashbuckle.AspNetCore.SwaggerUI;
+using Askmethat.Aspnet.JsonLocalizer.JsonOptions; // Thêm using này
 
 // Cấu hình Serilog tối thiểu để ghi ra Console
 Log.Logger = new LoggerConfiguration()
@@ -89,8 +90,8 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IContextAccessor, HttpContextAccessorWrapper>();
 builder.Services.AddScoped<Func<IContextAccessor>>(sp => () => sp.GetRequiredService<IContextAccessor>());
 
-// Đăng ký Password Hasher
-builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+// Đăng ký Password Hasher (Interface nằm ở Business, Implementation nằm ở Infrastructure)
+builder.Services.AddScoped<IBcryptPasswordHasher, PasswordHasher>();
 
 
 // 6. Cấu hình Redis Cache
@@ -104,6 +105,9 @@ builder.Services.AddStackExchangeRedisCache(options =>
 builder.Services.AddJsonLocalization(options =>
 {
     options.ResourcesPath = "wwwroot/Localization";
+    options.UseBaseName = false; // Thử thêm option này
+    options.CacheDuration = TimeSpan.FromMinutes(15);
+    options.FileEncoding = System.Text.Encoding.UTF8;
 });
 
 builder.Services.Configure<RequestLocalizationOptions>(options =>

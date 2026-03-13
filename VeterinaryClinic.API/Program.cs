@@ -1,5 +1,4 @@
 using VeterinaryClinic.Business;
-using Askmethat.Aspnet.JsonLocalizer.Extensions;
 using System.Globalization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +10,8 @@ using Microsoft.OpenApi.Models;
 using Serilog;
 using VeterinaryClinic.Shared.ContextAccessor;
 using Swashbuckle.AspNetCore.SwaggerUI;
-using Askmethat.Aspnet.JsonLocalizer.JsonOptions; // Thêm using này
+using Microsoft.Extensions.Localization;
+using VeterinaryClinic.API.Localization; // Using custom localizer
 
 // Cấu hình Serilog tối thiểu để ghi ra Console
 Log.Logger = new LoggerConfiguration()
@@ -54,6 +54,31 @@ builder.Services.AddSwaggerGen(c =>
         c.IncludeXmlComments(xmlPath);
     }
     
+    // Cấu hình JWT Auth cho Swagger
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+    
     c.DocInclusionPredicate((docName, apiDesc) => true);
     
     c.TagActionsBy(api =>
@@ -90,8 +115,11 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IContextAccessor, HttpContextAccessorWrapper>();
 builder.Services.AddScoped<Func<IContextAccessor>>(sp => () => sp.GetRequiredService<IContextAccessor>());
 
-// Đăng ký Password Hasher (Interface nằm ở Business, Implementation nằm ở Infrastructure)
+// Đăng ký Password Hasher
 builder.Services.AddScoped<IBcryptPasswordHasher, PasswordHasher>();
+
+// Đăng ký JWT Service
+builder.Services.AddScoped<IJwtService, JwtService>();
 
 
 // 6. Cấu hình Redis Cache
@@ -101,14 +129,9 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.InstanceName = "VeterinaryClinic_";
 });
 
-// 7. Cấu hình JSON Localization
-builder.Services.AddJsonLocalization(options =>
-{
-    options.ResourcesPath = "wwwroot/Localization";
-    options.UseBaseName = false; // Thử thêm option này
-    options.CacheDuration = TimeSpan.FromMinutes(15);
-    options.FileEncoding = System.Text.Encoding.UTF8;
-});
+// 7. Cấu hình Custom JSON Localization
+builder.Services.AddSingleton<IStringLocalizerFactory, JsonStringLocalizerFactory>();
+builder.Services.AddTransient(typeof(IStringLocalizer<>), typeof(StringLocalizer<>));
 
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {

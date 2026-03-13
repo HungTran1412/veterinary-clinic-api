@@ -33,9 +33,9 @@ namespace VeterinaryClinic.Data
         public string Subject { get; set; }
         
         /// <summary>
-        /// Noi dung
+        /// Noi dung (NVARCHAR(MAX))
         /// </summary>
-        [Column("body"), MaxLength(1000)]
+        [Column("body")]
         public string Body { get; set; }
         
         /// <summary>

@@ -24,6 +24,11 @@
   "user.existed.code": "Mã người dùng đã tồn tại",
   "user.existed.username": "Tên đăng nhập đã tồn tại",
   "user.existed.email": "Email đã tồn tại",
+  "user.existed.phone-number": "Số điện thoại đã tồn tại",
   "user.invalid.email_format": "Định dạng email không hợp lệ",
-  "user.invalid.password_complexity": "Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt"
+  "user.invalid.password_complexity": "Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt",
+  "user.password.mismatch": "Mật khẩu xác nhận không khớp",
+  "user.password.incorrect": "Mật khẩu cũ không chính xác",
+  "user.unauthorized": "Người dùng không tồn tại hoặc chưa đăng nhập",
+  "user.login.failed": "Tên đăng nhập hoặc mật khẩu không chính xác"
 }

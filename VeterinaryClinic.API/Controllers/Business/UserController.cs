@@ -16,6 +16,7 @@ namespace VeterinaryClinic.API.Controllers
         {
             _mediator = mediator;
         }
+        
 
         #region CRUD
 
@@ -72,7 +73,7 @@ namespace VeterinaryClinic.API.Controllers
         /// <param name="id">ID người dùng</param>
         /// <returns></returns>
         [HttpGet, Route("{id}")]
-        [ProducesResponseType(typeof(ResponseObject<UserBaseModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseObject<UserModel>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
             return await ExecuteFunction(async () =>

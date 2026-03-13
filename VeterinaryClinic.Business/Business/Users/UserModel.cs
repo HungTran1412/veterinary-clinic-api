@@ -3,7 +3,7 @@ using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared;
 
 namespace VeterinaryClinic.Business
-{
+{ 
     public class UserBaseModel
     {
         public int Id { get; set; }
@@ -34,6 +34,7 @@ namespace VeterinaryClinic.Business
         public int Order { get; set; }
         public DateTime? CreatedDate { get; set; }
     }
+
     public class UserModel : UserBaseModel
     {
         [Required(ErrorMessage = "user.password.required")]
@@ -81,5 +82,34 @@ namespace VeterinaryClinic.Business
         public string Email { set; get; }
         public string PhoneNumber { get; set; }
         public string Role { get; set; }
+    }
+
+    public class UserLoginModel
+    {
+        [Required]
+        public string LoginIdentifier { get; set; } 
+
+        [Required]
+        public string Password { get; set; }
+    }
+
+    public class LoginResponseModel
+    {
+        public int Id { get; set; }
+        public string FullName { get; set; }
+        public string UserName { get; set; }
+        public string Email { get; set; }
+        public string Role { get; set; }
+        public string AccessToken { get; set; }  // Đổi tên Token thành AccessToken cho rõ
+        public string RefreshToken { get; set; } // Thêm RefreshToken
+    }
+    
+    public class RefreshTokenModel
+    {
+        [Required]
+        public string AccessToken { get; set; }
+        
+        [Required]
+        public string RefreshToken { get; set; }
     }
 }

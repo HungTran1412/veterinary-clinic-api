@@ -61,5 +61,17 @@ namespace VeterinaryClinic.Data
         /// </summary>
         [Column("role")]
         public string Role { get; set; }
+
+        /// <summary>
+        /// Refresh Token để cấp lại Access Token
+        /// </summary>
+        [Column("refresh_token")]
+        public string? RefreshToken { get; set; }
+
+        /// <summary>
+        /// Thời gian hết hạn của Refresh Token
+        /// </summary>
+        [Column("refresh_token_expiry_time")]
+        public DateTime? RefreshTokenExpiryTime { get; set; }
     }   
 }

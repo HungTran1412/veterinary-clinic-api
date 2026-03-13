@@ -29,5 +29,6 @@
   "user.invalid.password_complexity": "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
   "user.password.mismatch": "Confirm password does not match",
   "user.password.incorrect": "Incorrect old password",
-  "user.unauthorized": "User not found or not logged in"
+  "user.unauthorized": "User not found or not logged in",
+  "user.login.failed": "Incorrect username or password"
 }

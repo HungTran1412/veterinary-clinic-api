@@ -24,7 +24,9 @@ namespace VeterinaryClinic.Business
         [Required(ErrorMessage = "user.phone_number.required")]
         public string PhoneNumber { get; set; }
         
-        public string AvatarUrl { get; set; }
+        public int? Gender { get; set; }
+        
+        public string? AvatarUrl { get; set; }
         
         [Required(ErrorMessage = "user.role.required")]
         public string Role { get; set; }
@@ -52,12 +54,15 @@ namespace VeterinaryClinic.Business
 
         public void UpdateEntity(VcUsers entity)
         {
-            entity.Email = this.Email;
+            entity.Username = this.UserName;
             entity.FullName = this.FullName;
             entity.PhoneNumber = this.PhoneNumber;
-            entity.AvatarUrl = this.AvatarUrl;
+            entity.AvatarUrl = string.IsNullOrEmpty(this.AvatarUrl) ? "" : this.AvatarUrl;
+            entity.Gender = this.Gender;
             entity.Order = this.Order;
+            entity.IsActive = this.IsActive;
             entity.ModifiedUserId = this.ModifiedUserId;
+            entity.Role = this.Role;
         }
     }
 
@@ -77,11 +82,11 @@ namespace VeterinaryClinic.Business
 
     public class UserFilterModel : BaseQueryFilterModel
     {
-        public string Code { get; set; }
-        public string FullName { get; set; }
-        public string Email { set; get; }
-        public string PhoneNumber { get; set; }
-        public string Role { get; set; }
+        public string? Code { get; set; }
+        public string? FullName { get; set; }
+        public string? Email { set; get; }
+        public string? PhoneNumber { get; set; }
+        public string? Role { get; set; }
     }
 
     public class UserLoginModel
@@ -100,8 +105,8 @@ namespace VeterinaryClinic.Business
         public string UserName { get; set; }
         public string Email { get; set; }
         public string Role { get; set; }
-        public string AccessToken { get; set; }  // Đổi tên Token thành AccessToken cho rõ
-        public string RefreshToken { get; set; } // Thêm RefreshToken
+        public string AccessToken { get; set; }
+        public string RefreshToken { get; set; }
     }
     
     public class RefreshTokenModel

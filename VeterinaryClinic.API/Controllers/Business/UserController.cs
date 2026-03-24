@@ -6,7 +6,7 @@ using VeterinaryClinic.Shared;
 namespace VeterinaryClinic.API.Controllers
 {
     [ApiController]
-    [Route("veterinary-clinic/v1/users")]
+    [Route("veterinary-clinic/v1/user-manager")]
     [ApiExplorerSettings(GroupName = "03. Người dùng (Quản lý người dùng)")]
     public class UserController : ApiControllerBase
     {
@@ -41,7 +41,7 @@ namespace VeterinaryClinic.API.Controllers
         /// <param name="id">ID người dùng</param>
         /// <param name="model">Thông tin cần cập nhật</param>
         /// <returns></returns>
-        [HttpPut, Route("{id}")]
+        [HttpPatch, Route("{id}")]
         [ProducesResponseType(typeof(ResponseObject<Unit>), StatusCodes.Status200OK)]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateUserModel model)
         {
@@ -102,7 +102,7 @@ namespace VeterinaryClinic.API.Controllers
         /// </summary>
         /// <param name="model">Thông tin đổi mật khẩu</param>
         /// <returns></returns>
-        [HttpPut, Route("change-password")]
+        [HttpPost, Route("change-password")]
         [ProducesResponseType(typeof(ResponseObject<Unit>), StatusCodes.Status200OK)]
         public async Task<IActionResult> ChangePassword([FromBody] UpdatePasswordUserModel model)
         {

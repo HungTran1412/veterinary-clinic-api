@@ -26,7 +26,7 @@ namespace VeterinaryClinic.Business
         {
             private readonly VeterinaryClinicDataContext _dataContext;
             private readonly ICacheService _cacheService;
-            private readonly IStringLocalizer<UpdateUserCommand> _localizer; // Sửa generic type cho đúng class
+            private readonly IStringLocalizer<UpdateUserCommand> _localizer;
             private readonly IContextAccessor _contextAccessor;
 
             public Handler(VeterinaryClinicDataContext dataContext, ICacheService cacheService, IStringLocalizer<UpdateUserCommand> localizer, Func<IContextAccessor> contextAccessorFactory)
@@ -68,7 +68,6 @@ namespace VeterinaryClinic.Business
                 var isPhoneExisted = await _dataContext.VcUsers.AnyAsync(x => x.PhoneNumber == model.PhoneNumber && x.Id != model.Id, cancellationToken);
                 if (isPhoneExisted)
                 {
-                    // Bạn cần thêm key này vào json: "user.existed.phone_number": "Số điện thoại đã tồn tại"
                     throw new ArgumentException($"{_localizer["user.existed.phone_number"]}");
                 }
 
@@ -78,9 +77,18 @@ namespace VeterinaryClinic.Business
                 //cap nhat thong tin
                 model.UpdateEntity(entity);
                 
-                //luu vao db
-                _dataContext.VcUsers.Update(entity);
-                await _dataContext.SaveChangesAsync(cancellationToken);
+                try
+                {
+                    _dataContext.VcUsers.Update(entity);
+                    await _dataContext.SaveChangesAsync(cancellationToken);
+                }
+                catch (DbUpdateException dbEx)
+                {
+                    // Lấy lỗi gốc từ SQL Server để in ra cho dễ debug
+                    var innerEx = dbEx.InnerException != null ? dbEx.InnerException.Message : dbEx.Message;
+                    Log.Error(dbEx, "Lỗi khi lưu DB Update User");
+                    throw new Exception($"DB Error: {innerEx}"); 
+                }
                 
                 //xoa cache
                 _cacheService.Remove(UserConstant.BuildCacheKey(entity.Id.ToString()));

@@ -117,6 +117,7 @@ namespace VeterinaryClinic.Business
                         Email = x.Email,
                         FullName = x.FullName,
                         PhoneNumber = x.PhoneNumber,
+                        Gender = x.Gender,
                         AvatarUrl = x.AvatarUrl,
                         Role = x.Role
                     })

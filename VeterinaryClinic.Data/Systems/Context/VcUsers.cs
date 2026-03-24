@@ -51,6 +51,12 @@ namespace VeterinaryClinic.Data
         public string PhoneNumber { get; set; }
         
         /// <summary>
+        /// Gioi tinh
+        /// </summary>
+        [Column("gender")]
+        public int? Gender { get; set; }
+        
+        /// <summary>
         /// Duong dan anh
         /// </summary>
         [Column("avatar_url")]

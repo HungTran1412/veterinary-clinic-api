@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VeterinaryClinic.Data;
 
@@ -11,9 +12,11 @@ using VeterinaryClinic.Data;
 namespace VeterinaryClinic.Data.Migrations
 {
     [DbContext(typeof(VeterinaryClinicDataContext))]
-    partial class VeterinaryClinicDataContextModelSnapshot : ModelSnapshot
+    [Migration("20260324031859_ModifiedGenderDataType")]
+    partial class ModifiedGenderDataType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -909,8 +912,8 @@ namespace VeterinaryClinic.Data.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("full_name");
 
-                    b.Property<int?>("Gender")
-                        .HasColumnType("int")
+                    b.Property<bool>("Gender")
+                        .HasColumnType("bit")
                         .HasColumnName("gender");
 
                     b.Property<bool>("IsActive")

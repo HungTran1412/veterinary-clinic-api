@@ -25,5 +25,12 @@ namespace VeterinaryClinic.Shared
             if (string.IsNullOrWhiteSpace(password)) return false;
             return Regex.IsMatch(password, PasswordPattern);
         }
+
+        public static bool IsValidUsername(string username)
+        {
+            if (string.IsNullOrEmpty(username)) return false;
+            // Kiểm tra xem username có chứa khoảng trắng hay không
+            return !username.Contains(" ");
+        }
     }
 }

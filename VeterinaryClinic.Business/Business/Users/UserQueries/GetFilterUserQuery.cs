@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared;
+using System;
 
 namespace VeterinaryClinic.Business
 {
@@ -32,83 +33,65 @@ namespace VeterinaryClinic.Business
             {
                 var filter = request.Filter;
 
-                // Lấy danh sách user đang active
-                var data = (from dt in _dataContext.VcUsers
+                // Lấy danh sách user đang active (nếu không có IsActive trong filter thì mặc định)
+                var data = _dataContext.VcUsers
                         .AsNoTracking()
-                        .Where(x => x.IsActive)
-                    select dt);
+                        .AsQueryable();
 
-                // Lọc theo từ khóa chung (TextSearch) - Tìm theo FullName, Code, Username
+                // Lọc theo từ khóa chung (TextSearch) - Tìm theo FullName, Code, Username, Email, PhoneNumber
                 if (!string.IsNullOrEmpty(filter.TextSearch))
                 {
                     string ts = filter.TextSearch.Trim().ToLower();
                     data = data.Where(x => 
                         x.FullName.ToLower().Contains(ts) || 
                         x.Code.ToLower().Contains(ts) ||
-                        x.Username.ToLower().Contains(ts));
+                        x.Username.ToLower().Contains(ts) ||
+                        x.Email.ToLower().Contains(ts) ||
+                        x.PhoneNumber.Contains(ts)); // Số điện thoại thường không có hoa/thường
                 }
                 
+                // Lọc theo IsActive nếu được truyền
                 if (filter.IsActive.HasValue)
                 {
                     data = data.Where(x => x.IsActive == filter.IsActive.Value);
                 }
-
-                #region Các điều kiện lọc cụ thể của User
-
-                if (!string.IsNullOrEmpty(filter.Code))
+                else 
                 {
-                    string code = filter.Code.Trim().ToLower();
-                    data = data.Where(x => x.Code.ToLower().Contains(code));
+                    // Mặc định chỉ lấy user active nếu FE không gửi
+                    data = data.Where(x => x.IsActive);
                 }
 
-                if (!string.IsNullOrEmpty(filter.FullName))
-                {
-                    string name = filter.FullName.Trim().ToLower();
-                    data = data.Where(x => x.FullName.ToLower().Contains(name));
-                }
-
-                if (!string.IsNullOrEmpty(filter.Email))
-                {
-                    string email = filter.Email.Trim().ToLower();
-                    data = data.Where(x => x.Email.ToLower().Contains(email));
-                }
-
-                if (!string.IsNullOrEmpty(filter.PhoneNumber))
-                {
-                    string phone = filter.PhoneNumber.Trim().ToLower();
-                    data = data.Where(x => x.PhoneNumber.Contains(phone));
-                }
-
+                // Lọc theo Role
                 if (!string.IsNullOrEmpty(filter.Role))
                 {
-                    string role = filter.Role.Trim().ToLower();
-                    data = data.Where(x => x.Role.ToLower() == role); // Role thường so sánh bằng chính xác
+                    string roleInput = filter.Role.Trim().ToUpper();
+                    
+                    // Kiểm tra xem Role truyền vào có nằm trong Enum Role không
+                    if (!Enum.IsDefined(typeof(Role), roleInput))
+                    {
+                        throw new ArgumentException($"Role '{filter.Role}' is invalid.");
+                    }
+                    
+                    data = data.Where(x => x.Role.ToUpper() == roleInput);
                 }
-
-                #endregion 
-                
 
                 // Sắp xếp
                 data = data.OrderByField(filter.PropertyName, filter.Ascending);
 
-                // Phân trang
-                if (filter.PageSize <= 0)
-                {
-                    filter.PageSize = 10;
-                }
+                // Phân trang an toàn
+                if (filter.PageSize <= 0) filter.PageSize = 10;
+                if (filter.PageNumber <= 0) filter.PageNumber = 1;
 
                 // Tổng bản ghi
                 int totalCount = await data.CountAsync(cancellationToken);
                 
                 // Tính số dòng bỏ qua
                 int excludedRows = (filter.PageNumber - 1) * filter.PageSize;
-                if (excludedRows <= 0)
-                {
-                    excludedRows = 0;
-                }
                 
                 // Lấy dữ liệu phân trang và sử dụng Select để chỉ lấy các trường cần thiết (bảo mật)
                 var listData = await data
+                    .Skip(excludedRows)
+                    .Take(filter.PageSize)
                     .Select(x => new UserModel 
                     {
                         Id = x.Id,
@@ -118,15 +101,14 @@ namespace VeterinaryClinic.Business
                         FullName = x.FullName,
                         PhoneNumber = x.PhoneNumber,
                         Gender = x.Gender,
+                        Address = x.Address,
                         AvatarUrl = x.AvatarUrl,
-                        Role = x.Role
+                        Role = x.Role,
+                        IsActive = x.IsActive,
+                        CreatedDate = x.CreatedDate
                     })
-                    .Skip(excludedRows)
-                    .Take(filter.PageSize)
                     .ToListAsync(cancellationToken);
 
-                // Không cần dùng AutoMapper nữa vì đã dùng .Select()
-                
                 return new PaginationList<UserModel>()
                 {
                     DataCount = listData.Count,

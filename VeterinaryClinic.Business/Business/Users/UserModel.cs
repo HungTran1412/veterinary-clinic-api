@@ -26,6 +26,7 @@ namespace VeterinaryClinic.Business
         
         public int? Gender { get; set; }
         
+        public string? Address { get; set; }
         public string? AvatarUrl { get; set; }
         
         [Required(ErrorMessage = "user.role.required")]
@@ -59,6 +60,7 @@ namespace VeterinaryClinic.Business
             entity.PhoneNumber = this.PhoneNumber;
             entity.AvatarUrl = string.IsNullOrEmpty(this.AvatarUrl) ? "" : this.AvatarUrl;
             entity.Gender = this.Gender;
+            entity.Address = this.Address;
             entity.Order = this.Order;
             entity.IsActive = this.IsActive;
             entity.ModifiedUserId = this.ModifiedUserId;
@@ -82,10 +84,6 @@ namespace VeterinaryClinic.Business
 
     public class UserFilterModel : BaseQueryFilterModel
     {
-        public string? Code { get; set; }
-        public string? FullName { get; set; }
-        public string? Email { set; get; }
-        public string? PhoneNumber { get; set; }
         public string? Role { get; set; }
     }
 

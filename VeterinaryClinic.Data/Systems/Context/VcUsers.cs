@@ -17,25 +17,27 @@ namespace VeterinaryClinic.Data
         /// <summary>
         /// Mã định danh (tự sinh hoặc theo quy tắc)
         /// </summary>
-        [Column("code"), MaxLength(100)]
+        [Column("code", TypeName = "varchar(100)")]
+        [MaxLength(100)]
         public string Code { get; set; }
         
         /// <summary>
         /// Ten dang nhap
         /// </summary>
-        [Column("username"), MaxLength(100)]
+        [Column("username", TypeName = "varchar(100)")]
+        [MaxLength(100)]
         public string Username { get; set; }
         
         /// <summary>
         /// email
         /// </summary>
-        [Column("email")]
+        [Column("email", TypeName = "varchar(255)")]
         public string Email { get; set; }
         
         /// <summary>
         /// mat khau
         /// </summary>
-        [Column("password")]
+        [Column("password", TypeName = "varchar(255)")]
         public string Password { get; set; }
         
         /// <summary>
@@ -47,7 +49,8 @@ namespace VeterinaryClinic.Data
         /// <summary>
         /// So dien thoai
         /// </summary>
-        [Column("phone_number"), MaxLength(10)]
+        [Column("phone_number", TypeName = "varchar(20)")]
+        [MaxLength(20)]
         public string PhoneNumber { get; set; }
         
         /// <summary>
@@ -65,9 +68,15 @@ namespace VeterinaryClinic.Data
         /// <summary>
         /// Vai tro: ADMIN, DOCTOR, RECEPTIONIST, CUSTOMER
         /// </summary>
-        [Column("role")]
+        [Column("role", TypeName = "varchar(50)")]
         public string Role { get; set; }
 
+        /// <summary>
+        /// Địa chỉ
+        /// </summary>
+        [Column("address")]
+        public string Address { get; set; }
+        
         /// <summary>
         /// Refresh Token để cấp lại Access Token
         /// </summary>

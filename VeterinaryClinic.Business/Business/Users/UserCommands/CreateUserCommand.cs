@@ -56,6 +56,12 @@ namespace VeterinaryClinic.Business
 
                 #region Validate
 
+                // validate username
+                if (!ValidationUtils.IsValidUsername(model.UserName))
+                {
+                    throw new ArgumentException($"{_localizer["user.invalid.username"]}");
+                }
+                
                 //validate email
                 if (!ValidationUtils.IsValidEmail(model.Email))
                 {
@@ -68,6 +74,21 @@ namespace VeterinaryClinic.Business
                     // Mật khẩu phải có chữ hoa, chữ thường, số và ký tự đặc biệt
                     throw new ArgumentException($"{_localizer["user.invalid.password_complexity"]}");
                 }
+                
+                //validate role - Chỉ cho phép ADMIN tạo tài khoản cho DOCTOR hoặc RECEPTIONIST
+                if (string.IsNullOrEmpty(model.Role))
+                {
+                    throw new ArgumentException("Role is required.");
+                }
+
+                var upperRole = model.Role.Trim().ToUpper();
+                if (upperRole != Role.DOCTOR.ToString() && upperRole != Role.RECEPTIONIST.ToString())
+                {
+                    throw new ArgumentException($"Admin can only create users with roles: {Role.DOCTOR}, {Role.RECEPTIONIST}");
+                }
+                
+                // Đảm bảo lưu đúng định dạng chữ hoa
+                model.Role = upperRole;
 
                 #endregion
 
@@ -77,6 +98,9 @@ namespace VeterinaryClinic.Business
                 {
                     throw new ArgumentException("Failed to map data.");
                 }
+                
+                entity.Address = string.IsNullOrEmpty(entity.Address) ? "" : entity.Address;
+                entity.AvatarUrl = string.IsNullOrEmpty(entity.AvatarUrl) ? "" : entity.AvatarUrl;
 
                 #region Check Duplicate
                 var checkCode = await _dataContext.VcUsers.AnyAsync(x => x.Code == entity.Code, cancellationToken);

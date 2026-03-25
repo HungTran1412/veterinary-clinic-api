@@ -12,7 +12,6 @@
 
   <ItemGroup>
     <Folder Include="DataProvider\" />
-    <Folder Include="Enums\" />
     <Folder Include="Helper\Response\" />
   </ItemGroup>
 

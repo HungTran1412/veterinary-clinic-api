@@ -2,6 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Serilog;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared.ContextAccessor;
 
@@ -41,10 +44,17 @@ namespace VeterinaryClinic.Business
                 Log.Information($"Delete {SpecializationConstant.CachePrefix}: {id}");
                 
                 //kiem tra data co ton tai khong
-                var dt = await _dataContext.VcSpecializations.FirstOrDefaultAsync(x => x.Id == id);
+                var dt = await _dataContext.VcSpecializations.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
                 if (dt == null)
                 {
                     throw new ArgumentException($"{_localizer["data.not-found"]}");
+                }
+
+                // Kiem tra xem co dich vu nao su dung chuyen nganh nay khong
+                var isUsed = await _dataContext.VcServices.AnyAsync(s => s.SpecializationId == id && s.IsActive, cancellationToken);
+                if (isUsed)
+                {
+                    throw new InvalidOperationException("Không thể xóa chuyên ngành vì có dịch vụ đang sử dụng.");
                 }
 
                 //xoa mem

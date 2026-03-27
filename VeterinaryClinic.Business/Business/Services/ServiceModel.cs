@@ -23,13 +23,15 @@ namespace VeterinaryClinic.Business
         [Required(ErrorMessage = "service.specialization_id.required")]
         public int SpecializationId { get; set; }
         
-        public string ImageUrl { get; set; }
+        public string? SpecializationName { get; set; } // Thêm trường này để chứa tên chuyên ngành
+        
+        public string? ImageUrl { get; set; }
         
         [Required(ErrorMessage = "service.is_available.required")]
         public bool IsAvailable { get; set; } = true;
         
         [MaxLength(1000)]
-        public string Description { get; set; }
+        public string? Description { get; set; }
         
         public bool IsActive { get; set; } = true;
 
@@ -43,6 +45,11 @@ namespace VeterinaryClinic.Business
     
     }
 
+    public class InfoServiceModel : ServiceModel
+    {
+        public string SpecializationName { get; set; }
+    }
+    
     public class CreateServiceModel : ServiceModel
     {
         public int? CreatedUserId { get; set; }
@@ -58,11 +65,11 @@ namespace VeterinaryClinic.Business
             entity.Price = this.Price;
             entity.DurationMinutes = this.DurationMinutes;
             entity.SpecializationId = this.SpecializationId;
-            entity.ImageUrl = this.ImageUrl;
+            entity.ImageUrl = string.IsNullOrEmpty(this.ImageUrl) ? "" : this.ImageUrl; // Xử lý null an toàn
             entity.IsAvailable = this.IsAvailable;
-            entity.Description = this.Description;
+            entity.Description = string.IsNullOrEmpty(this.Description) ? "" : this.Description; // Xử lý null an toàn
             entity.Order = this.Order;
-            entity.ModifiedUserId = entity.ModifiedUserId;
+            entity.ModifiedUserId = this.ModifiedUserId;
         }
     }
 
@@ -73,8 +80,8 @@ namespace VeterinaryClinic.Business
 
     public class ServiceFilterModel : BaseQueryFilterModel
     {
-        public string Code { get; set; }
-        public string Name { get; set; }
+        public string? Code { get; set; }
+        public string? Name { get; set; }
         public decimal? Price { get; set; }
         public int? DurationMinutes { get; set; }
         public int? SpecializationId { get; set; }

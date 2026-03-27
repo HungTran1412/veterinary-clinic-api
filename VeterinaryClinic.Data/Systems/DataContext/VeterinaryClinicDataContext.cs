@@ -21,7 +21,7 @@ namespace VeterinaryClinic.Data
         public DbSet<VcAppointments> VcAppointments { get; set; }
         public DbSet<VcNotifications> VcNotifications { get; set; }
         public DbSet<VcWorkSchedules> VcWorkSchedules { get; set; }
-        public DbSet<vcMedicalRecords> VcMedicalRecords { get; set; }
+        public DbSet<VcMedicalRecords> VcMedicalRecords { get; set; }
         public DbSet<VcSpecializations> VcSpecializations { get; set; }
         public DbSet<VcDoctorSpecializations> VcDoctorSpecializations { get; set; }
         public DbSet<VcUserVerificationTokens> VcUserVerificationTokens { get; set; }

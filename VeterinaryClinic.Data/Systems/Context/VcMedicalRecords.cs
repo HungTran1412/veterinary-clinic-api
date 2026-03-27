@@ -9,9 +9,9 @@ namespace VeterinaryClinic.Data
     /// Bang ho so kham
     /// </summary>
     [Table("vcMedicalRecords")]
-    public class vcMedicalRecords: BaseEntity
+    public class VcMedicalRecords: BaseEntity
     {
-        public vcMedicalRecords()
+        public VcMedicalRecords()
         {
         }
         

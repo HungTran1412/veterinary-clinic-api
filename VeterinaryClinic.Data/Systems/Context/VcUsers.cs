@@ -75,7 +75,7 @@ namespace VeterinaryClinic.Data
         /// Địa chỉ
         /// </summary>
         [Column("address")]
-        public string Address { get; set; }
+        public string? Address { get; set; }
         
         /// <summary>
         /// Refresh Token để cấp lại Access Token

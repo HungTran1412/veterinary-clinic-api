@@ -5,9 +5,9 @@ using VeterinaryClinic.Shared;
 
 namespace VeterinaryClinic.Business
 {
-    public class GetFilterServiceQuery : IRequest<PaginationList<ServiceBaseModel>>
+    public class GetFilterServiceQuery : IRequest<PaginationList<InfoServiceModel>>
     {
-        public ServiceFilterModel Filter {get; set;}
+        public ServiceFilterModel Filter { get; set; }
 
         /// <summary>
         /// Lay danh sach dich vu theo dieu kien loc
@@ -18,7 +18,7 @@ namespace VeterinaryClinic.Business
             Filter = filter;
         }
 
-        public class Handler : IRequestHandler<GetFilterServiceQuery, PaginationList<ServiceBaseModel>>
+        public class Handler : IRequestHandler<GetFilterServiceQuery, PaginationList<InfoServiceModel>>
         {
             private readonly VeterinaryClinicReadDataContext _dataContext;
 
@@ -27,36 +27,58 @@ namespace VeterinaryClinic.Business
                 _dataContext = dataContext;
             }
 
-            public async Task<PaginationList<ServiceBaseModel>> Handle(GetFilterServiceQuery request,
+            public async Task<PaginationList<InfoServiceModel>> Handle(GetFilterServiceQuery request,
                 CancellationToken cancellationToken)
             {
                 var filter = request.Filter;
 
-                var data = (from dt in _dataContext.VcServices
-                        .AsNoTracking()
-                        .Where(x => x.IsActive)
-                    select dt);
+                var data = from s in _dataContext.VcServices.AsNoTracking()
+                    join sp in _dataContext.VcSpecializations.AsNoTracking()
+                        on s.SpecializationId equals sp.Id into spGroup
+                    from sp in spGroup.DefaultIfEmpty()
+                    where s.IsActive
+                    select new InfoServiceModel
+                    {
+                        Id = s.Id,
+                        Code = s.Code,
+                        Name = s.Name,
+                        Price = s.Price,
+                        DurationMinutes = s.DurationMinutes,
+                        SpecializationId = s.SpecializationId,
+                        SpecializationName = sp.Name,
+                        IsAvailable = s.IsAvailable,
+                        IsActive = s.IsActive,
+                        Order = s.Order,
+                        CreatedDate = s.CreatedDate
+                    };
 
                 if (!string.IsNullOrEmpty(filter.TextSearch))
                 {
                     string ts = filter.TextSearch.Trim().ToLower();
-                    data = data.Where(x => x.Name.ToLower().Contains(ts) || x.Code.ToLower().Contains(ts));
+                    data = data.Where(x =>
+                        x.Name.ToLower().Contains(ts) ||
+                        x.Code.ToLower().Contains(ts));
                 }
+
+                #region Filter
 
                 if (filter.IsActive.HasValue)
                 {
                     data = data.Where(x => x.IsActive == filter.IsActive.Value);
                 }
-                
-                if (filter.SpecializationId.HasValue)
+
+                if (filter.SpecializationId.HasValue && filter.SpecializationId > 0)
                 {
                     data = data.Where(x => x.SpecializationId == filter.SpecializationId.Value);
                 }
-                
+
                 if (filter.IsAvailable.HasValue)
                 {
                     data = data.Where(x => x.IsAvailable == filter.IsAvailable.Value);
                 }
+
+                #endregion
+
 
                 data = data.OrderByField(filter.PropertyName, filter.Ascending);
 
@@ -65,33 +87,25 @@ namespace VeterinaryClinic.Business
                     filter.PageSize = 10;
                 }
 
-                //tong ban ghi
                 int totalCount = await data.CountAsync(cancellationToken);
-                
-                //tinh so dong bi bo qua trong kich thuoc trang
+
                 int excludedRows = (filter.PageNumber - 1) * filter.PageSize;
-                if (excludedRows <= 0)
-                {
-                    excludedRows = 0;
-                }
-                
-                // ap dung phan trang
+                if (excludedRows < 0) excludedRows = 0;
+
                 var listData = await data
                     .Skip(excludedRows)
                     .Take(filter.PageSize)
                     .ToListAsync(cancellationToken);
 
-                var listResult = AutoMapperUtils.AutoMap<VcServices, ServiceBaseModel>(listData);
-                
-                return new PaginationList<ServiceBaseModel>()
+                return new PaginationList<InfoServiceModel>()
                 {
-                    DataCount = listResult.Count,
+                    DataCount = listData.Count,
                     TotalCount = totalCount,
                     PageNumber = filter.PageNumber,
                     PageSize = filter.PageSize,
-                    Data = listResult
+                    Data = listData
                 };
             }
         }
-    }   
+    }
 }

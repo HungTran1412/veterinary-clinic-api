@@ -49,7 +49,7 @@ namespace VeterinaryClinic.Data
         /// anh dich vu
         /// </summary>
         [Column("ImageUrl"), MaxLength(500)]
-        public string ImageUrl { get; set; }
+        public string? ImageUrl { get; set; }
 
         /// <summary>
         /// Trang thai cung cap dich vu
@@ -61,6 +61,6 @@ namespace VeterinaryClinic.Data
         /// Mo ta
         /// </summary>
         [Column("description")]
-        public string Description { get; set; }
+        public string? Description { get; set; }
     }   
 }

@@ -46,9 +46,7 @@ namespace VeterinaryClinic.Business
                         DurationMinutes = s.DurationMinutes,
                         SpecializationId = s.SpecializationId,
                         SpecializationName = sp.Name,
-                        ImageUrl = s.ImageUrl,
                         IsAvailable = s.IsAvailable,
-                        Description = s.Description,
                         IsActive = s.IsActive,
                         Order = s.Order,
                         CreatedDate = s.CreatedDate

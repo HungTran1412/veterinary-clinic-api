@@ -23,15 +23,14 @@ namespace VeterinaryClinic.Business
         [Required(ErrorMessage = "service.specialization_id.required")]
         public int SpecializationId { get; set; }
         
-        public string? SpecializationName { get; set; } // Thêm trường này để chứa tên chuyên ngành
+        public string? SpecializationName { get; set; }
         
         public string? ImageUrl { get; set; }
         
         [Required(ErrorMessage = "service.is_available.required")]
         public bool IsAvailable { get; set; } = true;
-        
-        [MaxLength(1000)]
-        public string? Description { get; set; }
+
+        [MaxLength(1000)] public string? Description { get; set; }
         
         public bool IsActive { get; set; } = true;
 

@@ -28,6 +28,28 @@
         public const string EN = "en-US";
     }
     
+    public class ClaimConstants
+    {
+        // Standard OpenID Connect claims
+        public const string PREFERRED_USERNAME = "preferred_username";
+
+        // Custom claims cho hệ thống
+        public const string AVATAR = "x-avatar";
+        public const string APP_ID = "x-app-id";
+        public const string ORG_ID = "x-org-id";
+        public const string ROLES = "x-role";
+        public const string RIGHTS = "x-right";
+        public const string PERMISSTTIONS = "x-permission";
+        public const string ISSUED_AT = "x-iat";
+        public const string EXPIRES_AT = "x-exp";
+        public const string CHANNEL = "x-channel";
+        public const string REQUEST_ID = "x-request-id";
+        public const string API_KEY = "x-api-key";
+        public const string IS_STUDENT = "is_student";
+        public const string AUTHENTICATION_METHOD = "x-authentication-method";
+    }
+
+    
     public class QueryFilter
     {
         public const int DefaultPageNumber = 1;

@@ -62,9 +62,7 @@ namespace VeterinaryClinic.Business
             entity.Gender = this.Gender;
             entity.Address = this.Address;
             entity.Order = this.Order;
-            entity.IsActive = this.IsActive;
             entity.ModifiedUserId = this.ModifiedUserId;
-            entity.Role = this.Role;
         }
     }
 

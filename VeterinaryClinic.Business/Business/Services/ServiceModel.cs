@@ -79,10 +79,10 @@ namespace VeterinaryClinic.Business
 
     public class ServiceFilterModel : BaseQueryFilterModel
     {
-        public string? Code { get; set; }
-        public string? Name { get; set; }
-        public decimal? Price { get; set; }
-        public int? DurationMinutes { get; set; }
+        public decimal? MinPrice { get; set; }
+        public decimal? MaxPrice { get; set; }
+        public int? MinDurationMinutes { get; set; }
+        public int? MaxDurationMinutes { get; set; }
         public int? SpecializationId { get; set; }
         public bool? IsAvailable { get; set; }
     }

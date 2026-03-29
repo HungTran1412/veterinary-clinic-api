@@ -13,6 +13,8 @@
   "service.specialization_id.required": "Specialization is required",
   "service.is_available.required": "Availability status is required",
   "service.existed.code": "Service code already exists",
+  "service.filter.max_price_invalid": "Maximum price cannot be less than minimum price.",
+  "service.filter.max_duration_invalid": "Maximum duration cannot be less than minimum duration.",
 
   "user.code.required": "User code is required",
   "user.username.required": "Username is required",

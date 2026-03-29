@@ -13,6 +13,8 @@
   "service.specialization_id.required": "Chuyên ngành không được để trống",
   "service.is_available.required": "Trạng thái cung cấp không được để trống",
   "service.existed.code": "Mã dịch vụ đã tồn tại",
+  "service.filter.max_price_invalid": "Giá trị giá tối đa không được nhỏ hơn giá trị giá tối thiểu.",
+  "service.filter.max_duration_invalid": "Giá trị thời gian tối đa không được nhỏ hơn giá trị thời gian tối thiểu.",
 
   "user.code.required": "Mã người dùng không được để trống",
   "user.username.required": "Tên đăng nhập không được để trống",

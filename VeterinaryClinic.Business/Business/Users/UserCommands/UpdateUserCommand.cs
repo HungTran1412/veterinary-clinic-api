@@ -48,15 +48,21 @@ namespace VeterinaryClinic.Business
                 {
                     throw new ArgumentException($"{_localizer["data.not-found"]}");
                 }
-                
+
+                #region Validate
                 //validate mail
                 if (!ValidationUtils.IsValidEmail(model.Email))
                 {
                     throw new ArgumentException($"{_localizer["user.invalid.email_format"]}");
                 }
-
-                #region check duplicate
-
+                
+                //Can update only DOCTOR and RECEPTIONIST
+                var upperRole = model.Role.Trim().ToUpper();
+                if (upperRole != Role.DOCTOR.ToString() && upperRole != Role.RECEPTIONIST.ToString())
+                {
+                    throw new ArgumentException($"Admin can only update users with roles: {Role.DOCTOR}, {Role.RECEPTIONIST}");
+                }
+                
                 // Kiểm tra trùng Email (loại trừ chính nó)
                 var isEmailExisted = await _dataContext.VcUsers.AnyAsync(x => x.Email == model.Email && x.Id != model.Id, cancellationToken);
                 if (isEmailExisted)

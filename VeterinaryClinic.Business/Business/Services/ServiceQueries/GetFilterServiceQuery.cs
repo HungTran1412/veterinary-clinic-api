@@ -1,5 +1,7 @@
-﻿using MediatR;
+﻿using System;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared;
 
@@ -21,16 +23,30 @@ namespace VeterinaryClinic.Business
         public class Handler : IRequestHandler<GetFilterServiceQuery, PaginationList<InfoServiceModel>>
         {
             private readonly VeterinaryClinicReadDataContext _dataContext;
+            private readonly IStringLocalizer<GetFilterServiceQuery> _localizer;
 
-            public Handler(VeterinaryClinicReadDataContext dataContext)
+            public Handler(VeterinaryClinicReadDataContext dataContext, IStringLocalizer<GetFilterServiceQuery> localizer)
             {
                 _dataContext = dataContext;
+                _localizer = localizer;
             }
 
             public async Task<PaginationList<InfoServiceModel>> Handle(GetFilterServiceQuery request,
                 CancellationToken cancellationToken)
             {
                 var filter = request.Filter;
+
+                #region Validate
+                if (filter.MaxPrice.HasValue && filter.MinPrice.HasValue && filter.MaxPrice < filter.MinPrice)
+                {
+                    throw new ArgumentException(_localizer["service.filter.max_price_invalid"]);
+                }
+
+                if (filter.MaxDurationMinutes.HasValue && filter.MinDurationMinutes.HasValue && filter.MaxDurationMinutes < filter.MinDurationMinutes)
+                {
+                    throw new ArgumentException(_localizer["service.filter.max_duration_invalid"]);
+                }
+                #endregion
 
                 var data = from s in _dataContext.VcServices.AsNoTracking()
                     join sp in _dataContext.VcSpecializations.AsNoTracking()
@@ -75,6 +91,26 @@ namespace VeterinaryClinic.Business
                 if (filter.IsAvailable.HasValue)
                 {
                     data = data.Where(x => x.IsAvailable == filter.IsAvailable.Value);
+                }
+                
+                if (filter.MinPrice.HasValue)
+                {
+                    data = data.Where(x => x.Price >= filter.MinPrice.Value);
+                }
+
+                if (filter.MaxPrice.HasValue)
+                {
+                    data = data.Where(x => x.Price <= filter.MaxPrice.Value);
+                }
+                
+                if (filter.MinDurationMinutes.HasValue)
+                {
+                    data = data.Where(x => x.DurationMinutes >= filter.MinDurationMinutes.Value);
+                }
+
+                if (filter.MaxDurationMinutes.HasValue)
+                {
+                    data = data.Where(x => x.DurationMinutes <= filter.MaxDurationMinutes.Value);
                 }
 
                 #endregion

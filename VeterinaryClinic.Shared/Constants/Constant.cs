@@ -9,6 +9,7 @@
 
         public const string LIST_SELECT = "list-select";
         public const string SPECIALIZATION = "specialization";
+        public const string AUTHORIZATION = "authorization";
         public const string USER = "users";
         public const string SERVICE = "service";
         public const string EMAIL_LOGS = "email-logs";

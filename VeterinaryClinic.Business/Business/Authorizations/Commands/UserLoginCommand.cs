@@ -11,13 +11,13 @@ namespace VeterinaryClinic.Business
 {
     public class UserLoginCommand : IRequest<LoginResponseModel>
     {
-        public UserLoginModel Model { get; }
+        public LoginModel Model { get; }
 
         /// <summary>
         /// Dang nhap he thong
         /// </summary>
         /// <param name="model"></param>
-        public UserLoginCommand(UserLoginModel model)
+        public UserLoginCommand(LoginModel model)
         {
             Model = model;
         }

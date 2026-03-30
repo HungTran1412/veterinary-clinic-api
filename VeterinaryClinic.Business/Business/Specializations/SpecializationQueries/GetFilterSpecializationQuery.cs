@@ -26,8 +26,7 @@ namespace VeterinaryClinic.Business
             {
                 _dataContext = dataContext;
             }
-
-            // Đổi kiểu trả về thành BaseModel
+            
             public async Task<PaginationList<SpecializationBaseModel>> Handle(GetFilterSpecializationQuery request,
                 CancellationToken cancellationToken)
             {

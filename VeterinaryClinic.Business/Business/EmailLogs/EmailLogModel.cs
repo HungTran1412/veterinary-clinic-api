@@ -23,6 +23,6 @@ namespace VeterinaryClinic.Business
 
     public class EmailLogFilterModel : BaseQueryFilterModel
     {
-        
+        public string Subject { set; get; }
     }
 }

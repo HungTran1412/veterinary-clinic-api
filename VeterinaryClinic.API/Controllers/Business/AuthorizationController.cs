@@ -24,7 +24,7 @@ namespace VeterinaryClinic.API.Controllers
         /// <returns>Token và thông tin người dùng</returns>
         [HttpPost, Route("login")]
         [ProducesResponseType(typeof(ResponseObject<LoginResponseModel>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> Login([FromBody] UserLoginModel model)
+        public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
             return await ExecuteFunction(async () =>
             {

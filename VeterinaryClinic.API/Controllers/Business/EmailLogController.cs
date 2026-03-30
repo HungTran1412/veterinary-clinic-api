@@ -41,7 +41,7 @@ namespace VeterinaryClinic.API.Controllers
             return await ExecuteFunction(async () =>
             {
                 return await _mediator.Send(new GetEmailLogByIdQuery(id));
-            });
+            }); 
         }
         #endregion
     }

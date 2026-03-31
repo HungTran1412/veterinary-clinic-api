@@ -2,7 +2,7 @@
 
 namespace VeterinaryClinic.Business
 {
-    public class AuthorizationBaseModel
+    public record AuthorizationBaseModel
     {
         [Required]
         public string LoginIdentifier { get; set; }
@@ -11,11 +11,11 @@ namespace VeterinaryClinic.Business
         public string Password { get; set; }
     }
 
-    public class LoginModel : AuthorizationBaseModel
+    public record LoginModel : AuthorizationBaseModel
     {
     }
 
-    public class LoginResponseModel
+    public record LoginResponseModel
     {
         public int Id { get; set; }
         public string FullName { get; set; }
@@ -26,7 +26,7 @@ namespace VeterinaryClinic.Business
         public string RefreshToken { get; set; }
     }
 
-    public class RefreshTokenModel
+    public record RefreshTokenModel
     {
         [Required] public string AccessToken { get; set; }
 

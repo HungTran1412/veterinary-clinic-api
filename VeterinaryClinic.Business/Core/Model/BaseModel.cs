@@ -2,7 +2,7 @@
 
 namespace VeterinaryClinic.Business
 {
-    public class BaseQueryFilterModel
+    public record BaseQueryFilterModel
     {
         public string TextSearch { get; set; }
         public int PageSize { get; set; }

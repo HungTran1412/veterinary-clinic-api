@@ -4,7 +4,7 @@ using VeterinaryClinic.Shared;
 
 namespace VeterinaryClinic.Business
 {
-    public class SpecializationBaseModel
+    public record SpecializationBaseModel
     {
         public int Id { get; set; }
         
@@ -15,7 +15,7 @@ namespace VeterinaryClinic.Business
         public string Name { get; set; }
         
         [MaxLength(1000)]
-        public string Description { get; set; }
+        public string? Description { get; set; }
         
         public bool IsActive { get; set; } = true;
 
@@ -23,17 +23,17 @@ namespace VeterinaryClinic.Business
         public DateTime? CreatedDate { get; set; }
     }
     
-    public class SpecializationModel : SpecializationBaseModel
+    public record SpecializationModel : SpecializationBaseModel
     {
     
     }
 
-    public class CreateSpecializationModel : SpecializationModel
+    public record CreateSpecializationModel : SpecializationModel
     {
         public int? CreatedUserId { get; set; }
     }
 
-    public class UpdateSpecializationModel : SpecializationModel
+    public record UpdateSpecializationModel : SpecializationModel
     {
         public int? ModifiedUserId { get; set; }
 
@@ -47,12 +47,12 @@ namespace VeterinaryClinic.Business
         }
     }
 
-    public class SpecializationSelectItemModel : SelectItemModel
+    public record SpecializationSelectItemModel : SelectItemModel
     {
         
     }
 
-    public class SpecializationFilterModel : BaseQueryFilterModel
+    public record SpecializationFilterModel : BaseQueryFilterModel
     {
         public string? Code { get; set; }
         public string? Name { get; set; }

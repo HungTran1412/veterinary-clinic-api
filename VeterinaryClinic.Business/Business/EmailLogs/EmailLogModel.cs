@@ -2,7 +2,7 @@
 
 namespace VeterinaryClinic.Business
 {
-    public class EmailLogBaseModel
+    public record EmailLogBaseModel
     {
         [Required(ErrorMessage = "service.emailog-id.required")]
         public int Id { get; set; }
@@ -16,12 +16,12 @@ namespace VeterinaryClinic.Business
         public string ErrorMessage { get; set; } 
     }
 
-    public class EmailLogModel : EmailLogBaseModel
+    public record EmailLogModel : EmailLogBaseModel
     {
         public string Body { set; get; }
     }
 
-    public class EmailLogFilterModel : BaseQueryFilterModel
+    public record EmailLogFilterModel : BaseQueryFilterModel
     {
         public string? Subject { set; get; }
     }

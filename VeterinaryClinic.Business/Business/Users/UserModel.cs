@@ -4,7 +4,7 @@ using VeterinaryClinic.Shared;
 
 namespace VeterinaryClinic.Business
 { 
-    public class UserBaseModel
+    public record UserBaseModel
     {
         public int Id { get; set; }
         
@@ -38,18 +38,18 @@ namespace VeterinaryClinic.Business
         public DateTime? CreatedDate { get; set; }
     }
 
-    public class UserModel : UserBaseModel
+    public record UserModel : UserBaseModel
     {
         [Required(ErrorMessage = "user.password.required")]
         public string Password { get; set; }
     }
     
-    public class CreateUserModel : UserModel
+    public record CreateUserModel : UserModel
     {
         public int? CreatedUserId { get; set; }
     }
 
-    public class UpdateUserModel : UserBaseModel
+    public record UpdateUserModel : UserBaseModel
     {
         public int? ModifiedUserId { get; set; }
 
@@ -66,7 +66,7 @@ namespace VeterinaryClinic.Business
         }
     }
 
-    public class UpdatePasswordUserModel
+    public record UpdatePasswordUserModel
     {
         public int? ModifiedUserId { get; set; }
         public string OldPassword { get; set; }
@@ -80,7 +80,7 @@ namespace VeterinaryClinic.Business
         }
     }
 
-    public class UserFilterModel : BaseQueryFilterModel
+    public record UserFilterModel : BaseQueryFilterModel
     {
         public string? Role { get; set; }
     }

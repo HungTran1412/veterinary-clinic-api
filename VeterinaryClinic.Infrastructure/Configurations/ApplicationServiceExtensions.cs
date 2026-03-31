@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using VeterinaryClinic.Business;
 using VeterinaryClinic.Infrastructure.Services.CloudinaryHandler;
 
 namespace VeterinaryClinic.Infrastructure.Configurations
@@ -9,7 +10,7 @@ namespace VeterinaryClinic.Infrastructure.Configurations
         public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config)
         {
             services.Configure<CloudinarySettings>(config.GetSection("CloudinarySettings"));
-            services.AddScoped<IPhotoService, PhotoService>();
+            services.AddScoped<ICloudinaryService, PhotoService>();
 
             return services;
         }

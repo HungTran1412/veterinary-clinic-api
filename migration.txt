@@ -1,2 +1,5 @@
-dotnet ef database update --project VeterinaryClinic.Data --startup-project VeterinaryClinic.API --context VeterinaryClinicDataContext
+them migration
 dotnet ef migrations add AddGenderToUsers --project VeterinaryClinic.Data --startup-project VeterinaryClinic.API --context VeterinaryClinicDataContext
+
+cập nhật database:
+dotnet ef database update --project VeterinaryClinic.Data --startup-project VeterinaryClinic.API --context VeterinaryClinicDataContext

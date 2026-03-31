@@ -20,7 +20,7 @@
 
     #region System
 
-    public class SelectItemModel
+    public record SelectItemModel
     {
         public int Id { get; set; }
         public string Code { get; set; }

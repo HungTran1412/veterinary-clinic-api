@@ -30,6 +30,6 @@ namespace VeterinaryClinic.Data
         /// Mo ta
         /// </summary>
         [Column("description"), MaxLength(1000)]
-        public string Description { get; set; }
+        public string? Description { get; set; }
     }   
 }

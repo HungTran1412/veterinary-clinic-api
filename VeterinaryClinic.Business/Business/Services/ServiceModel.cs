@@ -4,7 +4,7 @@ using VeterinaryClinic.Shared;
 
 namespace VeterinaryClinic.Business
 {
-    public class ServiceBaseModel
+    public record ServiceBaseModel
     {
         public int Id { get; set; }
         
@@ -38,23 +38,23 @@ namespace VeterinaryClinic.Business
         public DateTime? CreatedDate { get; set; }
     }
     
-    public class ServiceModel : ServiceBaseModel
+    public record ServiceModel : ServiceBaseModel
     {
     
     
     }
 
-    public class InfoServiceModel : ServiceModel
+    public record InfoServiceModel : ServiceModel
     {
         public string SpecializationName { get; set; }
     }
     
-    public class CreateServiceModel : ServiceModel
+    public record CreateServiceModel : ServiceModel
     {
         public int? CreatedUserId { get; set; }
     }
 
-    public class UpdateServiceModel : ServiceModel
+    public record UpdateServiceModel : ServiceModel
     {
         public int? ModifiedUserId { get; set; }
 
@@ -72,12 +72,12 @@ namespace VeterinaryClinic.Business
         }
     }
 
-    public class ServiceSelectItemModel : SelectItemModel
+    public record ServiceSelectItemModel : SelectItemModel
     {
         
     }
 
-    public class ServiceFilterModel : BaseQueryFilterModel
+    public record ServiceFilterModel : BaseQueryFilterModel
     {
         public decimal? MinPrice { get; set; }
         public decimal? MaxPrice { get; set; }

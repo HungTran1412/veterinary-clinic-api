@@ -7,7 +7,6 @@ using VeterinaryClinic.Business.Services; // Interface giờ nằm ở đây
 using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared;
 using VeterinaryClinic.Shared.ContextAccessor;
-using VeterinaryClinic.Shared.Templates;
 
 namespace VeterinaryClinic.Business
 {

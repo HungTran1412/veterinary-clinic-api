@@ -80,6 +80,22 @@ namespace VeterinaryClinic.Business
         }
     }
 
+    public record UserRegisterModel
+    {
+        [Required]
+        public string UserName { get; init; }
+        [Required]
+        public string FullName { get; init; }
+        [Required]
+        public string PhoneNumber { get; init; }
+        [Required]
+        public string Email { get; init; }
+        [Required]
+        public string Password { get; init; }
+        [Required]
+        public string RepeatPassword { get; init; }
+    }
+
     public record UserFilterModel : BaseQueryFilterModel
     {
         public string? Role { get; init; }

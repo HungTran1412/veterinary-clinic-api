@@ -6,7 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using VeterinaryClinic.Business.Services;
 
-namespace VeterinaryClinic.Infrastructure.Services
+namespace VeterinaryClinic.Infrastructure
 {
     public class JwtService : IJwtService
     {

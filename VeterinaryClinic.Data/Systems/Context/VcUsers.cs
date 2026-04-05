@@ -88,5 +88,17 @@ namespace VeterinaryClinic.Data
         /// </summary>
         [Column("refresh_token_expiry_time")]
         public DateTime? RefreshTokenExpiryTime { get; set; }
+
+        /// <summary>
+        /// Token để xác thực email
+        /// </summary>
+        [Column("verification_token")]
+        public string? VerificationToken { get; set; }
+
+        /// <summary>
+        /// Thời gian hết hạn của token xác thực
+        /// </summary>
+        [Column("verification_token_expires")]
+        public DateTime? VerificationTokenExpires { get; set; }
     }   
 }

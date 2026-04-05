@@ -11,8 +11,8 @@ using Serilog;
 using VeterinaryClinic.Shared.ContextAccessor;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using Microsoft.Extensions.Localization;
-using VeterinaryClinic.API.Localization; // Using custom localizer
-using VeterinaryClinic.Infrastructure.Configurations; // Thêm using này
+using VeterinaryClinic.API.Localization;
+using VeterinaryClinic.Infrastructure; // Using custom localizer
 
 // Cấu hình Serilog tối thiểu để ghi ra Console
 Log.Logger = new LoggerConfiguration()

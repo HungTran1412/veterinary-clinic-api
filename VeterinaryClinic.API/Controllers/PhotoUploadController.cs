@@ -27,12 +27,11 @@ namespace VeterinaryClinic.API.Controllers
         /// <returns>Thông tin ảnh đã tải lên</returns>
         [HttpPost, Route("service")]
         [ProducesResponseType(typeof(ResponseObject<UploadServicePhotoModel>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> UploadServicePhoto([FromForm] UploadServicePhotoModel model)
+        public async Task<IActionResult> UploadPhoto([FromForm] UploadServicePhotoModel model)
         {
             return await ExecuteFunction(async () =>
             {
-                var command = new UploadServicePhotoCommand(model);
-                return await _mediator.Send(command);
+                return await _mediator.Send( new UploadServicePhotoCommand(model));
             });
         }
 
@@ -47,12 +46,11 @@ namespace VeterinaryClinic.API.Controllers
         /// <returns>Thông tin ảnh đã tải lên</returns>
         [HttpPost, Route("pet")]
         [ProducesResponseType(typeof(ResponseObject<UploadPetPhotoModel>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> UploadPetPhoto([FromForm] UploadPetPhotoModel model)
+        public async Task<IActionResult> UploadPhoto([FromForm] UploadPetPhotoModel model)
         {
             return await ExecuteFunction(async () =>
             {
-                var command = new UploadPetPhotoCommand(model);
-                return await _mediator.Send(command);
+                return await _mediator.Send(new UploadPetPhotoCommand(model));
             });
         }
         
@@ -60,8 +58,16 @@ namespace VeterinaryClinic.API.Controllers
 
         #region User
 
+        [HttpPost, Route("user")]
+        [ProducesResponseType(typeof(ResponseObject<UploadUserPhotoModel>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> UploadPhoto([FromForm] UploadUserPhotoModel model)
+        {
+            return await ExecuteFunction(async () =>
+            {
+                return await _mediator.Send(new UploadUserPhotoCommand(model));
+            });
+        }
         
-
         #endregion
     }
 }

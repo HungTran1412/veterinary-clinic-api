@@ -4,35 +4,34 @@ using System.Text.Json.Serialization;
 
 namespace VeterinaryClinic.Business
 {
+    
+    
     public record PhotoUploadBaseModel
     {
         [Required(ErrorMessage = "photo_upload.id.required")]
         public int Id { init; get; }
         
+        [JsonIgnore]
+        public IFormFile? File { init; get; }
+    }
+
+    public record PhotoUploadModel : PhotoUploadBaseModel
+    {
         public string? ImageUrl { init; get; }
-
-        [JsonIgnore]
-        public IFormFile? File { init; get; }
     }
 
-    public record UploadPetPhotoModel : PhotoUploadBaseModel
+    public record UploadPetPhotoModel : PhotoUploadModel
     {
         
     }
 
-    public record UploadServicePhotoModel : PhotoUploadBaseModel
+    public record UploadServicePhotoModel : PhotoUploadModel
     {
         
     }
 
-    public record UploadUserPhotoModel
+    public record UploadUserPhotoModel : PhotoUploadBaseModel
     {
-        [Required(ErrorMessage = "photo_upload.id.required")]
-        public int Id { get; init; }
-        
         public string? AvatarUrl { init; get; }
-
-        [JsonIgnore]
-        public IFormFile? File { init; get; }
     }
 }

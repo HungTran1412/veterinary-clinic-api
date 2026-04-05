@@ -13,6 +13,10 @@ namespace VeterinaryClinic.Business
     {
         public UploadServicePhotoModel Model { get; }
 
+        /// <summary>
+        /// Tải ảnh lên cho dịch vụ
+        /// </summary>
+        /// <param name="model"></param>
         public UploadServicePhotoCommand(UploadServicePhotoModel model)
         {
             Model = model;
@@ -44,7 +48,7 @@ namespace VeterinaryClinic.Business
 
                 if (model.File == null || model.File.Length == 0)
                 {
-                    throw new ArgumentException("Photo file is required.");
+                    throw new ArgumentException(_localizer["photo_upload.file.required"]);
                 }
 
                 // 1. Validate service exists
@@ -68,8 +72,8 @@ namespace VeterinaryClinic.Business
                 await _dataContext.SaveChangesAsync(cancellationToken);
 
                 // 4. Invalidate cache
-                _cacheService.Remove(ServiceConstant.BuildCacheKey(service.Id.ToString()));
-                _cacheService.Remove(ServiceConstant.BuildCacheKey()); // Invalidate list cache
+                _cacheService.Remove(PhotoUploadConstant.BuildCacheKey(service.Id.ToString()));
+                _cacheService.Remove(PhotoUploadConstant.BuildCacheKey());
 
                 Log.Information($"Successfully uploaded photo for ServiceId: {model.Id}. New ImageUrl: {imageUrl}");
 

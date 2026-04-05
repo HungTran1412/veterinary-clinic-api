@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using VeterinaryClinic.Business;
-using VeterinaryClinic.Infrastructure.Services.CloudinaryHandler;
+using VeterinaryClinic.Infrastructure.Services;
 
 namespace VeterinaryClinic.Infrastructure.Configurations
 {

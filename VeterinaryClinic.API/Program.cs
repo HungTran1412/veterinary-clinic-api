@@ -12,6 +12,7 @@ using VeterinaryClinic.Shared.ContextAccessor;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using Microsoft.Extensions.Localization;
 using VeterinaryClinic.API.Localization; // Using custom localizer
+using VeterinaryClinic.Infrastructure.Configurations; // Thêm using này
 
 // Cấu hình Serilog tối thiểu để ghi ra Console
 Log.Logger = new LoggerConfiguration()
@@ -120,6 +121,9 @@ builder.Services.AddScoped<IBcryptPasswordHasher, PasswordHasher>();
 
 // Đăng ký JWT Service
 builder.Services.AddScoped<IJwtService, JwtService>();
+
+// Đăng ký các service từ tầng Infrastructure (bao gồm Cloudinary)
+builder.Services.AddApplicationServices(builder.Configuration);
 
 
 // 6. Cấu hình Redis Cache

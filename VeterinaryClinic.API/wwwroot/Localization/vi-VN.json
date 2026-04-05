@@ -33,5 +33,12 @@
   "user.password.mismatch": "Mật khẩu xác nhận không khớp",
   "user.password.incorrect": "Mật khẩu cũ không chính xác",
   "user.unauthorized": "Người dùng không tồn tại hoặc chưa đăng nhập",
-  "user.login.failed": "Tên đăng nhập hoặc mật khẩu không chính xác"
+  "user.login.failed": "Tên đăng nhập hoặc mật khẩu không chính xác",
+  "user.verify.invalid_token": "Token không hợp lệ.",
+  "user.verify.already_activated": "Tài khoản đã được kích hoạt trước đó.",
+  "user.verify.token_expired": "Token đã hết hạn. Vui lòng yêu cầu gửi lại link kích hoạt.",
+  "user.verify.success": "Tài khoản của bạn đã được kích hoạt thành công! Bạn có thể đăng nhập ngay bây giờ.",
+  
+  "photo_upload.id.required": "ID không được để trống",
+  "photo_upload.file.required": "File không được để trống"
 }

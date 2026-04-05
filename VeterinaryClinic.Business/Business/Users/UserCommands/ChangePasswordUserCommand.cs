@@ -89,8 +89,8 @@ namespace VeterinaryClinic.Business
                 // Cập nhật mật khẩu mới (Mã hóa)
                 string newPasswordHash = _passwordHasher.HashPassword(model.NewPassword);
                 
-                // Sử dụng hàm helper trong model nếu muốn, hoặc gán trực tiếp
-                model.ModifiedUserId = userId;
+                // Sử dụng biểu thức with để cập nhật model một cách an toàn
+                model = model with { ModifiedUserId = userId };
                 user.Password = newPasswordHash;
                 user.ModifiedUserId = userId;
                 user.ModifiedDate = DateTime.Now;

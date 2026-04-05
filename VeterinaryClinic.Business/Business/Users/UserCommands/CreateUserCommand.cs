@@ -7,7 +7,6 @@ using VeterinaryClinic.Business.Services; // Interface giờ nằm ở đây
 using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared;
 using VeterinaryClinic.Shared.ContextAccessor;
-using VeterinaryClinic.Shared.Templates;
 
 namespace VeterinaryClinic.Business
 {
@@ -87,8 +86,8 @@ namespace VeterinaryClinic.Business
                     throw new ArgumentException($"Admin can only create users with roles: {Role.DOCTOR}, {Role.RECEPTIONIST}");
                 }
                 
-                // Đảm bảo lưu đúng định dạng chữ hoa
-                model.Role = upperRole;
+                // Đảm bảo lưu đúng định dạng chữ hoa bằng cách tạo bản sao
+                model = model with { Role = upperRole };
 
                 #endregion
 

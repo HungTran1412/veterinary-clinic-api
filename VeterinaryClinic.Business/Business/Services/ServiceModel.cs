@@ -6,36 +6,36 @@ namespace VeterinaryClinic.Business
 {
     public record ServiceBaseModel
     {
-        public int Id { get; set; }
+        public int Id { get; init; }
         
         [Required(ErrorMessage = "service.code.required")]
-        public string Code { get; set; }
+        public string Code { get; init; }
         
         [Required(ErrorMessage = "service.name.required")]
-        public string Name { get; set; }
+        public string Name { get; init; }
         
         [Required(ErrorMessage = "service.price.required")]
-        public decimal Price { get; set; }
+        public decimal Price { get; init; }
         
         [Required(ErrorMessage = "service.duration_minutes.required")]
-        public int DurationMinutes { get; set; }
+        public int DurationMinutes { get; init; }
         
         [Required(ErrorMessage = "service.specialization_id.required")]
-        public int SpecializationId { get; set; }
+        public int SpecializationId { get; init; }
         
-        public string? SpecializationName { get; set; }
+        public string? SpecializationName { get; init; }
         
-        public string? ImageUrl { get; set; }
+        public string? ImageUrl { get; init; }
         
         [Required(ErrorMessage = "service.is_available.required")]
-        public bool IsAvailable { get; set; } = true;
+        public bool IsAvailable { get; init; } = true;
 
-        [MaxLength(1000)] public string? Description { get; set; }
+        [MaxLength(1000)] public string? Description { get; init; }
         
-        public bool IsActive { get; set; } = true;
+        public bool IsActive { get; init; } = true;
 
-        public int Order { get; set; }
-        public DateTime? CreatedDate { get; set; }
+        public int Order { get; init; }
+        public DateTime? CreatedDate { get; init; }
     }
     
     public record ServiceModel : ServiceBaseModel
@@ -46,17 +46,17 @@ namespace VeterinaryClinic.Business
 
     public record InfoServiceModel : ServiceModel
     {
-        public string SpecializationName { get; set; }
+        public string SpecializationName { get; init; }
     }
     
     public record CreateServiceModel : ServiceModel
     {
-        public int? CreatedUserId { get; set; }
+        public int? CreatedUserId { get; init; }
     }
 
     public record UpdateServiceModel : ServiceModel
     {
-        public int? ModifiedUserId { get; set; }
+        public int? ModifiedUserId { get; init; }
 
         public void UpdateEntity(VcServices entity)
         {
@@ -79,11 +79,11 @@ namespace VeterinaryClinic.Business
 
     public record ServiceFilterModel : BaseQueryFilterModel
     {
-        public decimal? MinPrice { get; set; }
-        public decimal? MaxPrice { get; set; }
-        public int? MinDurationMinutes { get; set; }
-        public int? MaxDurationMinutes { get; set; }
-        public int? SpecializationId { get; set; }
-        public bool? IsAvailable { get; set; }
+        public decimal? MinPrice { get; init; }
+        public decimal? MaxPrice { get; init; }
+        public int? MinDurationMinutes { get; init; }
+        public int? MaxDurationMinutes { get; init; }
+        public int? SpecializationId { get; init; }
+        public bool? IsAvailable { get; init; }
     }
 }

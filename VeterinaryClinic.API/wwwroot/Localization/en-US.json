@@ -32,5 +32,12 @@
   "user.password.mismatch": "Confirm password does not match",
   "user.password.incorrect": "Incorrect old password",
   "user.unauthorized": "User not found or not logged in",
-  "user.login.failed": "Incorrect username or password"
+  "user.login.failed": "Incorrect username or password",
+  "user.verify.invalid_token": "Invalid token.",
+  "user.verify.already_activated": "Account already activated.",
+  "user.verify.token_expired": "Token expired. Please request a new verification link.",
+  "user.verify.success": "Your account has been successfully activated! You can log in now.",
+
+  "photo_upload.id.required": "ID is required",
+  "photo_upload.file.required": "File is required"
 }

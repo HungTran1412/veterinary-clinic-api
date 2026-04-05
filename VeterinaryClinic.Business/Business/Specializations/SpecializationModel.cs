@@ -6,21 +6,21 @@ namespace VeterinaryClinic.Business
 {
     public record SpecializationBaseModel
     {
-        public int Id { get; set; }
+        public int Id { get; init; }
         
         [Required(ErrorMessage = "specialization.code.required")]
-        public String Code { get; set; }
+        public String Code { get; init; }
         
         [Required(ErrorMessage = "specialization.name.required")]
-        public string Name { get; set; }
+        public string Name { get; init; }
         
         [MaxLength(1000)]
-        public string? Description { get; set; }
+        public string? Description { get; init; }
         
-        public bool IsActive { get; set; } = true;
+        public bool IsActive { get; init; } = true;
 
-        public int Order { get; set; }
-        public DateTime? CreatedDate { get; set; }
+        public int Order { get; init; }
+        public DateTime? CreatedDate { get; init; }
     }
     
     public record SpecializationModel : SpecializationBaseModel
@@ -30,12 +30,12 @@ namespace VeterinaryClinic.Business
 
     public record CreateSpecializationModel : SpecializationModel
     {
-        public int? CreatedUserId { get; set; }
+        public int? CreatedUserId { get; init; }
     }
 
     public record UpdateSpecializationModel : SpecializationModel
     {
-        public int? ModifiedUserId { get; set; }
+        public int? ModifiedUserId { get; init; }
 
         public void UpdateEntity(VcSpecializations entity)
         {
@@ -54,7 +54,7 @@ namespace VeterinaryClinic.Business
 
     public record SpecializationFilterModel : BaseQueryFilterModel
     {
-        public string? Code { get; set; }
-        public string? Name { get; set; }
+        public string? Code { get; init; }
+        public string? Name { get; init; }
     }
 }

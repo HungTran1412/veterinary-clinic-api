@@ -1,43 +1,36 @@
 using MailKit.Net.Smtp;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using MimeKit;
 using Serilog;
 using VeterinaryClinic.Business.Services;
 using VeterinaryClinic.Data;
+using VeterinaryClinic.Shared.Configurations; // <-- Sửa using ở đây
 
-namespace VeterinaryClinic.Infrastructure.Services
+namespace VeterinaryClinic.Infrastructure
 {
     public class EmailService : IEmailService
     {
-        private readonly IConfiguration _configuration;
+        private readonly MailSettings _mailSettings;
         private readonly IServiceScopeFactory _scopeFactory;
 
-        public EmailService(IConfiguration configuration, IServiceScopeFactory scopeFactory)
+        public EmailService(IOptions<MailSettings> mailSettings, IServiceScopeFactory scopeFactory)
         {
-            _configuration = configuration;
+            _mailSettings = mailSettings.Value;
             _scopeFactory = scopeFactory;
         }
 
         public async Task SendEmailAsync(string to, string subject, string body)
         {
-            var smtpServer = _configuration["EmailSettings:SmtpServer"];
-            var smtpPortStr = _configuration["EmailSettings:SmtpPort"];
-            var smtpPort = int.Parse(string.IsNullOrEmpty(smtpPortStr) ? "587" : smtpPortStr);
-            var smtpUser = _configuration["EmailSettings:SmtpUser"];
-            var smtpPass = _configuration["EmailSettings:SmtpPass"];
-            var senderName = _configuration["EmailSettings:SenderName"];
-            var senderEmail = _configuration["EmailSettings:SenderEmail"];
-
             string errorMessage = "";
             string status = "Success";
 
-            Log.Information($"[EmailService] Preparing to send email to {to} via {smtpServer}:{smtpPort}");
+            Log.Information($"[EmailService] Preparing to send email to {to} via {_mailSettings.SmtpServer}:{_mailSettings.SmtpPort}");
 
             try
             {
                 var message = new MimeMessage();
-                message.From.Add(new MailboxAddress(senderName, senderEmail));
+                message.From.Add(new MailboxAddress(_mailSettings.SenderName, _mailSettings.SenderEmail));
                 message.To.Add(new MailboxAddress("", to));
                 message.Subject = subject;
 
@@ -47,15 +40,14 @@ namespace VeterinaryClinic.Infrastructure.Services
                 };
 
                 using var client = new SmtpClient();
-
-                // For demo/dev environment, accept all certificates
+                
                 client.CheckCertificateRevocation = false;
 
                 Log.Information("[EmailService] Connecting...");
-                await client.ConnectAsync(smtpServer, smtpPort, MailKit.Security.SecureSocketOptions.StartTls);
+                await client.ConnectAsync(_mailSettings.SmtpServer, _mailSettings.SmtpPort, MailKit.Security.SecureSocketOptions.StartTls);
 
                 Log.Information("[EmailService] Authenticating...");
-                await client.AuthenticateAsync(smtpUser, smtpPass);
+                await client.AuthenticateAsync(_mailSettings.SmtpUser, _mailSettings.SmtpPass);
 
                 Log.Information("[EmailService] Sending...");
                 await client.SendAsync(message);
@@ -83,7 +75,6 @@ namespace VeterinaryClinic.Infrastructure.Services
 
                         var emailLog = new VcEmailLogs
                         {
-                            // Sinh mã code tự động để tránh lỗi NOT NULL
                             Code = $"LOG-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}",
                             ToEmail = to,
                             Subject = subject,
@@ -91,7 +82,6 @@ namespace VeterinaryClinic.Infrastructure.Services
                             SentStatus = status,
                             ErrorMessage = errorMessage,
                             CreatedDate = DateTime.Now,
-                            // Gán giá trị mặc định cho ReferenceType để tránh lỗi NOT NULL
                             ReferenceType = "System",
                             ReferenceId = 0
                         };

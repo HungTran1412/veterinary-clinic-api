@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VeterinaryClinic.Data;
 
@@ -11,9 +12,11 @@ using VeterinaryClinic.Data;
 namespace VeterinaryClinic.Data.Migrations
 {
     [DbContext(typeof(VeterinaryClinicDataContext))]
-    partial class VeterinaryClinicDataContextModelSnapshot : ModelSnapshot
+    [Migration("20260405093012_ChangeImageUrlColName")]
+    partial class ChangeImageUrlColName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1069,14 +1072,6 @@ namespace VeterinaryClinic.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)")
                         .HasColumnName("username");
-
-                    b.Property<string>("VerificationToken")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("verification_token");
-
-                    b.Property<DateTime?>("VerificationTokenExpires")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("verification_token_expires");
 
                     b.HasKey("Id");
 

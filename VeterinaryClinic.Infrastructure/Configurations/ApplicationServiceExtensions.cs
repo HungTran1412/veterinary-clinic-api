@@ -1,16 +1,23 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using VeterinaryClinic.Business;
-using VeterinaryClinic.Infrastructure.Services.CloudinaryHandler;
+using VeterinaryClinic.Business.Services;
+using VeterinaryClinic.Infrastructure.Services;
+using VeterinaryClinic.Shared.Configurations; // <-- Sửa using ở đây
 
-namespace VeterinaryClinic.Infrastructure.Configurations
+namespace VeterinaryClinic.Infrastructure
 {
     public static class ApplicationServiceExtensions
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config)
         {
+            // Đăng ký các lớp cấu hình từ Shared
             services.Configure<CloudinarySettings>(config.GetSection("CloudinarySettings"));
+            services.Configure<MailSettings>(config.GetSection("EmailSettings"));
+            
+            // Đăng ký các service của Infrastructure
             services.AddScoped<ICloudinaryService, PhotoService>();
+            services.AddScoped<IEmailService, EmailService>();
 
             return services;
         }

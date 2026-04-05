@@ -48,7 +48,7 @@ namespace VeterinaryClinic.Data
         /// <summary>
         /// anh dich vu
         /// </summary>
-        [Column("ImageUrl"), MaxLength(500)]
+        [Column("image_url"), MaxLength(500)]
         public string? ImageUrl { get; set; }
 
         /// <summary>

@@ -1,4 +1,4 @@
-namespace VeterinaryClinic.Infrastructure.Configurations
+namespace VeterinaryClinic.Infrastructure
 {
     public class CloudinarySettings
     {

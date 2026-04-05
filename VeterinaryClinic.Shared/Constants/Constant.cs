@@ -13,6 +13,7 @@
         public const string USER = "users";
         public const string SERVICE = "service";
         public const string EMAIL_LOGS = "email-logs";
+        public const string PHOTO_UPLOAD = "photo-upload";
         public const string PET = "pettest";
 
         #endregion

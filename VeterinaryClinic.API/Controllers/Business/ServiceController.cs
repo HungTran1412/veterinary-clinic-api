@@ -49,8 +49,8 @@ namespace VeterinaryClinic.API.Controllers
         {
             return await ExecuteFunction(async () =>
             {
-                model.Id = id;
-                return await _mediator.Send(new UpdateServiceCommand(model));
+                var updatedModel = model with { Id = id };
+                return await _mediator.Send(new UpdateServiceCommand(updatedModel));
             });
         }
 

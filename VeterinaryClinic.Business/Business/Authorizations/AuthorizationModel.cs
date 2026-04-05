@@ -5,10 +5,10 @@ namespace VeterinaryClinic.Business
     public record AuthorizationBaseModel
     {
         [Required]
-        public string LoginIdentifier { get; set; }
+        public string LoginIdentifier { get; init; }
 
         [Required] 
-        public string Password { get; set; }
+        public string Password { get; init; }
     }
 
     public record LoginModel : AuthorizationBaseModel
@@ -17,19 +17,19 @@ namespace VeterinaryClinic.Business
 
     public record LoginResponseModel
     {
-        public int Id { get; set; }
-        public string FullName { get; set; }
-        public string UserName { get; set; }
-        public string Email { get; set; }
-        public string Role { get; set; }
-        public string AccessToken { get; set; }
-        public string RefreshToken { get; set; }
+        public int Id { get; init; }
+        public string FullName { get; init; }
+        public string UserName { get; init; }
+        public string Email { get; init; }
+        public string Role { get; init; }
+        public string AccessToken { get; init; }
+        public string RefreshToken { get; init; }
     }
 
     public record RefreshTokenModel
     {
-        [Required] public string AccessToken { get; set; }
+        [Required] public string AccessToken { get; init; }
 
-        [Required] public string RefreshToken { get; set; }
+        [Required] public string RefreshToken { get; init; }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace VeterinaryClinic.Business
 {
-    public record EmailLogBaseModel
+    public abstract record EmailLogBaseModel
     {
         [Required(ErrorMessage = "service.emailog-id.required")]
         public int Id { get; init; }

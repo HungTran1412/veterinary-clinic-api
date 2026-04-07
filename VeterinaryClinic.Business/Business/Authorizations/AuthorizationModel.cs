@@ -2,7 +2,7 @@
 
 namespace VeterinaryClinic.Business
 {
-    public record AuthorizationBaseModel
+    public abstract record AuthorizationBaseModel
     {
         [Required]
         public string LoginIdentifier { get; init; }

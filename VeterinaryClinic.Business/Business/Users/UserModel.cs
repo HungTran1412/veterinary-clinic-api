@@ -3,8 +3,8 @@ using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared;
 
 namespace VeterinaryClinic.Business
-{ 
-    public record UserBaseModel
+{
+    public abstract record UserBaseModel
     {
         public int Id { get; init; }
         

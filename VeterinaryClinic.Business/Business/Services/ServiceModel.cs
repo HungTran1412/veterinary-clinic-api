@@ -4,7 +4,7 @@ using VeterinaryClinic.Shared;
 
 namespace VeterinaryClinic.Business
 {
-    public record ServiceBaseModel
+    public abstract record ServiceBaseModel
     {
         public int Id { get; init; }
         

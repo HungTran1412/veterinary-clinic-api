@@ -6,7 +6,7 @@ namespace VeterinaryClinic.Business
 {
     
     
-    public record PhotoUploadBaseModel
+    public abstract record PhotoUploadBaseModel
     {
         [Required(ErrorMessage = "photo_upload.id.required")]
         public int Id { init; get; }

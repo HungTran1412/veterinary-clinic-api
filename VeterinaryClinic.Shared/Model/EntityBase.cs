@@ -50,7 +50,7 @@ namespace VeterinaryClinic.Shared
         public bool IsActive { get; set; } = true;
     }
 
-    public class TrackedChangeEntity
+    public abstract class TrackedChangeEntity
     {
         [Key]
         [Column("id", Order = 1)]

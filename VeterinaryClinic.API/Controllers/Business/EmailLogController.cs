@@ -25,7 +25,7 @@ namespace VeterinaryClinic.API.Controllers
         /// <param name="filter">Điều kiện lọc</param>
         /// <returns></returns>
         [HttpPost, Route("filter")]
-        [ProducesResponseType(typeof(ResponseObject<PaginationList<EmailLogBaseModel>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseObject<PaginationList<EmailLogModel>>), StatusCodes.Status200OK)]
         public async Task<IActionResult> Filter([FromBody] EmailLogFilterModel filter)
         {
             return await ExecuteFunction(async () =>

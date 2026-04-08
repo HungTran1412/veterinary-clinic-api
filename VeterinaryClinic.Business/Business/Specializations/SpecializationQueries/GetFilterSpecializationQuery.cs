@@ -5,7 +5,7 @@ using VeterinaryClinic.Shared;
 
 namespace VeterinaryClinic.Business
 {
-    public class GetFilterSpecializationQuery : IRequest<PaginationList<SpecializationBaseModel>>
+    public class GetFilterSpecializationQuery : IRequest<PaginationList<SpecializationModel>>
     {
         public SpecializationFilterModel Filter {get; set;}
 
@@ -18,7 +18,7 @@ namespace VeterinaryClinic.Business
             Filter = filter;
         }
 
-        public class Handler : IRequestHandler<GetFilterSpecializationQuery, PaginationList<SpecializationBaseModel>>
+        public class Handler : IRequestHandler<GetFilterSpecializationQuery, PaginationList<SpecializationModel>>
         {
             private readonly VeterinaryClinicReadDataContext _dataContext;
 
@@ -27,7 +27,7 @@ namespace VeterinaryClinic.Business
                 _dataContext = dataContext;
             }
             
-            public async Task<PaginationList<SpecializationBaseModel>> Handle(GetFilterSpecializationQuery request,
+            public async Task<PaginationList<SpecializationModel>> Handle(GetFilterSpecializationQuery request,
                 CancellationToken cancellationToken)
             {
                 var filter = request.Filter;
@@ -72,10 +72,10 @@ namespace VeterinaryClinic.Business
                     .ToListAsync(cancellationToken);
 
                 // Áp dụng lại AutoMap cho từng đối tượng
-                var listResult = AutoMapperUtils.AutoMap<VcSpecializations, SpecializationBaseModel>(listData);
+                var listResult = AutoMapperUtils.AutoMap<VcSpecializations, SpecializationModel>(listData);
                 
                 // Đổi kiểu trả về thành BaseModel
-                return new PaginationList<SpecializationBaseModel>()
+                return new PaginationList<SpecializationModel>()
                 {
                     DataCount = listResult.Count,
                     TotalCount = totalCount,

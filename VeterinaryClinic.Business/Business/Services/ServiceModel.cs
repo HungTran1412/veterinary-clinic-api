@@ -40,8 +40,7 @@ namespace VeterinaryClinic.Business
     
     public record ServiceModel : ServiceBaseModel
     {
-    
-    
+        public int? CreatedUserId { get; init; }
     }
 
     public record InfoServiceModel : ServiceModel
@@ -64,7 +63,6 @@ namespace VeterinaryClinic.Business
             entity.Price = this.Price;
             entity.DurationMinutes = this.DurationMinutes;
             entity.SpecializationId = this.SpecializationId;
-            entity.ImageUrl = string.IsNullOrEmpty(this.ImageUrl) ? "" : this.ImageUrl; // Xử lý null an toàn
             entity.IsAvailable = this.IsAvailable;
             entity.Description = string.IsNullOrEmpty(this.Description) ? "" : this.Description; // Xử lý null an toàn
             entity.Order = this.Order;

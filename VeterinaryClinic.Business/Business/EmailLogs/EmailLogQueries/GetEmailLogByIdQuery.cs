@@ -6,7 +6,7 @@ using VeterinaryClinic.Shared;
 
 namespace VeterinaryClinic.Business
 {
-    public class GetEmailLogByIdQuery : IRequest<EmailLogModel>
+    public class GetEmailLogByIdQuery : IRequest<InfoEmailLogModel>
     {
         public int Id { get; }
 
@@ -19,7 +19,7 @@ namespace VeterinaryClinic.Business
             Id = id;
         }
 
-        public class Handler : IRequestHandler<GetEmailLogByIdQuery, EmailLogModel>
+        public class Handler : IRequestHandler<GetEmailLogByIdQuery, InfoEmailLogModel>
         {
             private readonly VeterinaryClinicReadDataContext _dataContext;
             private readonly ICacheService _cacheService;
@@ -30,7 +30,7 @@ namespace VeterinaryClinic.Business
                 _cacheService = cacheService;
             }
 
-            public async Task<EmailLogModel> Handle(GetEmailLogByIdQuery request, CancellationToken cancellationToken)
+            public async Task<InfoEmailLogModel> Handle(GetEmailLogByIdQuery request, CancellationToken cancellationToken)
             {
                 var id = request.Id;
                 string cacheKey = EmailLogConstant.BuildCacheKey(id.ToString());
@@ -39,7 +39,7 @@ namespace VeterinaryClinic.Business
                     var entity = await _dataContext.VcEmailLogs.AsNoTracking()
                         .FirstOrDefaultAsync(x => x.Id == id);
 
-                    return AutoMapperUtils.AutoMap<VcEmailLogs, EmailLogModel>(entity);
+                    return AutoMapperUtils.AutoMap<VcEmailLogs, InfoEmailLogModel>(entity);
                 });
                 return item;
             }

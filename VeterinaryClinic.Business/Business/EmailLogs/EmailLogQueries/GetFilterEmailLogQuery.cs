@@ -5,7 +5,7 @@ using VeterinaryClinic.Shared;
 
 namespace VeterinaryClinic.Business
 {
-    public class GetFilterEmailLogQuery : IRequest<PaginationList<EmailLogBaseModel>>
+    public class GetFilterEmailLogQuery : IRequest<PaginationList<EmailLogModel>>
     {
         public EmailLogFilterModel Filter { set; get; }
 
@@ -18,7 +18,7 @@ namespace VeterinaryClinic.Business
             Filter = filter;
         }
 
-        public class Handler : IRequestHandler<GetFilterEmailLogQuery, PaginationList<EmailLogBaseModel>>
+        public class Handler : IRequestHandler<GetFilterEmailLogQuery, PaginationList<EmailLogModel>>
         {
             private readonly VeterinaryClinicReadDataContext _dataContext;
             
@@ -27,7 +27,7 @@ namespace VeterinaryClinic.Business
                 _dataContext = dataContext;
             }
 
-            public async Task<PaginationList<EmailLogBaseModel>> Handle(GetFilterEmailLogQuery request,
+            public async Task<PaginationList<EmailLogModel>> Handle(GetFilterEmailLogQuery request,
                 CancellationToken cancellationToken)
             {
                 var filter = request.Filter;
@@ -74,9 +74,9 @@ namespace VeterinaryClinic.Business
                     .ToListAsync(cancellationToken);
                 
                 //map cho tung doi tuong
-                var listResult = AutoMapperUtils.AutoMap<VcEmailLogs, EmailLogBaseModel>(listData);
+                var listResult = AutoMapperUtils.AutoMap<VcEmailLogs, EmailLogModel>(listData);
 
-                return new PaginationList<EmailLogBaseModel>()
+                return new PaginationList<EmailLogModel>()
                 {
                     DataCount = listResult.Count,
                     TotalCount = totalCount,

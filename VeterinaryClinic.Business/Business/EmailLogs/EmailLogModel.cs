@@ -18,9 +18,14 @@ namespace VeterinaryClinic.Business
 
     public record EmailLogModel : EmailLogBaseModel
     {
-        public string Body { init; get; }
+        
     }
 
+    public record InfoEmailLogModel : EmailLogModel
+    {
+        public string Body { init; get; }
+    }
+    
     public record EmailLogFilterModel : BaseQueryFilterModel
     {
         public string? Subject { init; get; }

@@ -2,9 +2,9 @@ using VeterinaryClinic.Business;
 using System.Globalization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
-using VeterinaryClinic.Business.Services; // Using Interface
+using VeterinaryClinic.Business; // Using Interface
 using VeterinaryClinic.Data;
-using VeterinaryClinic.Infrastructure.Services; // Using Implementation
+using VeterinaryClinic.Infrastructure; // Using Implementation
 using System.Reflection;
 using Microsoft.OpenApi.Models;
 using Serilog;

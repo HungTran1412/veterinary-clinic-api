@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using VeterinaryClinic.Business;
-using VeterinaryClinic.Business.Users.UserCommands;
 using VeterinaryClinic.Shared;
 
 namespace VeterinaryClinic.API.Controllers

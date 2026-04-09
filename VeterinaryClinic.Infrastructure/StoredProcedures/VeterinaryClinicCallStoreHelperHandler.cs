@@ -1,6 +1,18 @@
-namespace VeterinaryClinic.Infrastructure.StoredProcedures;
+using Microsoft.Extensions.Configuration;
 
-public class VeterinaryClinicCallStoreHelperHandler
+namespace VeterinaryClinic.Infrastructure;
+
+public class VeterinaryClinicCallStoreHelperHandler : IVeterinaryClinicCallStoreHelper
 {
+    private readonly IConfiguration _config;
     
+    public VeterinaryClinicCallStoreHelperHandler(IConfiguration config)
+    {
+        _config = config;
+    }
+
+    private string DatabaseConnectionString()
+    {
+        return _config.GetConnectionString("DefaultConnection") ?? string.Empty;
+    }
 }

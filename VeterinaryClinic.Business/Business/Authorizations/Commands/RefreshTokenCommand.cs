@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using System.Security.Claims;
-using VeterinaryClinic.Business.Services;
 using VeterinaryClinic.Data;
 
 namespace VeterinaryClinic.Business

@@ -1,12 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared;
-using VeterinaryClinic.Business.Services;
+using VeterinaryClinic.Business;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Threading.Tasks;
-using VeterinaryClinic.Shared.Configurations;
+using VeterinaryClinic.Shared;
 using Serilog;
 using VeterinaryClinic.Business;
 

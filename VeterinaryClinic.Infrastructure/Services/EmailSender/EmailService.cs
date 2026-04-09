@@ -3,9 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using Serilog;
-using VeterinaryClinic.Business.Services;
+using VeterinaryClinic.Business;
 using VeterinaryClinic.Data;
-using VeterinaryClinic.Shared.Configurations; // <-- Sửa using ở đây
+using VeterinaryClinic.Shared;
 
 namespace VeterinaryClinic.Infrastructure
 {

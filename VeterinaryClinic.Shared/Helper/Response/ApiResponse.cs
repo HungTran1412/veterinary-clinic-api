@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace VeterinaryClinic.Shared.Helper.Response;
+namespace VeterinaryClinic.Shared;
 
 public class ApiResponse<T>
 {

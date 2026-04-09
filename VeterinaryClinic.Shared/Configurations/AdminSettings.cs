@@ -1,4 +1,4 @@
-namespace VeterinaryClinic.Shared.Configurations
+namespace VeterinaryClinic.Shared
 {
     public class AdminSettings
     {

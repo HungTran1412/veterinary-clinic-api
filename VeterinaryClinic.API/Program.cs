@@ -13,6 +13,7 @@ using Swashbuckle.AspNetCore.SwaggerUI;
 using Microsoft.Extensions.Localization;
 using VeterinaryClinic.API.Localization;
 using VeterinaryClinic.Infrastructure; // Using custom localizer
+using VeterinaryClinic.API.Extensions;
 
 // Cấu hình Serilog tối thiểu để ghi ra Console
 Log.Logger = new LoggerConfiguration()
@@ -151,6 +152,9 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 });
 
 var app = builder.Build();
+
+// Seed data
+await app.UseAdminSeeder();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -86,6 +86,7 @@ namespace VeterinaryClinic.Business
                     UserName = user.Username,
                     Email = user.Email,
                     Role = user.Role,
+                    AvatarUrl = user.AvatarUrl,
                     AccessToken = accessToken,
                     RefreshToken = refreshToken
                 };

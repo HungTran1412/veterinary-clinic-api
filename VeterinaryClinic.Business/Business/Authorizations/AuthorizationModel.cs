@@ -21,6 +21,7 @@ namespace VeterinaryClinic.Business
         public string FullName { get; init; }
         public string UserName { get; init; }
         public string Email { get; init; }
+        public string AvatarUrl { get; init; }
         public string Role { get; init; }
         public string AccessToken { get; init; }
         public string RefreshToken { get; init; }
@@ -31,5 +32,9 @@ namespace VeterinaryClinic.Business
         [Required] public string AccessToken { get; init; }
 
         [Required] public string RefreshToken { get; init; }
+    }
+    public record LogoutModel
+    {
+        public string RefreshToken { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using VeterinaryClinic.Busines;
 using VeterinaryClinic.Business;
 using VeterinaryClinic.Shared;
 
@@ -74,6 +75,21 @@ namespace VeterinaryClinic.API.Controllers
             return await ExecuteFunction(async () =>
             {
                 return await _mediator.Send(new RefreshTokenCommand(model));
+            });
+        }
+
+        /// <summary>
+        /// Đăng xuất hệ thống
+        /// </summary>
+        /// <param name="model">Refresh Token cần vô hiệu hóa</param>
+        /// <returns>Kết quả đăng xuất</returns>
+        [HttpPost("logout")]
+        [ProducesResponseType(typeof(ResponseObject<Unit>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> Logout([FromBody] LogoutModel model)
+        {
+            return await ExecuteFunction(async () =>
+            {
+                return await _mediator.Send(new UserLogoutCommand(model));
             });
         }
     }

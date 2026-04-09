@@ -14,6 +14,7 @@ using Microsoft.Extensions.Localization;
 using VeterinaryClinic.API.Localization;
 using VeterinaryClinic.Infrastructure; // Using custom localizer
 using VeterinaryClinic.API.Extensions;
+using VeterinaryClinic.Shared;
 
 // Cấu hình Serilog tối thiểu để ghi ra Console
 Log.Logger = new LoggerConfiguration()

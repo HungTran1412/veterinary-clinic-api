@@ -5,7 +5,6 @@ using Microsoft.Extensions.Localization;
 using Serilog;
 using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared;
-using VeterinaryClinic.Shared.ContextAccessor;
 
 namespace VeterinaryClinic.Business
 {

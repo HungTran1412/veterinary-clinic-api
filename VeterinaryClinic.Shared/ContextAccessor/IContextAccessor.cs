@@ -1,4 +1,4 @@
-﻿namespace VeterinaryClinic.Shared.ContextAccessor
+﻿namespace VeterinaryClinic.Shared
 {
     public interface IContextAccessor
     {

@@ -6,7 +6,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using VeterinaryClinic.Data;
-using VeterinaryClinic.Shared.ContextAccessor;
+using VeterinaryClinic.Shared;
 
 namespace VeterinaryClinic.Business
 {

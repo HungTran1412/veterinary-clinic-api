@@ -3,10 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Serilog;
 using System.Text.Json;
-using VeterinaryClinic.Business.Services; // Interface giờ nằm ở đây
+using VeterinaryClinic.Business; // Interface giờ nằm ở đây
 using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared;
-using VeterinaryClinic.Shared.ContextAccessor;
 
 namespace VeterinaryClinic.Business
 {

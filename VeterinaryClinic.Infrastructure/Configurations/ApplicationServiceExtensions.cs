@@ -1,9 +1,8 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using VeterinaryClinic.Business;
-using VeterinaryClinic.Business.Services;
-using VeterinaryClinic.Infrastructure.Services;
-using VeterinaryClinic.Shared.Configurations; // <-- Sửa using ở đây
+using VeterinaryClinic.Infrastructure;
+using VeterinaryClinic.Shared; // <-- Sửa using ở đây
 
 namespace VeterinaryClinic.Infrastructure
 {

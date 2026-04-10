@@ -2,9 +2,9 @@ using VeterinaryClinic.Business;
 using System.Globalization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
-using VeterinaryClinic.Business.Services; // Using Interface
+using VeterinaryClinic.Business; // Using Interface
 using VeterinaryClinic.Data;
-using VeterinaryClinic.Infrastructure.Services; // Using Implementation
+using VeterinaryClinic.Infrastructure; // Using Implementation
 using System.Reflection;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -13,6 +13,8 @@ using Swashbuckle.AspNetCore.SwaggerUI;
 using Microsoft.Extensions.Localization;
 using VeterinaryClinic.API.Localization;
 using VeterinaryClinic.Infrastructure; // Using custom localizer
+using VeterinaryClinic.API.Extensions;
+using VeterinaryClinic.Shared;
 
 // Cấu hình Serilog tối thiểu để ghi ra Console
 Log.Logger = new LoggerConfiguration()
@@ -151,6 +153,9 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 });
 
 var app = builder.Build();
+
+// Seed data
+await app.UseAdminSeeder();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

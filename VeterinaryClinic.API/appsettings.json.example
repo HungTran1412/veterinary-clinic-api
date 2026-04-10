@@ -13,6 +13,13 @@
   "AppSettings": {
     "EnableCache": true
   },
+  "AdminSettings": {
+    "Username": "admin",
+    "Email": "admin@veterinaryclinic.com",
+    "Password": "Abc@1234",
+    "FullName": "System Administrator",
+    "PhoneNumber": "0123456789"
+  },
   "JwtSettings": {
     "Secret": "DayLaMotChuoiBiMatRatDaiVaPhucTapDeMaHoaJWT1234567890",
     "Issuer": "VeterinaryClinicAPI",

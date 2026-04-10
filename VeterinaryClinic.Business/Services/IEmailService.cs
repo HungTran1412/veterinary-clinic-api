@@ -1,4 +1,4 @@
-namespace VeterinaryClinic.Business.Services;
+namespace VeterinaryClinic.Business;
 
 public interface IEmailService
 {

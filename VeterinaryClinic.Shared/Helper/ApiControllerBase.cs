@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using VeterinaryClinic.Shared.Helper.Response;
 
 namespace VeterinaryClinic.Shared
 {

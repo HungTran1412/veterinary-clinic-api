@@ -1,4 +1,4 @@
-﻿namespace VeterinaryClinic.Business.Services
+﻿namespace VeterinaryClinic.Business
 {
     /// <summary>
     /// Dịch vụ để xử lý mã hóa và xác thực mật khẩu.

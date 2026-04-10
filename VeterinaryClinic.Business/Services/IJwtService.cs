@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 
-namespace VeterinaryClinic.Business.Services
+namespace VeterinaryClinic.Business
 {
     public interface IJwtService
     {

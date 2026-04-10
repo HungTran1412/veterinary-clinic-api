@@ -1,7 +1,7 @@
 ﻿using BCrypt.Net;
-using VeterinaryClinic.Business.Services; // Using Interface từ Business
+using VeterinaryClinic.Business;
 
-namespace VeterinaryClinic.Infrastructure.Services
+namespace VeterinaryClinic.Infrastructure
 {
     public class PasswordHasher : IBcryptPasswordHasher
     {

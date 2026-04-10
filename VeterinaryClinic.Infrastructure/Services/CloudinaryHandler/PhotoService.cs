@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
 using VeterinaryClinic.Business;
 
-namespace VeterinaryClinic.Infrastructure.Services
+namespace VeterinaryClinic.Infrastructure
 {
     public class PhotoService : ICloudinaryService
     {

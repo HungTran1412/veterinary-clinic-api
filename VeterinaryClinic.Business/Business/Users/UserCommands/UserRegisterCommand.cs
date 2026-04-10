@@ -5,14 +5,11 @@ using Microsoft.Extensions.Options;
 using Serilog;
 using System.Security.Cryptography;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using VeterinaryClinic.Business.Services;
+using VeterinaryClinic.Business;
 using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared;
-using VeterinaryClinic.Shared.Configurations; 
 
-namespace VeterinaryClinic.Business.Users.UserCommands
+namespace VeterinaryClinic.Busines
 {
     public class UserRegisterCommand : IRequest<Unit>
     {

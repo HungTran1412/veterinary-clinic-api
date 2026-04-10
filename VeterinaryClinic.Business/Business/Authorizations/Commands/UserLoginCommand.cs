@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Serilog;
 using System.Security.Claims;
-using VeterinaryClinic.Business.Services;
+using VeterinaryClinic.Business;
 using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared.ContextAccessor;
 
@@ -86,6 +86,7 @@ namespace VeterinaryClinic.Business
                     UserName = user.Username,
                     Email = user.Email,
                     Role = user.Role,
+                    AvatarUrl = user.AvatarUrl,
                     AccessToken = accessToken,
                     RefreshToken = refreshToken
                 };

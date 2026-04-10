@@ -2,12 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Serilog;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using VeterinaryClinic.Data;
 
-namespace VeterinaryClinic.Business.Users.UserCommands
+namespace VeterinaryClinic.Business
 {
     public class VerifyEmailCommand : IRequest<string>
     {

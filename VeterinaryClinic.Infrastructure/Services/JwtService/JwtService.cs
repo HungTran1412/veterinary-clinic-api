@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using VeterinaryClinic.Business.Services;
+using VeterinaryClinic.Business;
 
 namespace VeterinaryClinic.Infrastructure
 {

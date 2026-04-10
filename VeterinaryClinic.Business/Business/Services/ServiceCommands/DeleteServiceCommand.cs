@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Serilog;
 using VeterinaryClinic.Data;
-using VeterinaryClinic.Shared.ContextAccessor;
+using VeterinaryClinic.Shared;
 
 namespace VeterinaryClinic.Business
 {

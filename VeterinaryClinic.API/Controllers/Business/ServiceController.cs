@@ -26,7 +26,7 @@ namespace VeterinaryClinic.API.Controllers
         /// <param name="model">Thông tin dịch vụ</param>
         /// <returns></returns>
         [HttpPost]
-        // [ClaimRequirement(ClaimConstants.PERMISSTTIONS, nameof(PermissionVeterinaryClinicEnum.SERVICE_MANAGER_ADD))]
+        // [ClaimRequirement(ClaimConstants.PERMISSIONS, nameof(PermissionVeterinaryClinicEnum.SERVICE_MANAGER_ADD))]
         [ProducesResponseType(typeof(ResponseObject<Unit>), StatusCodes.Status200OK)]
         public async Task<IActionResult> Create([FromBody] CreateServiceModel model)
         {
@@ -43,7 +43,7 @@ namespace VeterinaryClinic.API.Controllers
         /// <param name="model">Thông tin dịch vụ cần cập nhật</param>
         /// <returns></returns>
         [HttpPut, Route("{id}")]
-        // [ClaimRequirement(ClaimConstants.PERMISSTTIONS, nameof(PermissionVeterinaryClinicEnum.SERVICE_MANAGER_EDIT))]
+        // [ClaimRequirement(ClaimConstants.PERMISSIONS, nameof(PermissionVeterinaryClinicEnum.SERVICE_MANAGER_EDIT))]
         [ProducesResponseType(typeof(ResponseObject<Unit>), StatusCodes.Status200OK)]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateServiceModel model)
         {
@@ -61,7 +61,7 @@ namespace VeterinaryClinic.API.Controllers
         /// <returns></returns>
         [HttpDelete, Route("{id}")]
         [ProducesResponseType(typeof(ResponseObject<Unit>), StatusCodes.Status200OK)]
-        // [ClaimRequirement(ClaimConstants.PERMISSTTIONS, nameof(PermissionVeterinaryClinicEnum.SERVICE_MANAGER_DELETE))]
+        // [ClaimRequirement(ClaimConstants.PERMISSIONS, nameof(PermissionVeterinaryClinicEnum.SERVICE_MANAGER_DELETE))]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
             return await ExecuteFunction(async () =>
@@ -77,7 +77,7 @@ namespace VeterinaryClinic.API.Controllers
         /// <returns></returns>
         [HttpGet, Route("{id}")]
         [ProducesResponseType(typeof(ResponseObject<Unit>), StatusCodes.Status200OK)]
-        // [ClaimRequirement(ClaimConstants.PERMISSTTIONS, nameof(PermissionVeterinaryClinicEnum.SERVICE_MANAGER_VIEW))]
+        // [ClaimRequirement(ClaimConstants.PERMISSIONS, nameof(PermissionVeterinaryClinicEnum.SERVICE_MANAGER_VIEW))]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
             return await ExecuteFunction(async () =>
@@ -92,7 +92,7 @@ namespace VeterinaryClinic.API.Controllers
         /// <param name="filter">Điều kiện lọc</param>
         /// <returns></returns>
         [HttpPost, Route("filter")]
-        // [ClaimRequirement(ClaimConstants.PERMISSTTIONS, nameof(PermissionVeterinaryClinicEnum.SERVICE_MANAGER_VIEW))]
+        // [ClaimRequirement(ClaimConstants.PERMISSIONS, nameof(PermissionVeterinaryClinicEnum.SERVICE_MANAGER_VIEW))]
         [ProducesResponseType(typeof(ResponseObject<List<ServiceSelectItemModel>>), StatusCodes.Status200OK)]
         public async Task<IActionResult> Filter([FromBody] ServiceFilterModel filter)
         {

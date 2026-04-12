@@ -114,8 +114,7 @@ namespace VeterinaryClinic.API.Controllers
         {
             return await ExecuteFunction(async () =>
             {
-                var rs = await _mediator.Send(new GetComboboxServiceQuery(count, ts));
-                return rs;
+                return await _mediator.Send(new GetComboboxServiceQuery(count, ts));
             });
         }
         

@@ -16,6 +16,7 @@ namespace VeterinaryClinic.Data
             
         }
         
+        public virtual DbSet<Permission> Permissions { get; set; }
         public virtual DbSet<VcPets> VcPets { get; set; }
         public virtual DbSet<VcUsers> VcUsers { get; set; }
         public virtual DbSet<VcInvoices> VcInvoices { get; set; }

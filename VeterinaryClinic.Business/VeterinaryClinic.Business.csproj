@@ -25,6 +25,8 @@
 
   <ItemGroup>
     <Folder Include="Business\Appointments\" />
+    <Folder Include="Business\WorkSchedules\WorkScheduleCommands\" />
+    <Folder Include="Business\WorkSchedules\WorkScheduleQueries\" />
   </ItemGroup>
 
 </Project>

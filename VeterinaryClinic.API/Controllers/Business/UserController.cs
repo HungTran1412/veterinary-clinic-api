@@ -112,6 +112,22 @@ namespace VeterinaryClinic.API.Controllers
             });
         }
 
+        
+        /// <summary>
+        /// Lấy danh sách người dùng cho combobox
+        /// </summary>
+        /// <param name="count">Số bản ghi tối đa</param>
+        /// <param name="ts">Từ khóa tìm kiếm</param>
+        /// <response code="200">Thành công</response>
+        [HttpGet, Route("for-combobox")]
+        [ProducesResponseType(typeof(ResponseObject<List<UserSelectItemModel>>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetListCombobox(int count = 0, string ts = "")
+        {
+            return await ExecuteFunction(async () =>
+            {
+                return await _mediator.Send(new GetComboboxUserQuery(count, ts));
+            });
+        }
         #endregion
     }
 }

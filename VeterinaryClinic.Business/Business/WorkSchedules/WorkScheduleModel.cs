@@ -27,7 +27,10 @@ namespace VeterinaryClinic.Business
         
         public string Note { get; init; }
         
+        public bool IsActive { get; init; } = true;
 
+        public int Order { get; init; }
+        public DateTime? CreatedDate { get; init; }
     }
     
     public record WorkScheduleModel : WorkScheduleBaseModel
@@ -37,7 +40,7 @@ namespace VeterinaryClinic.Business
 
     public record CreateWorkScheduleModel : WorkScheduleModel
     {
-        public int? CraetedUserId { get; init; }
+        public int? CreatedUserId { get; init; }
     }
 
     public record UpdateWorkScheduleModel : WorkScheduleModel
@@ -58,5 +61,8 @@ namespace VeterinaryClinic.Business
     public record WorkScheduleFilterModel : BaseQueryFilterModel
     {
         public int? UserId { get; init; }
+        public string? Role { get; init; }
+        public DateTime? FromDate { get; init; }
+        public DateTime? ToDate { get; init; }
     }
 }

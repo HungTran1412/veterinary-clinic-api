@@ -40,5 +40,11 @@
   "user.verify.success": "Tài khoản của bạn đã được kích hoạt thành công! Bạn có thể đăng nhập ngay bây giờ.",
   
   "photo_upload.id.required": "ID không được để trống",
-  "photo_upload.file.required": "File không được để trống"
+  "photo_upload.file.required": "File không được để trống",
+
+  "work_schedule.not_found": "Không tìm thấy lịch làm việc.",
+  "work_schedule.user.not_found": "Không tìm thấy người dùng được chỉ định.",
+  "work_schedule.user.invalid_role": "Chỉ có thể tạo lịch cho Bác sĩ hoặc Lễ tân.",
+  "work_schedule.schedule.conflict": "Lịch làm việc bị trùng với một lịch khác của người dùng này.",
+  "work_schedule.end_time.must_be_after_start_time": "Thời gian kết thúc phải sau thời gian bắt đầu."
 }

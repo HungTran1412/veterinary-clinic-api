@@ -39,5 +39,11 @@
   "user.verify.success": "Your account has been successfully activated! You can log in now.",
 
   "photo_upload.id.required": "ID is required",
-  "photo_upload.file.required": "File is required"
+  "photo_upload.file.required": "File is required",
+
+  "work_schedule.not_found": "Work schedule not found.",
+  "work_schedule.user.not_found": "The specified user was not found.",
+  "work_schedule.user.invalid_role": "Schedules can only be created for Doctors or Receptionists.",
+  "work_schedule.schedule.conflict": "The work schedule conflicts with another existing schedule for this user.",
+  "work_schedule.end_time.must_be_after_start_time": "End time must be after start time."
 }

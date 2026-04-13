@@ -8,12 +8,14 @@
         #region Cache prefix
 
         public const string LIST_SELECT = "list-select";
+        public const string PERMISSION = "permission";
         public const string SPECIALIZATION = "specialization";
         public const string AUTHORIZATION = "authorization";
         public const string USER = "users";
         public const string SERVICE = "service";
         public const string EMAIL_LOGS = "email-logs";
         public const string PHOTO_UPLOAD = "photo-upload";
+        public const string WORK_SCHEDULE = "work-schedule";
         public const string PET = "pettest";
 
         #endregion
@@ -46,7 +48,7 @@
         public const string ORG_ID = "x-org-id";
         public const string ROLES = "x-role";
         public const string RIGHTS = "x-right";
-        public const string PERMISSTTIONS = "x-permission";
+        public const string PERMISSIONS = "x-permission";
         public const string ISSUED_AT = "x-iat";
         public const string EXPIRES_AT = "x-exp";
         public const string CHANNEL = "x-channel";

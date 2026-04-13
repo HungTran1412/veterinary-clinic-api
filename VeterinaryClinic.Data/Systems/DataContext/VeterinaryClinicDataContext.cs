@@ -13,6 +13,7 @@ namespace VeterinaryClinic.Data
             _contextAccessor = contextAccessorFactory?.Invoke();
         }
 
+        public virtual DbSet<Permission> Permissions { get; set; }
         public DbSet<VcPets> VcPets { get; set; }
         public DbSet<VcUsers> VcUsers { get; set; }
         public DbSet<VcInvoices> VcInvoices { get; set; }

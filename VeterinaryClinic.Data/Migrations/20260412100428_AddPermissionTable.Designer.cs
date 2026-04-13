@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VeterinaryClinic.Data;
 
@@ -11,9 +12,11 @@ using VeterinaryClinic.Data;
 namespace VeterinaryClinic.Data.Migrations
 {
     [DbContext(typeof(VeterinaryClinicDataContext))]
-    partial class VeterinaryClinicDataContextModelSnapshot : ModelSnapshot
+    [Migration("20260412100428_AddPermissionTable")]
+    partial class AddPermissionTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,83 +24,6 @@ namespace VeterinaryClinic.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("VeterinaryClinic.Data.Permission", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id")
-                        .HasColumnOrder(1);
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("code");
-
-                    b.Property<DateTime?>("CreatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_date")
-                        .HasColumnOrder(103);
-
-                    b.Property<int?>("CreatedUserId")
-                        .HasColumnType("int")
-                        .HasColumnName("created_user_id")
-                        .HasColumnOrder(104);
-
-                    b.Property<string>("CreatedUserName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("created_user_name")
-                        .HasColumnOrder(105);
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)")
-                        .HasColumnName("description");
-
-                    b.Property<string>("GroupName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("group_name");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_active")
-                        .HasColumnOrder(101);
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("modified_date")
-                        .HasColumnOrder(106);
-
-                    b.Property<int?>("ModifiedUserId")
-                        .HasColumnType("int")
-                        .HasColumnName("modified_user_id")
-                        .HasColumnOrder(107);
-
-                    b.Property<string>("ModifiedUserName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("modified_user_name")
-                        .HasColumnOrder(108);
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("name");
-
-                    b.Property<int>("Order")
-                        .HasColumnType("int")
-                        .HasColumnName("order")
-                        .HasColumnOrder(100);
-
-                    b.HasKey("Id");
-
-                    b.ToTable("sys_permission");
-                });
 
             modelBuilder.Entity("VeterinaryClinic.Data.VcAppointments", b =>
                 {

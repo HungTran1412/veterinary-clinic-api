@@ -80,6 +80,11 @@ namespace VeterinaryClinic.Business
         }
     }
 
+    public record UserSelectItemModel : SelectItemModel
+    {
+        public string Role { get; set; }
+    }
+    
     public record UserRegisterModel
     {
         [Required]

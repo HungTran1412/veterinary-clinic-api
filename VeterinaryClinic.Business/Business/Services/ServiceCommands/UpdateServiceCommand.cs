@@ -49,6 +49,7 @@ namespace VeterinaryClinic.Business
                 }
                 
                 //cap nhat entity
+                entity.ModifiedUserId = _contextAccessor.UserId;
                 model.UpdateEntity(entity);
                 
                 //luu vao db

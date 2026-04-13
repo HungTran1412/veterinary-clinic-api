@@ -80,6 +80,7 @@ namespace VeterinaryClinic.Business
                 
                 
                 //cap nhat thong tin
+                entity.ModifiedUserId = _contextAccessor.UserId;
                 model.UpdateEntity(entity);
                 
                 try

@@ -98,7 +98,8 @@ namespace VeterinaryClinic.Business
                 
                 entity.Address = string.IsNullOrEmpty(entity.Address) ? "" : entity.Address;
                 entity.AvatarUrl = string.IsNullOrEmpty(entity.AvatarUrl) ? "" : entity.AvatarUrl;
-
+                entity.CreatedUserId = _contextAccessor.UserId;
+                
                 #region Check Duplicate
                 var checkCode = await _dataContext.VcUsers.AnyAsync(x => x.Code == entity.Code, cancellationToken);
                 if (checkCode)

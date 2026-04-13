@@ -49,6 +49,7 @@ namespace VeterinaryClinic.Business
                 }
 
                 //xoa mem
+                dt.ModifiedUserId = _contextAccessor.UserId;
                 dt.IsActive = false;
                 
                 //luu vao db

@@ -83,7 +83,7 @@ namespace VeterinaryClinic.Business
                 }
 
                 model.UpdateEntity(entity);
-                // entity.ModifiedUserId = _contextAccessor.GetUserId();
+                entity.ModifiedUserId = _contextAccessor.UserId;
 
                 _dataContext.VcWorkSchedules.Update(entity);
                 await _dataContext.SaveChangesAsync(cancellationToken);

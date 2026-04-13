@@ -58,6 +58,7 @@ namespace VeterinaryClinic.Business
                 }
 
                 //luu vao database
+                entity.CreatedUserId = _contextAccessor.UserId;
                 await _dataContext.VcSpecializations.AddAsync(entity, cancellationToken);
                 await _dataContext.SaveChangesAsync(cancellationToken);
                 

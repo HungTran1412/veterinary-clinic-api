@@ -63,5 +63,7 @@ namespace VeterinaryClinic.Business
     {
         public DateTime? FromDate { get; init; }
         public DateTime? ToDate { get; init; }
+        public string TextSearch { get; init; }
+        public string Role { get; init; }
     }
 }

@@ -47,7 +47,31 @@ namespace VeterinaryClinic.Business
                     query = query.Where(x => x.WorkSchedule.WorkDate <= filter.ToDate.Value.Date);
                 }
 
-                // Role-based filtering
+                // Filter by TextSearch (User Code and FullName)
+                if (!string.IsNullOrEmpty(filter.TextSearch))
+                {
+                    string ts = filter.TextSearch.Trim().ToLower();
+                    query = query.Where(x => 
+                        x.User.Code.ToLower().Contains(ts) || 
+                        x.User.FullName.ToLower().Contains(ts));
+                }
+
+                // Filter by Role
+                if (!string.IsNullOrEmpty(filter.Role))
+                {
+                    string roleInput = filter.Role.Trim().ToUpper();
+                    
+                    if (Enum.TryParse<Role>(roleInput, true, out var parsedRole) && Enum.IsDefined(typeof(Role), parsedRole))
+                    {
+                        query = query.Where(x => x.User.Role.ToUpper() == roleInput);
+                    }
+                    else
+                    {
+                        return new List<WorkScheduleModel>();
+                    }
+                }
+
+                // Security check: Role-based data access
                 var currentUserId = _contextAccessor.UserId;
                 var userRole = _contextAccessor.Role;
 

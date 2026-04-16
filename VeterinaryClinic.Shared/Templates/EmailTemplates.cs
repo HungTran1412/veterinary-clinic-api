@@ -63,5 +63,32 @@
                 </div>
             ";
         }
+
+        /// <summary>
+        /// Template email thông báo đăng ký thành công
+        /// </summary>
+        /// <param name="fullName">Họ tên người dùng</param>
+        /// <param name="loginUrl">URL trang đăng nhập</param>
+        /// <returns>Nội dung HTML của email</returns>
+        public static string GetRegistrationSuccessEmail(string fullName, string loginUrl)
+        {
+            return $@"
+                <div style='font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px;'>
+                    <h2 style='color: #28a745; text-align: center;'>Đăng ký tài khoản thành công!</h2>
+                    <p>Xin chào {fullName},</p>
+                    <p>Chúc mừng bạn đã kích hoạt thành công tài khoản tại Veterinary Clinic.</p>
+                    <p>Bây giờ bạn có thể đăng nhập vào hệ thống và bắt đầu sử dụng các dịch vụ của chúng tôi.</p>
+                    <div style='text-align: center; margin: 30px 0;'>
+                        <a href='{loginUrl}' style='background-color: #007bff; color: white; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-size: 1.1em;'>Đăng nhập ngay</a>
+                    </div>
+                    <br/>
+                    <hr style='border: none; border-top: 1px solid #eee;' />
+                    <p style='font-size: 0.9em; color: #777;'>
+                        Trân trọng,<br/>
+                        <strong>Ban quản trị hệ thống Veterinary Clinic</strong>
+                    </p>
+                </div>
+            ";
+        }
     }
 }

@@ -42,7 +42,7 @@ namespace VeterinaryClinic.API.Controllers
         [Produces("text/html")]
         public async Task<IActionResult> VerifyEmail([FromQuery] string token)
         {
-            var message = await _mediator.Send(new VerifyEmailCommand(token));
+            var message = await _mediator.Send(new VerifyEmailQuery(token));
             // Trả về một trang HTML đơn giản để thông báo cho người dùng
             var htmlContent = $"<html><head><title>Xac thuc tai khoan</title></head><body style='font-family: sans-serif; text-align: center; padding-top: 50px;'><h2>{message}</h2></body></html>";
             return Content(htmlContent, "text/html");

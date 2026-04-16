@@ -38,6 +38,12 @@ namespace VeterinaryClinic.Business
                 var model = request.Model;
                 Log.Information($"Create WorkSchedule: {JsonSerializer.Serialize(model)}");
 
+                // 0. Validate WorkDate is not in the past
+                if (model.WorkDate.Date < DateTime.Now.Date)
+                {
+                    throw new ArgumentException(_localizer["work_schedule.work_date.cannot_be_in_the_past"]);
+                }
+
                 // 1. Validate EndTime > StartTime
                 if (model.EndTime <= model.StartTime)
                 {
@@ -72,8 +78,22 @@ namespace VeterinaryClinic.Business
                     throw new InvalidOperationException(_localizer["work_schedule.schedule.conflict"]);
                 }
 
-                var entity = AutoMapperUtils.AutoMap<CreateWorkScheduleModel, VcWorkSchedules>(model);
-                entity.CreatedUserId = _contextAccessor.UserId;
+                // Manual mapping to ensure all required fields are set
+                var entity = new VcWorkSchedules
+                {
+                    Code = GenerateCodeUtils.GenerateUserCode("WS"),
+                    UserId = model.UserId,
+                    WorkDate = model.WorkDate,
+                    StartTime = model.StartTime,
+                    EndTime = model.EndTime,
+                    ShiftName = model.ShiftName,
+                    Note = model.Note ?? string.Empty, 
+                    IsActive = true,
+                    Order = 0,
+                    CreatedDate = DateTime.UtcNow,
+                    CreatedUserId = _contextAccessor.UserId,
+                    CreatedUserName = _contextAccessor.UserName
+                };
 
                 await _dataContext.VcWorkSchedules.AddAsync(entity, cancellationToken);
                 await _dataContext.SaveChangesAsync(cancellationToken);

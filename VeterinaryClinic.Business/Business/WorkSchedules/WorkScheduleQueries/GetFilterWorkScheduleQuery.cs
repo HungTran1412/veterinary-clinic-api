@@ -35,19 +35,51 @@ namespace VeterinaryClinic.Business
                             where ws.IsActive
                             select new { WorkSchedule = ws, User = u };
 
-
-                // Apply date filters
-                if (filter.FromDate.HasValue)
+                // New time-intersection filtering logic
+                if (filter.FromDate.HasValue && filter.ToDate.HasValue)
                 {
-                    query = query.Where(x => x.WorkSchedule.WorkDate >= filter.FromDate.Value.Date);
+                    // Find all schedules that intersect with the filter range
+                    query = query.Where(x => x.WorkSchedule.StartTime < filter.ToDate.Value && x.WorkSchedule.EndTime > filter.FromDate.Value);
+                }
+                else
+                {
+                    // Fallback to old logic if only one date is provided
+                    if (filter.FromDate.HasValue)
+                    {
+                        query = query.Where(x => x.WorkSchedule.WorkDate >= filter.FromDate.Value.Date);
+                    }
+
+                    if (filter.ToDate.HasValue)
+                    {
+                        query = query.Where(x => x.WorkSchedule.WorkDate <= filter.ToDate.Value.Date);
+                    }
                 }
 
-                if (filter.ToDate.HasValue)
+                // Filter by TextSearch (User Code and FullName)
+                if (!string.IsNullOrEmpty(filter.TextSearch))
                 {
-                    query = query.Where(x => x.WorkSchedule.WorkDate <= filter.ToDate.Value.Date);
+                    string ts = filter.TextSearch.Trim().ToLower();
+                    query = query.Where(x => 
+                        x.User.Code.ToLower().Contains(ts) || 
+                        x.User.FullName.ToLower().Contains(ts));
                 }
 
-                // Role-based filtering
+                // Filter by Role
+                if (!string.IsNullOrEmpty(filter.Role))
+                {
+                    string roleInput = filter.Role.Trim().ToUpper();
+                    
+                    if (Enum.TryParse<Role>(roleInput, true, out var parsedRole) && Enum.IsDefined(typeof(Role), parsedRole))
+                    {
+                        query = query.Where(x => x.User.Role.ToUpper() == roleInput);
+                    }
+                    else
+                    {
+                        return new List<WorkScheduleModel>();
+                    }
+                }
+
+                // Security check: Role-based data access
                 var currentUserId = _contextAccessor.UserId;
                 var userRole = _contextAccessor.Role;
 

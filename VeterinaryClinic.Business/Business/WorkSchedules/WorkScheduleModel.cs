@@ -36,6 +36,7 @@ namespace VeterinaryClinic.Business
     public record WorkScheduleModel : WorkScheduleBaseModel
     {
         public string FullName { get; init; }
+        public string Role { get; init; }
     }
 
     public record CreateWorkScheduleModel : WorkScheduleBaseModel

@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VeterinaryClinic.Busines;
 using VeterinaryClinic.Business;
@@ -90,6 +91,20 @@ namespace VeterinaryClinic.API.Controllers
             return await ExecuteFunction(async () =>
             {
                 return await _mediator.Send(new UserLogoutCommand(model));
+            });
+        }
+
+        /// <summary>
+        /// Kiểm tra tính hợp lệ của Access Token hiện tại
+        /// </summary>
+        /// <returns>True nếu token hợp lệ, False nếu không</returns>
+        [HttpGet("check-token")]
+        [ProducesResponseType(typeof(ResponseObject<bool>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> CheckToken()
+        {
+            return await ExecuteFunction(async () =>
+            {
+                return await _mediator.Send(new CheckTokenQuery());
             });
         }
     }

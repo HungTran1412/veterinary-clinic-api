@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VeterinaryClinic.Business;
 using VeterinaryClinic.Shared;
@@ -8,6 +9,7 @@ namespace VeterinaryClinic.API.Controllers
     [ApiController]
     [Route("veterinary-clinic/v1/user-manager")]
     [ApiExplorerSettings(GroupName = "03. Người dùng (Quản lý người dùng)")]
+    // [Authorize]
     public class UserController : ApiControllerBase
     {
         private readonly IMediator _mediator;

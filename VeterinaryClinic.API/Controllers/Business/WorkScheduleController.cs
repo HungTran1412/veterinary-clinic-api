@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VeterinaryClinic.Business;
 using VeterinaryClinic.Shared;
@@ -8,6 +9,7 @@ namespace VeterinaryClinic.API.Controllers
     [ApiController]
     [Route("veterinary-clinic/v1/work-schedule")]
     [ApiExplorerSettings(GroupName = "05. Lịch làm việc (Quản lý lịch làm việc)")]
+    [Authorize]
     public class WorkScheduleController : ApiControllerBase
     {
         private readonly IMediator _mediator;
@@ -84,7 +86,7 @@ namespace VeterinaryClinic.API.Controllers
         /// <param name="filter">Điều kiện lọc</param>
         /// <returns></returns>
         [HttpPost, Route("filter")]
-        [ProducesResponseType(typeof(ResponseObject<PaginationList<WorkScheduleModel>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseObject<List<WorkScheduleModel>>), StatusCodes.Status200OK)]
         public async Task<IActionResult> Filter([FromBody] WorkScheduleFilterModel filter)
         {
             return await ExecuteFunction(async () =>

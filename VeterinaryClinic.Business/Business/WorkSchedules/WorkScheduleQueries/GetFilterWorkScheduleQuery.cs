@@ -6,7 +6,7 @@ using VeterinaryClinic.Shared;
 namespace VeterinaryClinic.Business
 {
 
-    public class GetFilterWorkScheduleQuery : IRequest<PaginationList<WorkScheduleModel>>
+    public class GetFilterWorkScheduleQuery : IRequest<List<WorkScheduleModel>>
     {
         public WorkScheduleFilterModel Filter { get; set; }
 
@@ -15,16 +15,18 @@ namespace VeterinaryClinic.Business
             Filter = filter;
         }
 
-        public class Handler : IRequestHandler<GetFilterWorkScheduleQuery, PaginationList<WorkScheduleModel>>
+        public class Handler : IRequestHandler<GetFilterWorkScheduleQuery, List<WorkScheduleModel>>
         {
             private readonly VeterinaryClinicReadDataContext _dataContext;
+            private readonly IContextAccessor _contextAccessor;
 
-            public Handler(VeterinaryClinicReadDataContext dataContext)
+            public Handler(VeterinaryClinicReadDataContext dataContext, Func<IContextAccessor> contextAccessorFactory)
             {
                 _dataContext = dataContext;
+                _contextAccessor = contextAccessorFactory();
             }
 
-            public async Task<PaginationList<WorkScheduleModel>> Handle(GetFilterWorkScheduleQuery request, CancellationToken cancellationToken)
+            public async Task<List<WorkScheduleModel>> Handle(GetFilterWorkScheduleQuery request, CancellationToken cancellationToken)
             {
                 var filter = request.Filter;
 
@@ -33,16 +35,8 @@ namespace VeterinaryClinic.Business
                             where ws.IsActive
                             select new { WorkSchedule = ws, User = u };
 
-                if (filter.UserId.HasValue)
-                {
-                    query = query.Where(x => x.WorkSchedule.UserId == filter.UserId.Value);
-                }
 
-                if (!string.IsNullOrEmpty(filter.Role))
-                {
-                    query = query.Where(x => x.User.Role == filter.Role);
-                }
-
+                // Apply date filters
                 if (filter.FromDate.HasValue)
                 {
                     query = query.Where(x => x.WorkSchedule.WorkDate >= filter.FromDate.Value.Date);
@@ -52,35 +46,44 @@ namespace VeterinaryClinic.Business
                 {
                     query = query.Where(x => x.WorkSchedule.WorkDate <= filter.ToDate.Value.Date);
                 }
-                
-                if (!string.IsNullOrEmpty(filter.TextSearch))
+
+                // Role-based filtering
+                var currentUserId = _contextAccessor.UserId;
+                var userRole = _contextAccessor.Role;
+
+                // If the user is not an Admin, filter by their UserId
+                if (userRole != Role.ADMIN.ToString())
                 {
-                    string ts = filter.TextSearch.Trim().ToLower();
-                    query = query.Where(x => x.User.FullName.ToLower().Contains(ts) || x.WorkSchedule.ShiftName.ToLower().Contains(ts));
+                    if (currentUserId.HasValue)
+                    {
+                        query = query.Where(x => x.WorkSchedule.UserId == currentUserId.Value);
+                    }
+                    else
+                    {
+                        // If a non-admin user has no UserId in the context, return an empty list
+                        return new List<WorkScheduleModel>();
+                    }
                 }
 
-                var data = query.Select(x => x.WorkSchedule).OrderByField(filter.PropertyName, filter.Ascending);
-
-                int totalCount = await data.CountAsync(cancellationToken);
-
-                int excludedRows = (filter.PageNumber - 1) * filter.PageSize;
-                if (excludedRows <= 0) excludedRows = 0;
-
-                var listData = await data
-                    .Skip(excludedRows)
-                    .Take(filter.PageSize)
+                var listData = await query
+                    .Select(x => new WorkScheduleModel
+                    {
+                        Id = x.WorkSchedule.Id,
+                        Code = x.User.Code,
+                        UserId = x.WorkSchedule.UserId,
+                        FullName = x.User.FullName,
+                        WorkDate = x.WorkSchedule.WorkDate,
+                        StartTime = x.WorkSchedule.StartTime,
+                        EndTime = x.WorkSchedule.EndTime,
+                        ShiftName = x.WorkSchedule.ShiftName,
+                        Note = x.WorkSchedule.Note,
+                        IsActive = x.WorkSchedule.IsActive,
+                        Order = x.WorkSchedule.Order,
+                        CreatedDate = x.WorkSchedule.CreatedDate
+                    })
                     .ToListAsync(cancellationToken);
 
-                var listResult = AutoMapperUtils.AutoMap<VcWorkSchedules, WorkScheduleModel>(listData);
-
-                return new PaginationList<WorkScheduleModel>()
-                {
-                    DataCount = listResult.Count,
-                    TotalCount = totalCount,
-                    PageNumber = filter.PageNumber,
-                    PageSize = filter.PageSize,
-                    Data = listResult
-                };
+                return listData;
             }
         }
     }

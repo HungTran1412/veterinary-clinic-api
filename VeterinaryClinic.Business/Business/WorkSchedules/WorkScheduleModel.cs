@@ -35,15 +35,16 @@ namespace VeterinaryClinic.Business
     
     public record WorkScheduleModel : WorkScheduleBaseModel
     {
-        
+        public string Code { init; get; }
+        public string FullName { get; init; }
     }
 
-    public record CreateWorkScheduleModel : WorkScheduleModel
+    public record CreateWorkScheduleModel : WorkScheduleBaseModel
     {
         public int? CreatedUserId { get; init; }
     }
 
-    public record UpdateWorkScheduleModel : WorkScheduleModel
+    public record UpdateWorkScheduleModel : WorkScheduleBaseModel
     {
         public int? ModifiedUserId { get; init; }
 
@@ -58,10 +59,8 @@ namespace VeterinaryClinic.Business
         }
     }
 
-    public record WorkScheduleFilterModel : BaseQueryFilterModel
+    public record WorkScheduleFilterModel
     {
-        public int? UserId { get; init; }
-        public string? Role { get; init; }
         public DateTime? FromDate { get; init; }
         public DateTime? ToDate { get; init; }
     }

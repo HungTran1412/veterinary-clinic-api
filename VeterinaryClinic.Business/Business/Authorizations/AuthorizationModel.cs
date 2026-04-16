@@ -37,4 +37,17 @@ namespace VeterinaryClinic.Business
     {
         public string RefreshToken { get; set; }
     }
+    
+    /// <summary>
+    /// Response model for checking a token, returning user information.
+    /// </summary>
+    public record CheckTokenResponseModel
+    {
+        public int Id { get; init; }
+        public string UserName { get; init; }
+        public string FullName { get; init; }
+        public string Email { get; init; }
+        public string Role { get; init; }
+        public string AvatarUrl { get; init; }
+    }
 }

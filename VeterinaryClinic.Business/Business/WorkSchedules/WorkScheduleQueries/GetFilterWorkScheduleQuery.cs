@@ -104,6 +104,7 @@ namespace VeterinaryClinic.Business
                         Code = x.User.Code,
                         UserId = x.WorkSchedule.UserId,
                         FullName = x.User.FullName,
+                        Role = x.User.Role,
                         WorkDate = x.WorkSchedule.WorkDate,
                         StartTime = x.WorkSchedule.StartTime,
                         EndTime = x.WorkSchedule.EndTime,

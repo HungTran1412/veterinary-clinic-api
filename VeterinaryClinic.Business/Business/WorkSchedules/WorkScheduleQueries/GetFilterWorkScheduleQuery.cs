@@ -35,16 +35,24 @@ namespace VeterinaryClinic.Business
                             where ws.IsActive
                             select new { WorkSchedule = ws, User = u };
 
-
-                // Apply date filters
-                if (filter.FromDate.HasValue)
+                // New time-intersection filtering logic
+                if (filter.FromDate.HasValue && filter.ToDate.HasValue)
                 {
-                    query = query.Where(x => x.WorkSchedule.WorkDate >= filter.FromDate.Value.Date);
+                    // Find all schedules that intersect with the filter range
+                    query = query.Where(x => x.WorkSchedule.StartTime < filter.ToDate.Value && x.WorkSchedule.EndTime > filter.FromDate.Value);
                 }
-
-                if (filter.ToDate.HasValue)
+                else
                 {
-                    query = query.Where(x => x.WorkSchedule.WorkDate <= filter.ToDate.Value.Date);
+                    // Fallback to old logic if only one date is provided
+                    if (filter.FromDate.HasValue)
+                    {
+                        query = query.Where(x => x.WorkSchedule.WorkDate >= filter.FromDate.Value.Date);
+                    }
+
+                    if (filter.ToDate.HasValue)
+                    {
+                        query = query.Where(x => x.WorkSchedule.WorkDate <= filter.ToDate.Value.Date);
+                    }
                 }
 
                 // Filter by TextSearch (User Code and FullName)

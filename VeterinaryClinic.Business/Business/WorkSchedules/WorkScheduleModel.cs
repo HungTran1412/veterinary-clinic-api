@@ -7,8 +7,7 @@ namespace VeterinaryClinic.Business
     {
         public int Id { get; init; }
         
-        [Required(ErrorMessage = "work_schedule.code.required")]
-        public string Code { get; init; }
+        public string? Code { get; init; }
         
         [Required(ErrorMessage = "work_schedule.user_id.required")]
         public int UserId { get; init; }
@@ -25,7 +24,8 @@ namespace VeterinaryClinic.Business
         [Required(ErrorMessage = "work_schedule.shift_name.required")]
         public string ShiftName { get; init; }
         
-        public string Note { get; init; }
+        // Made Note nullable
+        public string? Note { get; init; }
         
         public bool IsActive { get; init; } = true;
 
@@ -35,7 +35,6 @@ namespace VeterinaryClinic.Business
     
     public record WorkScheduleModel : WorkScheduleBaseModel
     {
-        public string Code { init; get; }
         public string FullName { get; init; }
     }
 

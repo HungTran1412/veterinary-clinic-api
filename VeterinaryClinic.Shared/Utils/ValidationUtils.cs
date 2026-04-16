@@ -33,4 +33,16 @@ namespace VeterinaryClinic.Shared
             return !username.Contains(" ");
         }
     }
+
+    public static class GenerateCodeUtils
+    {
+        /// <summary>
+        /// Sinh mã người dùng ngẫu nhiên với một tiền tố.
+        /// </summary>
+        public static string GenerateUserCode(string prefix)
+        {
+            int randomNumber = Random.Shared.Next(10000000, 100000000);
+            return $"{prefix}{randomNumber}";
+        }
+    }
 }

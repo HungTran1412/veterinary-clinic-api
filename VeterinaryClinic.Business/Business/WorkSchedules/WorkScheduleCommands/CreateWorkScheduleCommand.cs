@@ -73,6 +73,9 @@ namespace VeterinaryClinic.Business
                 }
 
                 var entity = AutoMapperUtils.AutoMap<CreateWorkScheduleModel, VcWorkSchedules>(model);
+                
+                // Generate Code
+                entity.Code = GenerateCodeUtils.GenerateUserCode("WS");
                 entity.CreatedUserId = _contextAccessor.UserId;
 
                 await _dataContext.VcWorkSchedules.AddAsync(entity, cancellationToken);

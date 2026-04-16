@@ -91,7 +91,7 @@ namespace VeterinaryClinic.Busines
 
                 var entity = new VcUsers
                 {
-                    Code = GenerateUserCode("CUS"),
+                    Code = GenerateCodeUtils.GenerateUserCode("CUS"),
                     Username = model.UserName,
                     Email = model.Email,
                     Password = _passwordHasher.HashPassword(model.Password),
@@ -123,15 +123,6 @@ namespace VeterinaryClinic.Busines
                 Log.Information($"User {model.UserName} registered successfully. Verification email sent.");
 
                 return Unit.Value;
-            }
-
-            /// <summary>
-            /// Sinh mã người dùng ngẫu nhiên với một tiền tố.
-            /// </summary>
-            private string GenerateUserCode(string prefix)
-            {
-                int randomNumber = Random.Shared.Next(10000000, 100000000);
-                return $"{prefix}{randomNumber}";
             }
         }
     }

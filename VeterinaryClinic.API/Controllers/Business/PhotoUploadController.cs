@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using VeterinaryClinic.Business;
 using VeterinaryClinic.Shared;
 
@@ -9,6 +10,7 @@ namespace VeterinaryClinic.API.Controllers
     [ApiController]
     [Route("veterinary-clinic/v1/photo-upload")]
     [ApiExplorerSettings(GroupName = "10. Tải ảnh")]
+    // [Authorize]
     public class PhotoUploadController : ApiControllerBase
     {
         private readonly IMediator _mediator;

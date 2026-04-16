@@ -15,6 +15,9 @@ using VeterinaryClinic.API.Localization;
 using VeterinaryClinic.Infrastructure; // Using custom localizer
 using VeterinaryClinic.API.Extensions;
 using VeterinaryClinic.Shared;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 // Cấu hình Serilog tối thiểu để ghi ra Console
 Log.Logger = new LoggerConfiguration()
@@ -98,6 +101,27 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+// Cấu hình xác thực JWT
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+        ValidAudience = builder.Configuration["JwtSettings:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]))
+    };
+});
+
+
 // 1. Đăng ký DbContext
 builder.Services.AddDbContext<VeterinaryClinicDataContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -179,7 +203,11 @@ app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 
+app.UseRouting(); // Thêm UseRouting ở đây
+
 app.UseRequestLocalization();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

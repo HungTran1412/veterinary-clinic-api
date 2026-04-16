@@ -1,32 +1,42 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Options;
 using Serilog;
 using VeterinaryClinic.Data;
+using VeterinaryClinic.Shared;
 
 namespace VeterinaryClinic.Business
 {
-    public class VerifyEmailCommand : IRequest<string>
+    public class VerifyEmailQuery : IRequest<string>
     {
         public string Token { get; }
 
-        public VerifyEmailCommand(string token)
+        public VerifyEmailQuery(string token)
         {
             Token = token;
         }
 
-        public class Handler : IRequestHandler<VerifyEmailCommand, string>
+        public class Handler : IRequestHandler<VerifyEmailQuery, string>
         {
             private readonly VeterinaryClinicDataContext _dataContext;
-            private readonly IStringLocalizer<VerifyEmailCommand> _localizer;
+            private readonly IStringLocalizer<VerifyEmailQuery> _localizer;
+            private readonly IEmailService _emailService;
+            private readonly MailSettings _mailSettings;
 
-            public Handler(VeterinaryClinicDataContext dataContext, IStringLocalizer<VerifyEmailCommand> localizer)
+            public Handler(
+                VeterinaryClinicDataContext dataContext, 
+                IStringLocalizer<VerifyEmailQuery> localizer,
+                IEmailService emailService,
+                IOptions<MailSettings> mailSettings)
             {
                 _dataContext = dataContext;
                 _localizer = localizer;
+                _emailService = emailService;
+                _mailSettings = mailSettings.Value;
             }
 
-            public async Task<string> Handle(VerifyEmailCommand request, CancellationToken cancellationToken)
+            public async Task<string> Handle(VerifyEmailQuery request, CancellationToken cancellationToken)
             {
                 Log.Information($"Email verification attempt with token: {request.Token}");
 
@@ -55,6 +65,22 @@ namespace VeterinaryClinic.Business
                 await _dataContext.SaveChangesAsync(cancellationToken);
 
                 Log.Information($"User {user.Username} has been successfully activated.");
+
+                // Gửi email thông báo đăng ký thành công
+                try
+                {
+                    var loginUrl = $"{_mailSettings.BaseUrl}/login"; // Giả sử URL đăng nhập là /login
+                    string subject = "Tài khoản của bạn đã được kích hoạt - Phòng khám thú y";
+                    string body = EmailTemplates.GetRegistrationSuccessEmail(user.FullName, loginUrl);
+
+                    await _emailService.SendEmailAsync(user.Email, subject, body);
+                    Log.Information($"Registration success email sent to {user.Email}");
+                }
+                catch (Exception ex)
+                {
+                    // Không ném lỗi ra ngoài để không làm gián đoạn luồng chính
+                    Log.Error(ex, $"Failed to send registration success email to {user.Email}");
+                }
 
                 return _localizer["user.verify.success"];
             }

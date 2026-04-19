@@ -11,18 +11,22 @@ namespace VeterinaryClinic.Business
         public string Password { get; init; }
     }
 
+    public abstract record ResponseBaseModel
+    {
+        public int Id { get; init; }
+        public string UserName { get; init; }
+        public string FullName { get; init; }
+        public string Email { get; init; }
+        public string Role { get; init; }
+        public string AvatarUrl { get; init; }
+    }
+    
     public record LoginModel : AuthorizationBaseModel
     {
     }
-
-    public record LoginResponseModel
+    
+    public record LoginResponseModel : ResponseBaseModel
     {
-        public int Id { get; init; }
-        public string FullName { get; init; }
-        public string UserName { get; init; }
-        public string Email { get; init; }
-        public string AvatarUrl { get; init; }
-        public string Role { get; init; }
         public string AccessToken { get; init; }
         public string RefreshToken { get; init; }
     }
@@ -41,13 +45,8 @@ namespace VeterinaryClinic.Business
     /// <summary>
     /// Response model for checking a token, returning user information.
     /// </summary>
-    public record CheckTokenResponseModel
+    public record CheckTokenResponseModel : ResponseBaseModel
     {
-        public int Id { get; init; }
-        public string UserName { get; init; }
-        public string FullName { get; init; }
-        public string Email { get; init; }
-        public string Role { get; init; }
-        public string AvatarUrl { get; init; }
+      
     }
 }

@@ -69,7 +69,7 @@ namespace VeterinaryClinic.Business
                 // Gửi email thông báo đăng ký thành công
                 try
                 {
-                    var loginUrl = $"{_mailSettings.BaseUrl}/login"; // Giả sử URL đăng nhập là /login
+                    var loginUrl = $"{_mailSettings.ApiBaseUrl}/login"; // Giả sử URL đăng nhập là /login
                     string subject = "Tài khoản của bạn đã được kích hoạt - Phòng khám thú y";
                     string body = EmailTemplates.GetRegistrationSuccessEmail(user.FullName, loginUrl);
 

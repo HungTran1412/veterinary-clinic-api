@@ -34,7 +34,8 @@
     "SmtpPass": "password",
     "SenderName": "Veterinary Clinic",
     "SenderEmail": "noreply@veterinaryclinic.com",
-     "BaseUrl": "http://localhost:5000"
+    "ApiBaseUrl": "https://localhost:44360",
+    "FrontendBaseUrl": "http://localhost:4200"
   },
   "CloudinarySettings": {
     "CloudName": "your_cloud_name",

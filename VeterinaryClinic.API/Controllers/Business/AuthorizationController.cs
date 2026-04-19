@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using VeterinaryClinic.Busines;
 using VeterinaryClinic.Business;
 using VeterinaryClinic.Shared;
@@ -13,10 +14,12 @@ namespace VeterinaryClinic.API.Controllers
     public class AuthorizationController : ApiControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly MailSettings _mailSettings;
 
-        public AuthorizationController(IMediator mediator)
+        public AuthorizationController(IMediator mediator, IOptions<MailSettings> mailSettings)
         {
             _mediator = mediator;
+            _mailSettings = mailSettings.Value;
         }
 
         /// <summary>
@@ -25,7 +28,7 @@ namespace VeterinaryClinic.API.Controllers
         /// <param name="model">Thông tin đăng ký</param>
         /// <returns></returns>
         [HttpPost("register")]
-        [ProducesResponseType(typeof(ResponseObject<Unit>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseObject<UserRegisterResponseModel>), StatusCodes.Status200OK)]
         public async Task<IActionResult> Register([FromBody] UserRegisterModel model)
         {
             return await ExecuteFunction(async () =>
@@ -38,15 +41,18 @@ namespace VeterinaryClinic.API.Controllers
         /// Xác thực email và kích hoạt tài khoản
         /// </summary>
         /// <param name="token">Token được gửi qua email</param>
-        /// <returns>Trang HTML thông báo kết quả</returns>
+        /// <returns>Chuyển hướng đến trang đăng nhập của FE</returns>
         [HttpGet("verify-email")]
-        [Produces("text/html")]
         public async Task<IActionResult> VerifyEmail([FromQuery] string token)
         {
-            var message = await _mediator.Send(new VerifyEmailQuery(token));
-            // Trả về một trang HTML đơn giản để thông báo cho người dùng
-            var htmlContent = $"<html><head><title>Xac thuc tai khoan</title></head><body style='font-family: sans-serif; text-align: center; padding-top: 50px;'><h2>{message}</h2></body></html>";
-            return Content(htmlContent, "text/html");
+            return await ExecuteFunction(async () =>
+            {
+                await _mediator.Send(new VerifyEmailQuery(token));
+
+                // Redirect to the frontend login page after successful verification
+                var loginUrl = $"{_mailSettings.FrontendBaseUrl.TrimEnd('/')}/login";
+                return Redirect(loginUrl);
+            });
         }
 
         /// <summary>
@@ -97,9 +103,10 @@ namespace VeterinaryClinic.API.Controllers
         /// <summary>
         /// Kiểm tra tính hợp lệ của Access Token hiện tại
         /// </summary>
-        /// <returns>True nếu token hợp lệ, False nếu không</returns>
+        /// <returns>Thông tin người dùng nếu token hợp lệ</returns>
         [HttpGet("check-token")]
-        [ProducesResponseType(typeof(ResponseObject<bool>), StatusCodes.Status200OK)]
+        [Authorize]
+        [ProducesResponseType(typeof(ResponseObject<CheckTokenResponseModel>), StatusCodes.Status200OK)]
         public async Task<IActionResult> CheckToken()
         {
             return await ExecuteFunction(async () =>

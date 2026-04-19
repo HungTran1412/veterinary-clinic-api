@@ -11,7 +11,12 @@ using VeterinaryClinic.Shared;
 
 namespace VeterinaryClinic.Busines
 {
-    public class UserRegisterCommand : IRequest<Unit>
+    public record UserRegisterResponseModel
+    {
+        public string Email { get; init; }
+    }
+
+    public class UserRegisterCommand : IRequest<UserRegisterResponseModel>
     {
         public UserRegisterModel Model { get; }
 
@@ -20,7 +25,7 @@ namespace VeterinaryClinic.Busines
             Model = model;
         }
 
-        public class Handler : IRequestHandler<UserRegisterCommand, Unit>
+        public class Handler : IRequestHandler<UserRegisterCommand, UserRegisterResponseModel>
         {
             private readonly VeterinaryClinicDataContext _dataContext;
             private readonly IStringLocalizer<UserRegisterCommand> _localizer;
@@ -42,7 +47,7 @@ namespace VeterinaryClinic.Busines
                 _mailSettings = mailSettings.Value;
             }
 
-            public async Task<Unit> Handle(UserRegisterCommand request, CancellationToken cancellationToken)
+            public async Task<UserRegisterResponseModel> Handle(UserRegisterCommand request, CancellationToken cancellationToken)
             {
                 var model = request.Model;
                 Log.Information($"User Registration attempt: " + JsonSerializer.Serialize(model));
@@ -98,9 +103,13 @@ namespace VeterinaryClinic.Busines
                     FullName = model.FullName,
                     PhoneNumber = model.PhoneNumber,
                     Role = Role.CUSTOMER.ToString(),
+                    AvatarUrl = string.Empty,
                     IsActive = false,
                     VerificationToken = verificationToken,
-                    VerificationTokenExpires = DateTime.UtcNow.AddDays(1) // Token valid for 1 day
+                    VerificationTokenExpires = DateTime.UtcNow.AddDays(1),
+                    
+                    CreatedDate = DateTime.UtcNow,
+                    CreatedUserName = model.UserName
                 };
 
                 await _dataContext.VcUsers.AddAsync(entity, cancellationToken);
@@ -109,7 +118,9 @@ namespace VeterinaryClinic.Busines
                 // Gửi email xác thực
                 try
                 {
-                    var verificationLink = $"{_mailSettings.BaseUrl}/veterinary-clinic/v1/authorization/verify-email?token={verificationToken}";
+                    // Create a link to the frontend page for verification
+                    var frontendUrl = _mailSettings.FrontendBaseUrl.TrimEnd('/');
+                    var verificationLink = $"{frontendUrl}/verify-account?token={verificationToken}"; // Changed to FE route
                     string subject = "Xác thực tài khoản của bạn - Phòng khám thú y";
                     string body = EmailTemplates.GetVerificationEmail(entity.FullName, verificationLink);
 
@@ -122,7 +133,7 @@ namespace VeterinaryClinic.Busines
 
                 Log.Information($"User {model.UserName} registered successfully. Verification email sent.");
 
-                return Unit.Value;
+                return new UserRegisterResponseModel { Email = entity.Email };
             }
         }
     }

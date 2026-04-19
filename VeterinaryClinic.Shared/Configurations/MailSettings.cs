@@ -8,6 +8,7 @@ namespace VeterinaryClinic.Shared
         public string SmtpPass { get; set; }
         public string SenderName { get; set; }
         public string SenderEmail { get; set; }
-        public string BaseUrl { get; set; }
+        public string ApiBaseUrl { get; set; }
+        public string FrontendBaseUrl { get; set; }
     }
 }

@@ -38,20 +38,17 @@ namespace VeterinaryClinic.API.Controllers
         }
 
         /// <summary>
-        /// Xác thực email và kích hoạt tài khoản
+        /// Xác thực email và kích hoạt tài khoản (Dành cho người dùng bấm link từ email)
         /// </summary>
         /// <param name="token">Token được gửi qua email</param>
-        /// <returns>Chuyển hướng đến trang đăng nhập của FE</returns>
+        /// <returns>JSON response chuẩn</returns>
         [HttpGet("verify-email")]
+        [ProducesResponseType(typeof(ResponseObject<Unit>), StatusCodes.Status200OK)]
         public async Task<IActionResult> VerifyEmail([FromQuery] string token)
         {
             return await ExecuteFunction(async () =>
             {
-                await _mediator.Send(new VerifyEmailQuery(token));
-
-                // Redirect to the frontend login page after successful verification
-                var loginUrl = $"{_mailSettings.FrontendBaseUrl.TrimEnd('/')}/login";
-                return Redirect(loginUrl);
+                return await _mediator.Send(new VerifyEmailQuery(token));
             });
         }
 

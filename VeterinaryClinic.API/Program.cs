@@ -197,13 +197,14 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseCors("AllowAll");
-
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 
-app.UseRouting(); // Thêm UseRouting ở đây
+// The correct order for middleware
+app.UseRouting();
+
+app.UseCors("AllowAll");
 
 app.UseRequestLocalization();
 

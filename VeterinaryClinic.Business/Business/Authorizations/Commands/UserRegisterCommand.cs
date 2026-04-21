@@ -120,7 +120,7 @@ namespace VeterinaryClinic.Busines
                 {
                     // Create a link to the frontend page for verification
                     var frontendUrl = _mailSettings.FrontendBaseUrl.TrimEnd('/');
-                    var verificationLink = $"{frontendUrl}/verify-account?token={verificationToken}"; // Changed to FE route
+                    var verificationLink = $"{frontendUrl}/verify-email?token={verificationToken}";
                     string subject = "Xác thực tài khoản của bạn - Phòng khám thú y";
                     string body = EmailTemplates.GetVerificationEmail(entity.FullName, verificationLink);
 

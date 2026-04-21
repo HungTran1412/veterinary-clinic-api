@@ -8,7 +8,7 @@ using VeterinaryClinic.Shared;
 
 namespace VeterinaryClinic.Business
 {
-    public class VerifyEmailQuery : IRequest<string>
+    public class VerifyEmailQuery : IRequest<Unit>
     {
         public string Token { get; }
 
@@ -17,7 +17,7 @@ namespace VeterinaryClinic.Business
             Token = token;
         }
 
-        public class Handler : IRequestHandler<VerifyEmailQuery, string>
+        public class Handler : IRequestHandler<VerifyEmailQuery, Unit>
         {
             private readonly VeterinaryClinicDataContext _dataContext;
             private readonly IStringLocalizer<VerifyEmailQuery> _localizer;
@@ -25,7 +25,7 @@ namespace VeterinaryClinic.Business
             private readonly MailSettings _mailSettings;
 
             public Handler(
-                VeterinaryClinicDataContext dataContext, 
+                VeterinaryClinicDataContext dataContext,
                 IStringLocalizer<VerifyEmailQuery> localizer,
                 IEmailService emailService,
                 IOptions<MailSettings> mailSettings)
@@ -36,7 +36,7 @@ namespace VeterinaryClinic.Business
                 _mailSettings = mailSettings.Value;
             }
 
-            public async Task<string> Handle(VerifyEmailQuery request, CancellationToken cancellationToken)
+            public async Task<Unit> Handle(VerifyEmailQuery request, CancellationToken cancellationToken)
             {
                 Log.Information($"Email verification attempt with token: {request.Token}");
 
@@ -49,7 +49,6 @@ namespace VeterinaryClinic.Business
 
                 if (user.IsActive)
                 {
-                    // Ném lỗi nhưng có thể coi là một trường hợp "thành công" vì tài khoản đã hoạt động
                     throw new ArgumentException(_localizer["user.verify.already_activated"]);
                 }
 
@@ -69,7 +68,7 @@ namespace VeterinaryClinic.Business
                 // Gửi email thông báo đăng ký thành công
                 try
                 {
-                    var loginUrl = $"{_mailSettings.ApiBaseUrl}/login"; // Giả sử URL đăng nhập là /login
+                    var loginUrl = $"{_mailSettings.FrontendBaseUrl.TrimEnd('/')}/login";
                     string subject = "Tài khoản của bạn đã được kích hoạt - Phòng khám thú y";
                     string body = EmailTemplates.GetRegistrationSuccessEmail(user.FullName, loginUrl);
 
@@ -82,7 +81,7 @@ namespace VeterinaryClinic.Business
                     Log.Error(ex, $"Failed to send registration success email to {user.Email}");
                 }
 
-                return _localizer["user.verify.success"];
+                return Unit.Value;
             }
         }
     }

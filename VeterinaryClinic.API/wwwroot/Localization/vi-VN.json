@@ -32,7 +32,7 @@
   "user.invalid.password_complexity": "Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt",
   "user.password.mismatch": "Mật khẩu xác nhận không khớp",
   "user.password.incorrect": "Mật khẩu cũ không chính xác",
-  "user.unauthorized": "Người dùng không tồn tại hoặc chưa đăng nhập",
+  "user.unauthorized": "Bạn không có quyền thực hiện thao tác này.",
   "user.login.failed": "Tên đăng nhập hoặc mật khẩu không chính xác",
   "user.verify.invalid_token": "Token không hợp lệ.",
   "user.verify.already_activated": "Tài khoản đã được kích hoạt trước đó.",
@@ -46,5 +46,18 @@
   "work_schedule.user.not_found": "Không tìm thấy người dùng được chỉ định.",
   "work_schedule.user.invalid_role": "Chỉ có thể tạo lịch cho Bác sĩ hoặc Lễ tân.",
   "work_schedule.schedule.conflict": "Lịch làm việc bị trùng với một lịch khác của người dùng này.",
-  "work_schedule.end_time.must_be_after_start_time": "Thời gian kết thúc phải sau thời gian bắt đầu."
+  "work_schedule.end_time.must_be_after_start_time": "Thời gian kết thúc phải sau thời gian bắt đầu.",
+  "work_schedule.work_date.cannot_be_in_the_past": "Không thể tạo lịch làm việc trong quá khứ.",
+
+  "pet.name.required": "Tên thú cưng không được để trống.",
+  "pet.species.required": "Loài không được để trống.",
+  "pet.breed.required": "Giống không được để trống.",
+  "pet.gender.required": "Giới tính không được để trống.",
+  "pet.birth_date.required": "Ngày sinh không được để trống.",
+  "pet.owner_id.required": "Chủ sở hữu không được để trống.",
+  "pet.not_found": "Không tìm thấy thú cưng.",
+  "pet.create.unauthorized": "Chỉ khách hàng hoặc lễ tân mới có thể thêm thú cưng.",
+  "pet.create.cannot_create_for_others": "Bạn chỉ có thể tạo thú cưng cho chính mình.",
+  "pet.owner.not_found_or_invalid": "Chủ sở hữu không tồn tại hoặc không phải là khách hàng.",
+  "pet.update.cannot_change_owner": "Không thể thay đổi chủ sở hữu của thú cưng."
 }

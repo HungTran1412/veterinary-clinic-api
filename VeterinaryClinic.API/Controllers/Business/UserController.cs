@@ -131,5 +131,21 @@ namespace VeterinaryClinic.API.Controllers
             });
         }
         #endregion
+
+        #region User Logged In
+
+        /// <summary>
+        /// Lấy thông tin người dùng theo ID
+        /// </summary>
+        /// <param name="id">ID người dùng</param>
+        /// <returns></returns>
+        [HttpGet, Route("user-info")]
+        [ProducesResponseType(typeof(ResponseObject<UserModel>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetUserInfo()
+        {
+            return await ExecuteFunction(async () => { return await _mediator.Send(new GetUserInfoLoggedInQuery()); });
+        }
+
+        #endregion
     }
 }

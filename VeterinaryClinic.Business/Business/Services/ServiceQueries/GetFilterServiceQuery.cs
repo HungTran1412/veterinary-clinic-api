@@ -60,6 +60,7 @@ namespace VeterinaryClinic.Business
                         Name = s.Name,
                         Price = s.Price,
                         DurationMinutes = s.DurationMinutes,
+                        ImageUrl = s.ImageUrl,
                         SpecializationId = s.SpecializationId,
                         SpecializationName = sp.Name,
                         IsAvailable = s.IsAvailable,

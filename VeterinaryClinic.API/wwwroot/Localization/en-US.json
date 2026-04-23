@@ -31,7 +31,7 @@
   "user.invalid.password_complexity": "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
   "user.password.mismatch": "Confirm password does not match",
   "user.password.incorrect": "Incorrect old password",
-  "user.unauthorized": "User not found or not logged in",
+  "user.unauthorized": "You are not authorized to perform this action.",
   "user.login.failed": "Incorrect username or password",
   "user.verify.invalid_token": "Invalid token.",
   "user.verify.already_activated": "Account already activated.",
@@ -45,5 +45,18 @@
   "work_schedule.user.not_found": "The specified user was not found.",
   "work_schedule.user.invalid_role": "Schedules can only be created for Doctors or Receptionists.",
   "work_schedule.schedule.conflict": "The work schedule conflicts with another existing schedule for this user.",
-  "work_schedule.end_time.must_be_after_start_time": "End time must be after start time."
+  "work_schedule.end_time.must_be_after_start_time": "End time must be after start time.",
+  "work_schedule.work_date.cannot_be_in_the_past": "Cannot create a work schedule in the past.",
+
+  "pet.name.required": "Pet name is required.",
+  "pet.species.required": "Species is required.",
+  "pet.breed.required": "Breed is required.",
+  "pet.gender.required": "Gender is required.",
+  "pet.birth_date.required": "Birth date is required.",
+  "pet.owner_id.required": "Owner is required.",
+  "pet.not_found": "Pet not found.",
+  "pet.create.unauthorized": "Only customers or receptionists can add a new pet.",
+  "pet.create.cannot_create_for_others": "You can only create pets for yourself.",
+  "pet.owner.not_found_or_invalid": "The specified owner does not exist or is not a customer.",
+  "pet.update.cannot_change_owner": "Cannot change the owner of a pet."
 }

@@ -8,7 +8,7 @@ namespace VeterinaryClinic.Data
     /// Bang chuyen nganh cua bac si
     /// </summary>
     [Table("vcDoctorSpecializations")]
-    public class VcDoctorSpecializations : BaseEntity
+    public class VcDoctorSpecializations
     {
         public VcDoctorSpecializations()
         {

@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared;
 
@@ -42,6 +44,9 @@ namespace VeterinaryClinic.Business
     {
         [Required(ErrorMessage = "user.password.required")]
         public string Password { get; init; }
+        
+        public List<VcSpecializations> Specializations { get; set; }
+        public List<PetModel> Pets { get; set; }
     }
     
     public record CreateUserModel : UserModel
@@ -64,6 +69,15 @@ namespace VeterinaryClinic.Business
             entity.Order = this.Order;
             entity.ModifiedUserId = this.ModifiedUserId;
         }
+    }
+    
+    public record UpdateUserLoggedInModel
+    {
+        public string FullName { get; set; }
+        public string PhoneNumber { get; set; }
+        public int Gender { get; set; }
+        public string AvatarUrl { get; set; }
+        public List<int> SpecializationIds { get; set; }
     }
 
     public record UpdatePasswordUserModel

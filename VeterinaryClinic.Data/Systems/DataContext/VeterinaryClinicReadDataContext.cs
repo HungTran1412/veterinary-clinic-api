@@ -32,6 +32,9 @@ namespace VeterinaryClinic.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<VcDoctorSpecializations>()
+                .HasKey(ds => new { ds.DoctorId, ds.SpecializationId });
+
             OnModelCreatingPartial(modelBuilder);
         }
         

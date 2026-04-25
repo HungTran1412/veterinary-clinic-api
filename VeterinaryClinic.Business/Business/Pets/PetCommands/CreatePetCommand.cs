@@ -2,7 +2,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Serilog;
+using System;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared;
 using VeterinaryClinic.Shared.ContextAccessor;
@@ -38,6 +41,19 @@ namespace VeterinaryClinic.Business
                 var userRole = _contextAccessor.Role;
                 Log.Information($"Create Pet attempt by User {currentUserId}: {JsonSerializer.Serialize(model)}");
 
+                // Validate BirthDate
+                if (model.BirthDate > DateTime.UtcNow)
+                {
+                    throw new ArgumentException(_localizer["pet.birthdate.future"]);
+                }
+
+                // Determine the owner ID. If not provided, use the current user's ID.
+                var ownerId = model.OwnerId ?? currentUserId;
+                if (ownerId == null)
+                {
+                    throw new ArgumentException(_localizer["pet.owner.required"]);
+                }
+
                 // Validation 1: The creator must be CUSTOMER or RECEPTIONIST
                 if (userRole != Role.CUSTOMER.ToString() && userRole != Role.RECEPTIONIST.ToString())
                 {
@@ -45,16 +61,16 @@ namespace VeterinaryClinic.Business
                 }
 
                 // Validation 2: If the creator is a CUSTOMER, they can only create pets for themselves.
-                if (userRole == Role.CUSTOMER.ToString() && model.OwnerId != currentUserId)
+                if (userRole == Role.CUSTOMER.ToString() && ownerId != currentUserId)
                 {
                     throw new UnauthorizedAccessException(_localizer["pet.create.cannot_create_for_others"]);
                 }
 
                 // Validation 3: The specified owner must exist and must be a CUSTOMER.
-                var owner = await _dataContext.VcUsers.FindAsync(model.OwnerId);
+                var owner = await _dataContext.VcUsers.FindAsync(ownerId.Value);
                 if (owner == null || owner.Role != Role.CUSTOMER.ToString())
                 {
-                    throw new KeyNotFoundException(_localizer["pet.owner.not_found_or_invalid"]);
+                    throw new ArgumentException(_localizer["pet.owner.not_found_or_invalid"]);
                 }
 
                 var entity = new VcPets
@@ -67,9 +83,9 @@ namespace VeterinaryClinic.Business
                     IsNeutered = model.IsNeutered,
                     BirthDate = model.BirthDate,
                     Weight = model.Weight,
-                    Color = model.Color,
+                    Color = model.Color ?? string.Empty,
                     ImageUrl = model.ImageUrl ?? string.Empty,
-                    OwnerId = model.OwnerId,
+                    OwnerId = ownerId.Value,
                     Note = model.Note ?? string.Empty,
                     IsActive = true,
                     Order = model.Order,

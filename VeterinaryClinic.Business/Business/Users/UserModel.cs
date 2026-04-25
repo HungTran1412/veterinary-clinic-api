@@ -42,15 +42,14 @@ namespace VeterinaryClinic.Business
 
     public record UserModel : UserBaseModel
     {
-        [Required(ErrorMessage = "user.password.required")]
-        public string Password { get; init; }
-        
         public List<VcSpecializations> Specializations { get; set; }
         public List<PetModel> Pets { get; set; }
     }
     
-    public record CreateUserModel : UserModel
+    public record CreateUserModel : UserBaseModel
     {
+        [Required(ErrorMessage = "user.password.required")]
+        public string Password { get; init; }
         public int? CreatedUserId { get; init; }
     }
 

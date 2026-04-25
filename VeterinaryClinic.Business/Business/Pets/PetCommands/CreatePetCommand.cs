@@ -57,13 +57,13 @@ namespace VeterinaryClinic.Business
                 // Validation 1: The creator must be CUSTOMER or RECEPTIONIST
                 if (userRole != Role.CUSTOMER.ToString() && userRole != Role.RECEPTIONIST.ToString())
                 {
-                    throw new UnauthorizedAccessException(_localizer["pet.create.unauthorized"]);
+                    throw new ArgumentException(_localizer["pet.create.unauthorized"]);
                 }
 
                 // Validation 2: If the creator is a CUSTOMER, they can only create pets for themselves.
                 if (userRole == Role.CUSTOMER.ToString() && ownerId != currentUserId)
                 {
-                    throw new UnauthorizedAccessException(_localizer["pet.create.cannot_create_for_others"]);
+                    throw new ArgumentException(_localizer["pet.create.cannot_create_for_others"]);
                 }
 
                 // Validation 3: The specified owner must exist and must be a CUSTOMER.

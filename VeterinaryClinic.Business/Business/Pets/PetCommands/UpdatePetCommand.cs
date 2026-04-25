@@ -40,6 +40,12 @@ namespace VeterinaryClinic.Business
                 var userRole = _contextAccessor.Role;
                 Log.Information($"Update Pet {request.Id} attempt by User {currentUserId}: {JsonSerializer.Serialize(model)}");
 
+                // Validate BirthDate
+                if (model.BirthDate > DateTime.UtcNow)
+                {
+                    throw new ArgumentException(_localizer["pet.birthdate.future"]);
+                }
+
                 var entity = await _dataContext.VcPets.FindAsync(request.Id);
                 if (entity == null || !entity.IsActive)
                 {

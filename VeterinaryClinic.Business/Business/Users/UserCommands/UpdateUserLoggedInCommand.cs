@@ -46,7 +46,11 @@ namespace VeterinaryClinic.Business
                 user.PhoneNumber = request.Model.PhoneNumber;
                 user.Gender = (int)request.Model.Gender;
                 user.AvatarUrl = request.Model.AvatarUrl;
+                user.Address = request.Model.Address;
+                user.ModifiedUserId = userId;
+                user.ModifiedDate = DateTime.Now;
 
+                _dataContext.VcUsers.Update(user);
                 await _dataContext.SaveChangesAsync(cancellationToken);
 
                 //xoa cache

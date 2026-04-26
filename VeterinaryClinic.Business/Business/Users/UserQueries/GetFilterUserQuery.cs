@@ -34,10 +34,10 @@ namespace VeterinaryClinic.Business
 
                 var query = _dataContext.VcUsers.AsNoTracking();
 
-                // Hardcoded filter for DOCTOR and RECEPTIONIST roles
+                // Base filter for DOCTOR and RECEPTIONIST roles
                 query = query.Where(x => x.Role == Role.DOCTOR.ToString() || x.Role == Role.RECEPTIONIST.ToString());
 
-                // Lọc theo từ khóa chung (TextSearch) - Tìm theo FullName, Code, Username, Email, PhoneNumber
+                // Lọc theo từ khóa chung (TextSearch)
                 if (!string.IsNullOrEmpty(filter.TextSearch))
                 {
                     string ts = filter.TextSearch.Trim().ToLower();
@@ -49,21 +49,35 @@ namespace VeterinaryClinic.Business
                         x.PhoneNumber.Contains(ts));
                 }
                 
-                // Lọc theo IsActive nếu được truyền
+                // Lọc theo IsActive
                 if (filter.IsActive.HasValue)
                 {
                     query = query.Where(x => x.IsActive == filter.IsActive.Value);
                 }
                 else 
                 {
-                    // Mặc định chỉ lấy user active nếu FE không gửi
                     query = query.Where(x => x.IsActive);
+                }
+
+                // Lọc theo Role nếu được cung cấp
+                if (!string.IsNullOrEmpty(filter.Role))
+                {
+                    string roleInput = filter.Role.Trim().ToUpper();
+                    if (roleInput == Role.DOCTOR.ToString() || roleInput == Role.RECEPTIONIST.ToString())
+                    {
+                        query = query.Where(x => x.Role == roleInput);
+                    }
+                    else
+                    {
+                        // If an invalid role is passed, return no results as it's outside the allowed scope.
+                        query = query.Where(x => false);
+                    }
                 }
 
                 // Sắp xếp
                 query = query.OrderByField(filter.PropertyName, filter.Ascending);
 
-                // Phân trang an toàn
+                // Phân trang
                 if (filter.PageSize <= 0) filter.PageSize = 10;
                 if (filter.PageNumber <= 0) filter.PageNumber = 1;
 

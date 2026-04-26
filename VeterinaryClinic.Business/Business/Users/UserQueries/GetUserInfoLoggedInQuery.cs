@@ -41,6 +41,7 @@ namespace VeterinaryClinic.Business
                             UserName = x.Username,
                             Email = x.Email,
                             FullName = x.FullName,
+                            Address = x.Address,
                             PhoneNumber = x.PhoneNumber,
                             Gender = x.Gender,
                             AvatarUrl = x.AvatarUrl,

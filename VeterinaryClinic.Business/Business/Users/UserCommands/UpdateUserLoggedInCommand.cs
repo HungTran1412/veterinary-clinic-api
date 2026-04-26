@@ -47,25 +47,6 @@ namespace VeterinaryClinic.Business
                 user.Gender = (int)request.Model.Gender;
                 user.AvatarUrl = request.Model.AvatarUrl;
 
-                // If the user is a doctor, update their specializations
-                if (user.Role == Role.DOCTOR.ToString())
-                {
-                    // Remove existing specializations
-                    var existingSpecializations = _dataContext.VcDoctorSpecializations.Where(ds => ds.DoctorId == user.Id);
-                    _dataContext.VcDoctorSpecializations.RemoveRange(existingSpecializations);
-
-                    // Add new specializations
-                    if (request.Model.SpecializationIds != null && request.Model.SpecializationIds.Any())
-                    {
-                        var newSpecializations = request.Model.SpecializationIds.Select(specId => new VcDoctorSpecializations
-                        {
-                            DoctorId = user.Id,
-                            SpecializationId = specId
-                        });
-                        await _dataContext.VcDoctorSpecializations.AddRangeAsync(newSpecializations, cancellationToken);
-                    }
-                }
-
                 await _dataContext.SaveChangesAsync(cancellationToken);
 
                 //xoa cache

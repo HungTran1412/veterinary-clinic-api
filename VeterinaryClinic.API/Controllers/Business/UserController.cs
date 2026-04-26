@@ -135,15 +135,29 @@ namespace VeterinaryClinic.API.Controllers
         #region User Logged In
 
         /// <summary>
-        /// Lấy thông tin người dùng theo ID
+        /// Lấy thông tin người dùng đang đăng nhập
         /// </summary>
-        /// <param name="id">ID người dùng</param>
         /// <returns></returns>
         [HttpGet, Route("user-info")]
         [ProducesResponseType(typeof(ResponseObject<UserModel>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetUserInfo()
         {
             return await ExecuteFunction(async () => { return await _mediator.Send(new GetUserInfoLoggedInQuery()); });
+        }
+        
+        /// <summary>
+        /// Cập nhật thông tin cá nhân của người dùng đang đăng nhập
+        /// </summary>
+        /// <param name="model">Thông tin cần cập nhật</param>
+        /// <returns></returns>
+        [HttpPut, Route("update-profile")]
+        [ProducesResponseType(typeof(ResponseObject<Unit>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateUserLoggedInModel model)
+        {
+            return await ExecuteFunction(async () =>
+            {
+                return await _mediator.Send(new UpdateUserLoggedInCommand { Model = model });
+            });
         }
 
         #endregion

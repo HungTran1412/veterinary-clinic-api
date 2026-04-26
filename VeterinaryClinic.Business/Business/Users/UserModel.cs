@@ -78,7 +78,6 @@ namespace VeterinaryClinic.Business
         public string PhoneNumber { get; set; }
         public int Gender { get; set; }
         public string AvatarUrl { get; set; }
-        public List<int> SpecializationIds { get; set; }
     }
 
     public record UpdatePasswordUserModel

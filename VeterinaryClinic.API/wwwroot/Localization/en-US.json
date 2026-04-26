@@ -5,6 +5,7 @@
   "specialization.code.required": "Specialization code is required",
   "specialization.name.required": "Specialization name is required",
   "Specialization.existed.code;": "Specialization code already exists",
+  "specialization.not_found_or_inactive": "One or more specializations not found or are inactive.",
 
   "service.code.required": "Service code is required",
   "service.name.required": "Service name is required",
@@ -37,6 +38,15 @@
   "user.verify.already_activated": "Account already activated.",
   "user.verify.token_expired": "Token expired. Please request a new verification link.",
   "user.verify.success": "Your account has been successfully activated! You can log in now.",
+  "user.invalid.role_must_be_doctor": "The specified user is not a doctor.",
+  "user.specialization.not_for_receptionist": "Specializations can only be assigned to doctors.",
+
+  "doctor.not_found": "Doctor not found or is inactive.",
+  "doctor_specialization.doctor_id.required": "Doctor ID is required.",
+  "doctor_specialization.specialization_ids.required": "A list of specialization IDs is required.",
+  "doctor_specialization.specialization_ids.min_length": "At least one specialization ID must be provided.",
+  "doctor_specialization.already_exists": "The doctor already has the following specialization(s):",
+  "doctor_specialization.limit_exceeded": "A doctor can have a maximum of 3 specializations.",
 
   "photo_upload.id.required": "ID is required",
   "photo_upload.file.required": "File is required",
@@ -58,5 +68,6 @@
   "pet.create.unauthorized": "Only customers or receptionists can add a new pet.",
   "pet.create.cannot_create_for_others": "You can only create pets for yourself.",
   "pet.owner.not_found_or_invalid": "The specified owner does not exist or is not a customer.",
-  "pet.update.cannot_change_owner": "Cannot change the owner of a pet."
+  "pet.update.cannot_change_owner": "Cannot change the owner of a pet.",
+  "pet.birthdate.future": "The pet's birth date cannot be in the future."
 }

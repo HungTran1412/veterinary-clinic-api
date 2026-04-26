@@ -2,7 +2,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Serilog;
+using System;
+using System.Linq;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared;
 
@@ -12,10 +16,6 @@ namespace VeterinaryClinic.Business
     {
         public CreateUserModel Model { get; }
 
-        /// <summary>
-        /// Them moi nguoi dung
-        /// </summary>
-        /// <param name="model"></param>
         public CreateUserCommand(CreateUserModel model)
         {
             Model = model;
@@ -29,14 +29,16 @@ namespace VeterinaryClinic.Business
             private readonly IContextAccessor _contextAccessor;
             private readonly IBcryptPasswordHasher _passwordHasher;
             private readonly IEmailService _emailService;
+            private readonly IMediator _mediator;
 
             public Handler(
-                VeterinaryClinicDataContext dataContext, 
-                ICacheService cacheService, 
-                IStringLocalizer<CreateUserCommand> localizer, 
+                VeterinaryClinicDataContext dataContext,
+                ICacheService cacheService,
+                IStringLocalizer<CreateUserCommand> localizer,
                 Func<IContextAccessor> contextAccessorFactory,
                 IBcryptPasswordHasher passwordHasher,
-                IEmailService emailService)
+                IEmailService emailService,
+                IMediator mediator)
             {
                 _dataContext = dataContext;
                 _cacheService = cacheService;
@@ -44,6 +46,7 @@ namespace VeterinaryClinic.Business
                 _contextAccessor = contextAccessorFactory();
                 _passwordHasher = passwordHasher;
                 _emailService = emailService;
+                _mediator = mediator;
             }
 
             public async Task<Unit> Handle(CreateUserCommand request, CancellationToken cancellationToken)
@@ -58,7 +61,7 @@ namespace VeterinaryClinic.Business
                 {
                     throw new ArgumentException($"{_localizer["user.invalid.username"]}");
                 }
-                
+
                 //validate email
                 if (!ValidationUtils.IsValidEmail(model.Email))
                 {
@@ -68,10 +71,9 @@ namespace VeterinaryClinic.Business
                 //validate password
                 if (!ValidationUtils.IsValidPassword(model.Password))
                 {
-                    // Mật khẩu phải có chữ hoa, chữ thường, số và ký tự đặc biệt
                     throw new ArgumentException($"{_localizer["user.invalid.password_complexity"]}");
                 }
-                
+
                 //validate role - Chỉ cho phép ADMIN tạo tài khoản cho DOCTOR hoặc RECEPTIONIST
                 if (string.IsNullOrEmpty(model.Role))
                 {
@@ -84,22 +86,27 @@ namespace VeterinaryClinic.Business
                     throw new ArgumentException($"Admin can only create users with roles: {Role.DOCTOR}, {Role.RECEPTIONIST}");
                 }
                 
-                // Đảm bảo lưu đúng định dạng chữ hoa bằng cách tạo bản sao
+                // Validate that specializations are only provided for doctors
+                if (upperRole != Role.DOCTOR.ToString() && model.SpecializationIds != null && model.SpecializationIds.Any())
+                {
+                    throw new ArgumentException(_localizer["user.specialization.not_for_receptionist"]);
+                }
+
                 model = model with { Role = upperRole };
 
                 #endregion
 
                 var entity = AutoMapperUtils.AutoMap<CreateUserModel, VcUsers>(model);
-                
+
                 if (entity == null)
                 {
                     throw new ArgumentException("Failed to map data.");
                 }
-                
+
                 entity.Address = string.IsNullOrEmpty(entity.Address) ? "" : entity.Address;
                 entity.AvatarUrl = string.IsNullOrEmpty(entity.AvatarUrl) ? "" : entity.AvatarUrl;
                 entity.CreatedUserId = _contextAccessor.UserId;
-                
+
                 #region Check Duplicate
                 var checkCode = await _dataContext.VcUsers.AnyAsync(x => x.Code == entity.Code, cancellationToken);
                 if (checkCode)
@@ -118,9 +125,9 @@ namespace VeterinaryClinic.Business
                 {
                     throw new ArgumentException($"{_localizer["user.existed.email"]}");
                 }
-                
+
                 var checkPhoneNumber = await _dataContext.VcUsers.AnyAsync(x => x.PhoneNumber == entity.PhoneNumber, cancellationToken);
-                if(checkPhoneNumber)
+                if (checkPhoneNumber)
                 {
                     throw new ArgumentException($"{_localizer["user.existed.phone-number"]}");
                 }
@@ -131,14 +138,25 @@ namespace VeterinaryClinic.Business
 
                 await _dataContext.VcUsers.AddAsync(entity, cancellationToken);
                 await _dataContext.SaveChangesAsync(cancellationToken);
-                
-                try 
+
+                // If the user is a DOCTOR and has specializations, add them.
+                if (entity.Role == Role.DOCTOR.ToString() && model.SpecializationIds != null && model.SpecializationIds.Any())
+                {
+                    var specializationModel = new DoctorSpecializationModel
+                    {
+                        DoctorId = entity.Id,
+                        SpecializationIds = model.SpecializationIds
+                    };
+                    await _mediator.Send(new CreateDoctorSpecializationCommand(specializationModel), cancellationToken);
+                }
+
+                try
                 {
                     string subject = "Thông báo cấp tài khoản - Phòng khám thú y";
                     string body = EmailTemplates.GetAccountCreatedEmail(
-                        entity.FullName, 
-                        entity.Username, 
-                        password, 
+                        entity.FullName,
+                        entity.Username,
+                        password,
                         entity.Role
                     );
 
@@ -150,9 +168,9 @@ namespace VeterinaryClinic.Business
                 }
 
                 _cacheService.Remove(UserConstant.BuildCacheKey());
-                
+
                 return Unit.Value;
             }
         }
-    }   
+    }
 }

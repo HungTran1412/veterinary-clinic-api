@@ -1,12 +1,24 @@
-﻿namespace VeterinaryClinic.Business
+﻿using VeterinaryClinic.Shared;
+
+namespace VeterinaryClinic.Business
 {
     public static class PetConstant
     {
-        private const string PetCacheKey = "pets";
-
-        public static string BuildCacheKey(string id)
+        public const string CachePrefix = VeterinaryClinicCacheConstants.PETS; 
+        public const string SelectItemCacheSubfix = VeterinaryClinicCacheConstants.LIST_SELECT;
+        
+        public static string BuildCacheKey(string id = "")
         {
-            return string.IsNullOrWhiteSpace(id) ? PetCacheKey : $"{PetCacheKey}-{id}";
+            if (string.IsNullOrEmpty(id))
+            {
+                //Cache cho danh sách combobox
+                return $"{CachePrefix}-{SelectItemCacheSubfix}";
+            }
+            else
+            {
+                //Cache cho item
+                return $"{CachePrefix}-{id}";
+            }
         }
     }
 }

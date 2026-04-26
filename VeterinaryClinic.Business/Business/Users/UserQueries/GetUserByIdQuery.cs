@@ -1,11 +1,14 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared;
 
 namespace VeterinaryClinic.Business
 {
-    public class GetUserByIdQuery : IRequest<UserBaseModel>
+    public class GetUserByIdQuery : IRequest<UserModel>
     {
         public int Id { get; }
 
@@ -18,7 +21,7 @@ namespace VeterinaryClinic.Business
             Id = id;
         }
 
-        public class Handler : IRequestHandler<GetUserByIdQuery, UserBaseModel>
+        public class Handler : IRequestHandler<GetUserByIdQuery, UserModel>
         {
             private readonly VeterinaryClinicReadDataContext _dataContext;
             private readonly ICacheService _cacheService;
@@ -29,16 +32,15 @@ namespace VeterinaryClinic.Business
                 _cacheService = cacheService;
             }
 
-            public async Task<UserBaseModel> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
+            public async Task<UserModel> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
             {
                 var id = request.Id;
                 string cacheKey = UserConstant.BuildCacheKey(id.ToString());
                 
-                var item = await _cacheService.GetOrCreate(cacheKey, async () =>
+                var item = await _cacheService.GetOrCreate<UserModel>(cacheKey, async () =>
                 {
                     var entity = await _dataContext.VcUsers.AsNoTracking()
                         .Where(x => x.Id == id)
-                        // Sử dụng Projection để chỉ lấy các trường cần thiết và tránh lộ mật khẩu
                         .Select(x => new UserModel
                         {
                             Id = x.Id,
@@ -52,6 +54,21 @@ namespace VeterinaryClinic.Business
                             Role = x.Role
                         })
                         .FirstOrDefaultAsync(cancellationToken);
+
+                    if (entity != null && entity.Role == Role.DOCTOR.ToString())
+                    {
+                        var specializationIds = await _dataContext.VcDoctorSpecializations
+                            .Where(ds => ds.DoctorId == entity.Id)
+                            .Select(ds => ds.SpecializationId)
+                            .ToListAsync(cancellationToken);
+                        
+                        if (specializationIds.Any())
+                        {
+                            entity.Specializations = await _dataContext.VcSpecializations
+                                .Where(s => specializationIds.Contains(s.Id) && s.IsActive)
+                                .ToListAsync(cancellationToken);
+                        }
+                    }
                         
                     return entity;
                 });

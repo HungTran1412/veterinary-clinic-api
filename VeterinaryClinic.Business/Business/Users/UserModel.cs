@@ -50,11 +50,13 @@ namespace VeterinaryClinic.Business
     {
         [Required(ErrorMessage = "user.password.required")]
         public string Password { get; init; }
+        public List<int> SpecializationIds { get; set; }
         public int? CreatedUserId { get; init; }
     }
 
     public record UpdateUserModel : UserBaseModel
     {
+        public List<int> SpecializationIds { get; set; }
         public int? ModifiedUserId { get; init; }
 
         public void UpdateEntity(VcUsers entity)

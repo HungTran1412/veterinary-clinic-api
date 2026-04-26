@@ -8,7 +8,7 @@ namespace VeterinaryClinic.API.Controllers
 {
     [ApiController]
     [Route("veterinary-clinic/v1/specializations")]
-    [ApiExplorerSettings(GroupName = "01. Chuyên ngành (Quản lý chuyên ngành)")]
+    [ApiExplorerSettings(GroupName = "01. Quản lý huyên ngành (Quản trị viên)")]
     // [Authorize]
     public class SpecializationController: ApiControllerBase
     {

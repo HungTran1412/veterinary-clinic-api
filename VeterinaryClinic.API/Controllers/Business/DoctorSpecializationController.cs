@@ -33,20 +33,6 @@ namespace VeterinaryClinic.API.Controllers
                 return await _mediator.Send(new CreateDoctorSpecializationCommand(model));
             });
         }
-
-        /// <summary>
-        /// Xóa một hoặc nhiều chuyên ngành của bác sĩ
-        /// </summary>
-        /// <param name="model">Thông tin bác sĩ và danh sách chuyên ngành cần xóa</param>
-        /// <returns></returns>
-        [HttpDelete]
-        [ProducesResponseType(typeof(ResponseObject<Unit>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> Delete([FromBody] DoctorSpecializationModel model)
-        {
-            return await ExecuteFunction(async () =>
-            {
-                return await _mediator.Send(new DeleteDoctorSpecializationCommand(model));
-            });
-        }
+        
     }
 }

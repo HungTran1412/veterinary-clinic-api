@@ -17,6 +17,7 @@
         public const string PHOTO_UPLOAD = "photo-upload";
         public const string WORK_SCHEDULE = "work-schedule";
         public const string PETS = "pets";
+        public const string DOCTOR_SPECIALIZATION = "doctor-specializations";
 
         #endregion
     }   

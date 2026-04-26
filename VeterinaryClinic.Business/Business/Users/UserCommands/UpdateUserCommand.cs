@@ -3,6 +3,10 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Serilog;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared;
 
@@ -12,10 +16,6 @@ namespace VeterinaryClinic.Business
     {
         public UpdateUserModel Model { get; }
 
-        /// <summary>
-        /// Cap nhat thong tin
-        /// </summary>
-        /// <param name="model"></param>
         public UpdateUserCommand(UpdateUserModel model)
         {
             Model = model;
@@ -40,8 +40,7 @@ namespace VeterinaryClinic.Business
             {
                 var model = request.Model;
                 Log.Information($"Update User: " + JsonSerializer.Serialize(model));
-                
-                //Kiem tra ton tai khong
+
                 var entity = await _dataContext.VcUsers.FirstOrDefaultAsync(x => x.Id == model.Id, cancellationToken);
                 if (entity == null)
                 {
@@ -54,7 +53,7 @@ namespace VeterinaryClinic.Business
                 {
                     throw new ArgumentException($"{_localizer["user.invalid.email_format"]}");
                 }
-                
+
                 //Can update only DOCTOR and RECEPTIONIST
                 var upperRole = model.Role.Trim().ToUpper();
                 if (upperRole != Role.DOCTOR.ToString() && upperRole != Role.RECEPTIONIST.ToString())
@@ -62,6 +61,12 @@ namespace VeterinaryClinic.Business
                     throw new ArgumentException($"Admin can only update users with roles: {Role.DOCTOR}, {Role.RECEPTIONIST}");
                 }
                 
+                // Validate that specializations are only provided for doctors
+                if (upperRole != Role.DOCTOR.ToString() && model.SpecializationIds != null && model.SpecializationIds.Any())
+                {
+                    throw new ArgumentException(_localizer["user.specialization.not_for_receptionist"]);
+                }
+
                 // Kiểm tra trùng Email (loại trừ chính nó)
                 var isEmailExisted = await _dataContext.VcUsers.AnyAsync(x => x.Email == model.Email && x.Id != model.Id, cancellationToken);
                 if (isEmailExisted)
@@ -75,31 +80,41 @@ namespace VeterinaryClinic.Business
                 {
                     throw new ArgumentException($"{_localizer["user.existed.phone_number"]}");
                 }
-
                 #endregion
-                
-                
+
                 //cap nhat thong tin
                 entity.ModifiedUserId = _contextAccessor.UserId;
                 model.UpdateEntity(entity);
-                
-                try
+
+                // If the user is a DOCTOR, update their specializations.
+                if (entity.Role == Role.DOCTOR.ToString())
                 {
-                    _dataContext.VcUsers.Update(entity);
-                    await _dataContext.SaveChangesAsync(cancellationToken);
+                    var existingSpecializations = _dataContext.VcDoctorSpecializations.Where(ds => ds.DoctorId == entity.Id);
+                    _dataContext.VcDoctorSpecializations.RemoveRange(existingSpecializations);
+
+                    if (model.SpecializationIds != null && model.SpecializationIds.Any())
+                    {
+                        var validSpecializations = await _dataContext.VcSpecializations
+                            .Where(s => model.SpecializationIds.Contains(s.Id) && s.IsActive)
+                            .Select(s => s.Id)
+                            .ToListAsync(cancellationToken);
+
+                        var newSpecializations = validSpecializations.Select(specId => new VcDoctorSpecializations
+                        {
+                            DoctorId = entity.Id,
+                            SpecializationId = specId
+                        });
+                        await _dataContext.VcDoctorSpecializations.AddRangeAsync(newSpecializations, cancellationToken);
+                    }
                 }
-                catch (DbUpdateException dbEx)
-                {
-                    // Lấy lỗi gốc từ SQL Server để in ra cho dễ debug
-                    var innerEx = dbEx.InnerException != null ? dbEx.InnerException.Message : dbEx.Message;
-                    Log.Error(dbEx, "Lỗi khi lưu DB Update User");
-                    throw new Exception($"DB Error: {innerEx}"); 
-                }
-                
+
+                _dataContext.VcUsers.Update(entity);
+                await _dataContext.SaveChangesAsync(cancellationToken);
+
                 //xoa cache
                 _cacheService.Remove(UserConstant.BuildCacheKey(entity.Id.ToString()));
                 _cacheService.Remove(UserConstant.BuildCacheKey());
-                
+
                 return Unit.Value;
             }
         }

@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared;
 using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace VeterinaryClinic.Business
 {
@@ -10,10 +13,6 @@ namespace VeterinaryClinic.Business
     {
         public UserFilterModel Filter {get; set;}
 
-        /// <summary>
-        /// Lay danh sach nguoi dung theo dieu kien loc
-        /// </summary>
-        /// <param name="filter">Thong tin loc</param>
         public GetFilterUserQuery(UserFilterModel filter)
         {
             Filter = filter;
@@ -33,63 +32,46 @@ namespace VeterinaryClinic.Business
             {
                 var filter = request.Filter;
 
-                // Lấy danh sách user đang active (nếu không có IsActive trong filter thì mặc định)
-                var data = _dataContext.VcUsers
-                        .AsNoTracking()
-                        .AsQueryable();
+                var query = _dataContext.VcUsers.AsNoTracking();
+
+                // Hardcoded filter for DOCTOR and RECEPTIONIST roles
+                query = query.Where(x => x.Role == Role.DOCTOR.ToString() || x.Role == Role.RECEPTIONIST.ToString());
 
                 // Lọc theo từ khóa chung (TextSearch) - Tìm theo FullName, Code, Username, Email, PhoneNumber
                 if (!string.IsNullOrEmpty(filter.TextSearch))
                 {
                     string ts = filter.TextSearch.Trim().ToLower();
-                    data = data.Where(x => 
+                    query = query.Where(x => 
                         x.FullName.ToLower().Contains(ts) || 
                         x.Code.ToLower().Contains(ts) ||
                         x.Username.ToLower().Contains(ts) ||
                         x.Email.ToLower().Contains(ts) ||
-                        x.PhoneNumber.Contains(ts)); // Số điện thoại thường không có hoa/thường
+                        x.PhoneNumber.Contains(ts));
                 }
                 
                 // Lọc theo IsActive nếu được truyền
                 if (filter.IsActive.HasValue)
                 {
-                    data = data.Where(x => x.IsActive == filter.IsActive.Value);
+                    query = query.Where(x => x.IsActive == filter.IsActive.Value);
                 }
                 else 
                 {
                     // Mặc định chỉ lấy user active nếu FE không gửi
-                    data = data.Where(x => x.IsActive);
-                }
-
-                // Lọc theo Role
-                if (!string.IsNullOrEmpty(filter.Role))
-                {
-                    string roleInput = filter.Role.Trim().ToUpper();
-                    
-                    // Kiểm tra xem Role truyền vào có nằm trong Enum Role không
-                    if (!Enum.IsDefined(typeof(Role), roleInput))
-                    {
-                        throw new ArgumentException($"Role '{filter.Role}' is invalid.");
-                    }
-                    
-                    data = data.Where(x => x.Role.ToUpper() == roleInput);
+                    query = query.Where(x => x.IsActive);
                 }
 
                 // Sắp xếp
-                data = data.OrderByField(filter.PropertyName, filter.Ascending);
+                query = query.OrderByField(filter.PropertyName, filter.Ascending);
 
                 // Phân trang an toàn
                 if (filter.PageSize <= 0) filter.PageSize = 10;
                 if (filter.PageNumber <= 0) filter.PageNumber = 1;
 
-                // Tổng bản ghi
-                int totalCount = await data.CountAsync(cancellationToken);
+                int totalCount = await query.CountAsync(cancellationToken);
                 
-                // Tính số dòng bỏ qua
                 int excludedRows = (filter.PageNumber - 1) * filter.PageSize;
                 
-                // Lấy dữ liệu phân trang và sử dụng Select để chỉ lấy các trường cần thiết (bảo mật)
-                var listData = await data
+                var listData = await query
                     .Skip(excludedRows)
                     .Take(filter.PageSize)
                     .Select(x => new UserModel 

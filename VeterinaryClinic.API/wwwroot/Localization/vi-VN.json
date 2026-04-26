@@ -5,6 +5,7 @@
   "specialization.code.required": "Mã chuyên ngành không được để trống",
   "specialization.name.required": "Tên chuyên ngành không được để trống",
   "Specialization.existed.code;": "Mã chuyên ngành đã tồn tại",
+  "specialization.not_found_or_inactive": "Một hoặc nhiều chuyên ngành không tồn tại hoặc đã bị vô hiệu hóa.",
 
   "service.code.required": "Mã dịch vụ không được để trống",
   "service.name.required": "Tên dịch vụ không được để trống",
@@ -38,7 +39,16 @@
   "user.verify.already_activated": "Tài khoản đã được kích hoạt trước đó.",
   "user.verify.token_expired": "Token đã hết hạn. Vui lòng yêu cầu gửi lại link kích hoạt.",
   "user.verify.success": "Tài khoản của bạn đã được kích hoạt thành công! Bạn có thể đăng nhập ngay bây giờ.",
-  
+  "user.invalid.role_must_be_doctor": "Người dùng được chỉ định không phải là bác sĩ.",
+  "user.specialization.not_for_receptionist": "Chuyên ngành chỉ có thể được gán cho bác sĩ.",
+
+  "doctor.not_found": "Không tìm thấy bác sĩ hoặc bác sĩ đã bị vô hiệu hóa.",
+  "doctor_specialization.doctor_id.required": "ID bác sĩ không được để trống.",
+  "doctor_specialization.specialization_ids.required": "Danh sách ID chuyên ngành không được để trống.",
+  "doctor_specialization.specialization_ids.min_length": "Phải cung cấp ít nhất một ID chuyên ngành.",
+  "doctor_specialization.already_exists": "Bác sĩ đã có các chuyên ngành sau:",
+  "doctor_specialization.limit_exceeded": "Một bác sĩ chỉ có thể có tối đa 3 chuyên ngành.",
+
   "photo_upload.id.required": "ID không được để trống",
   "photo_upload.file.required": "File không được để trống",
 
@@ -59,5 +69,6 @@
   "pet.create.unauthorized": "Chỉ khách hàng hoặc lễ tân mới có thể thêm thú cưng.",
   "pet.create.cannot_create_for_others": "Bạn chỉ có thể tạo thú cưng cho chính mình.",
   "pet.owner.not_found_or_invalid": "Chủ sở hữu không tồn tại hoặc không phải là khách hàng.",
-  "pet.update.cannot_change_owner": "Không thể thay đổi chủ sở hữu của thú cưng."
+  "pet.update.cannot_change_owner": "Không thể thay đổi chủ sở hữu của thú cưng.",
+  "pet.birthdate.future": "Ngày sinh của thú cưng không thể là một ngày trong tương lai."
 }

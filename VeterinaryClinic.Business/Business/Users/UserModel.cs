@@ -56,7 +56,7 @@ namespace VeterinaryClinic.Business
 
     public record UpdateUserModel : UserBaseModel
     {
-        public List<int> SpecializationIds { get; set; }
+        public List<int>? SpecializationIds { get; set; }
         public int? ModifiedUserId { get; init; }
 
         public void UpdateEntity(VcUsers entity)

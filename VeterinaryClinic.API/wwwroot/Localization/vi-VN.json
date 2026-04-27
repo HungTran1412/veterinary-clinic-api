@@ -58,6 +58,9 @@
   "work_schedule.schedule.conflict": "Lịch làm việc bị trùng với một lịch khác của người dùng này.",
   "work_schedule.end_time.must_be_after_start_time": "Thời gian kết thúc phải sau thời gian bắt đầu.",
   "work_schedule.work_date.cannot_be_in_the_past": "Không thể tạo lịch làm việc trong quá khứ.",
+  "work_schedule.receptionist.limit_exceeded": "Ca làm việc đã đủ 2 lễ tân.",
+  "work_schedule.doctor.limit_exceeded": "Ca làm việc đã đủ 15 bác sĩ.",
+  "work_schedule.user.shift_limit_exceeded": "Người dùng đã đạt đến giới hạn 3 ca làm việc mỗi ngày.",
 
   "pet.name.required": "Tên thú cưng không được để trống.",
   "pet.species.required": "Loài không được để trống.",

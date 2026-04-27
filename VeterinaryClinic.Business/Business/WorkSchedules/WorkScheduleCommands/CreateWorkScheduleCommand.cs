@@ -78,6 +78,51 @@ namespace VeterinaryClinic.Business
                     throw new InvalidOperationException(_localizer["work_schedule.schedule.conflict"]);
                 }
 
+                // 4. Validate Role-based shift limits
+                if (user.Role == Role.RECEPTIONIST.ToString())
+                {
+                    var receptionistCount = await (from ws in _dataContext.VcWorkSchedules
+                                                   join u in _dataContext.VcUsers on ws.UserId equals u.Id
+                                                   where ws.IsActive &&
+                                                         ws.WorkDate.Date == model.WorkDate.Date &&
+                                                         ws.ShiftName == model.ShiftName &&
+                                                         u.Role == Role.RECEPTIONIST.ToString()
+                                                   select ws).CountAsync(cancellationToken);
+
+                    if (receptionistCount >= 2)
+                    {
+                        throw new InvalidOperationException(_localizer["work_schedule.receptionist.limit_exceeded"]);
+                    }
+                }
+                else if (user.Role == Role.DOCTOR.ToString())
+                {
+                    var doctorCount = await (from ws in _dataContext.VcWorkSchedules
+                                             join u in _dataContext.VcUsers on ws.UserId equals u.Id
+                                             where ws.IsActive &&
+                                                   ws.WorkDate.Date == model.WorkDate.Date &&
+                                                   ws.ShiftName == model.ShiftName &&
+                                                   u.Role == Role.DOCTOR.ToString()
+                                             select ws).CountAsync(cancellationToken);
+
+                    if (doctorCount >= 15)
+                    {
+                        throw new InvalidOperationException(_localizer["work_schedule.doctor.limit_exceeded"]);
+                    }
+                }
+
+                // 5. Validate user's shift limit per day
+                var userShiftCount = await _dataContext.VcWorkSchedules
+                    .CountAsync(ws =>
+                        ws.IsActive &&
+                        ws.UserId == model.UserId &&
+                        ws.WorkDate.Date == model.WorkDate.Date,
+                        cancellationToken);
+
+                if (userShiftCount >= 2)
+                {
+                    throw new InvalidOperationException(_localizer["work_schedule.user.shift_limit_exceeded"]);
+                }
+
                 // Manual mapping to ensure all required fields are set
                 var entity = new VcWorkSchedules
                 {
@@ -87,7 +132,7 @@ namespace VeterinaryClinic.Business
                     StartTime = model.StartTime,
                     EndTime = model.EndTime,
                     ShiftName = model.ShiftName,
-                    Note = model.Note ?? string.Empty, 
+                    Note = model.Note ?? string.Empty,
                     IsActive = true,
                     Order = 0,
                     CreatedDate = DateTime.UtcNow,

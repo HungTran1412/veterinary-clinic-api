@@ -63,8 +63,7 @@ namespace VeterinaryClinic.Business
                 await _dataContext.SaveChangesAsync(cancellationToken);
                 
                 //xoa cache
-                // Thay thế bằng hằng số của bạn sau này: SpecializationConstant.BuildCacheKey()
-                _cacheService.Remove("Specializations");
+                _cacheService.Remove(SpecializationConstant.BuildCacheKey());
                 
                 return Unit.Value;
             }

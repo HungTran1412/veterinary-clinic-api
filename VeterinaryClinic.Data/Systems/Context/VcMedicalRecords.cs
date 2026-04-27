@@ -37,31 +37,31 @@ namespace VeterinaryClinic.Data
         /// Trieu chung
         /// </summary>
         [Column("symptoms")]
-        public string Symptoms { get; set; }
+        public string? Symptoms { get; set; }
         
         /// <summary>
         /// Chan doan
         /// </summary>
         [Column("diagnosis")]
-        public string Diagnosis { get; set; }
+        public string? Diagnosis { get; set; }
         
         /// <summary>
         /// Phac do dieu tri
         /// </summary>
         [Column("treatment_plan")]
-        public string TreatmentPlan { get; set; }
+        public string? TreatmentPlan { get; set; }
         
         /// <summary>
         /// Don thuoc
         /// </summary>
         [Column("prescription")]
-        public string Prescription { get; set; }
+        public string? Prescription { get; set; }
         
         /// <summary>
         /// Ghi chu cua bac si
         /// </summary>
         [Column("doctor_note")]
-        public string DoctorNote { get; set; }
+        public string? DoctorNote { get; set; }
     
         /// <summary>
         /// Ngay hoan thanh

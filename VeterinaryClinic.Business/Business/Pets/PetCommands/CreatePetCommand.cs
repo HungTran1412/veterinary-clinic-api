@@ -26,12 +26,14 @@ namespace VeterinaryClinic.Business
             private readonly VeterinaryClinicDataContext _dataContext;
             private readonly IContextAccessor _contextAccessor;
             private readonly IStringLocalizer<CreatePetCommand> _localizer;
+            private readonly ICacheService _cacheService;
 
-            public Handler(VeterinaryClinicDataContext dataContext, Func<IContextAccessor> contextAccessorFactory, IStringLocalizer<CreatePetCommand> localizer)
+            public Handler(VeterinaryClinicDataContext dataContext, Func<IContextAccessor> contextAccessorFactory, IStringLocalizer<CreatePetCommand> localizer, ICacheService cacheService)
             {
                 _dataContext = dataContext;
                 _contextAccessor = contextAccessorFactory();
                 _localizer = localizer;
+                _cacheService = cacheService;
             }
 
             public async Task<int> Handle(CreatePetCommand request, CancellationToken cancellationToken)
@@ -98,6 +100,9 @@ namespace VeterinaryClinic.Business
                 await _dataContext.SaveChangesAsync(cancellationToken);
 
                 Log.Information($"Pet created successfully with Id: {entity.Id}");
+                
+                _cacheService.Remove(PetConstant.BuildCacheKey());
+                
                 return entity.Id;
             }
         }

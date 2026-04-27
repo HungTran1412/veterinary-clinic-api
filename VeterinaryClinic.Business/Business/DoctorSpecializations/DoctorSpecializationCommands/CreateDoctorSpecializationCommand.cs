@@ -23,11 +23,13 @@ namespace VeterinaryClinic.Business
         {
             private readonly VeterinaryClinicDataContext _dataContext;
             private readonly IStringLocalizer<CreateDoctorSpecializationCommand> _localizer;
+            private readonly ICacheService _cacheService;
 
-            public Handler(VeterinaryClinicDataContext dataContext, IStringLocalizer<CreateDoctorSpecializationCommand> localizer)
+            public Handler(VeterinaryClinicDataContext dataContext, IStringLocalizer<CreateDoctorSpecializationCommand> localizer, ICacheService cacheService)
             {
                 _dataContext = dataContext;
                 _localizer = localizer;
+                _cacheService = cacheService;
             }
 
             public async Task<Unit> Handle(CreateDoctorSpecializationCommand request, CancellationToken cancellationToken)
@@ -76,6 +78,8 @@ namespace VeterinaryClinic.Business
                 await _dataContext.VcDoctorSpecializations.AddRangeAsync(newDoctorSpecializations, cancellationToken);
                 await _dataContext.SaveChangesAsync(cancellationToken);
 
+                _cacheService.Remove(DoctorSpecializationConstant.BuildCacheKey());
+                
                 return Unit.Value;
             }
         }

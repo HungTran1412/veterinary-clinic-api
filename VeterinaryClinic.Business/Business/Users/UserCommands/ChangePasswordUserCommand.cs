@@ -51,7 +51,7 @@ namespace VeterinaryClinic.Business
 
                 if (userId == null || userId == 0)
                 {
-                    throw new UnauthorizedAccessException(_localizer["user.unauthorized"]);
+                    throw new ArgumentException(_localizer["user.unauthorized"]);
                 }
 
                 Log.Information($"Change Password for User Id: {userId}");
@@ -101,6 +101,8 @@ namespace VeterinaryClinic.Business
 
                 Log.Information($"Password changed successfully for User Id: {userId}");
 
+                _cacheService.Remove(UserConstant.BuildCacheKey());
+                
                 return Unit.Value;
             }
         }

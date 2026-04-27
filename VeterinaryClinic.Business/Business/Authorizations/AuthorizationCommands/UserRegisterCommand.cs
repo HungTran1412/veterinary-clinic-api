@@ -32,19 +32,22 @@ namespace VeterinaryClinic.Busines
             private readonly IBcryptPasswordHasher _passwordHasher;
             private readonly IEmailService _emailService;
             private readonly MailSettings _mailSettings;
+            private readonly ICacheService _cacheService;
 
             public Handler(
                 VeterinaryClinicDataContext dataContext,
                 IStringLocalizer<UserRegisterCommand> localizer,
                 IBcryptPasswordHasher passwordHasher,
                 IEmailService emailService,
-                IOptions<MailSettings> mailSettings)
+                IOptions<MailSettings> mailSettings,
+                ICacheService cacheService)
             {
                 _dataContext = dataContext;
                 _localizer = localizer;
                 _passwordHasher = passwordHasher;
                 _emailService = emailService;
                 _mailSettings = mailSettings.Value;
+                _cacheService = cacheService;
             }
 
             public async Task<UserRegisterResponseModel> Handle(UserRegisterCommand request, CancellationToken cancellationToken)
@@ -133,6 +136,8 @@ namespace VeterinaryClinic.Busines
 
                 Log.Information($"User {model.UserName} registered successfully. Verification email sent.");
 
+                _cacheService.Remove(AuthorizationConstant.BuildCacheKey());
+                
                 return new UserRegisterResponseModel { Email = entity.Email };
             }
         }

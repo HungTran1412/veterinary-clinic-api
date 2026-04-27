@@ -56,7 +56,7 @@ public class UploadPetPhotoCommand : IRequest<UploadPetPhotoModel>
 
             if (string.IsNullOrEmpty(imageUrl))
             {
-                throw new Exception("Failed to upload photo.");
+                throw new ArgumentException("Failed to upload photo.");
             }
             
             //cap nhat anh vao database

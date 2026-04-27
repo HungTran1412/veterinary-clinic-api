@@ -54,13 +54,13 @@ namespace VeterinaryClinic.Business
                 var user = await _dataContext.VcUsers.FindAsync(model.UserId);
                 if (user == null)
                 {
-                    throw new KeyNotFoundException(_localizer["work_schedule.user.not_found"]);
+                    throw new ArgumentException(_localizer["work_schedule.user.not_found"]);
                 }
 
                 var validRoles = new[] { Role.DOCTOR.ToString(), Role.RECEPTIONIST.ToString() };
                 if (!validRoles.Contains(user.Role))
                 {
-                    throw new InvalidOperationException(_localizer["work_schedule.user.invalid_role"]);
+                    throw new ArgumentException(_localizer["work_schedule.user.invalid_role"]);
                 }
 
                 // 3. Validate for schedule conflicts
@@ -75,7 +75,7 @@ namespace VeterinaryClinic.Business
 
                 if (conflictExists)
                 {
-                    throw new InvalidOperationException(_localizer["work_schedule.schedule.conflict"]);
+                    throw new ArgumentException(_localizer["work_schedule.schedule.conflict"]);
                 }
 
                 // 4. Validate Role-based shift limits
@@ -91,7 +91,7 @@ namespace VeterinaryClinic.Business
 
                     if (receptionistCount >= 2)
                     {
-                        throw new InvalidOperationException(_localizer["work_schedule.receptionist.limit_exceeded"]);
+                        throw new ArgumentException(_localizer["work_schedule.receptionist.limit_exceeded"]);
                     }
                 }
                 else if (user.Role == Role.DOCTOR.ToString())
@@ -106,7 +106,7 @@ namespace VeterinaryClinic.Business
 
                     if (doctorCount >= 15)
                     {
-                        throw new InvalidOperationException(_localizer["work_schedule.doctor.limit_exceeded"]);
+                        throw new ArgumentException(_localizer["work_schedule.doctor.limit_exceeded"]);
                     }
                 }
 
@@ -120,7 +120,7 @@ namespace VeterinaryClinic.Business
 
                 if (userShiftCount >= 2)
                 {
-                    throw new InvalidOperationException(_localizer["work_schedule.user.shift_limit_exceeded"]);
+                    throw new ArgumentException(_localizer["work_schedule.user.shift_limit_exceeded"]);
                 }
 
                 // Manual mapping to ensure all required fields are set
@@ -144,7 +144,7 @@ namespace VeterinaryClinic.Business
                 await _dataContext.SaveChangesAsync(cancellationToken);
 
                 // Remove cache
-                _cacheService.Remove(WorkScheduleConstant.BuildCacheKey(string.Empty));
+                _cacheService.Remove(WorkScheduleConstant.BuildCacheKey());
 
                 Log.Information($"WorkSchedule created successfully with Id: {entity.Id}");
 

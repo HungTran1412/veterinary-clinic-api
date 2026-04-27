@@ -20,12 +20,14 @@ namespace VeterinaryClinic.Business
             private readonly VeterinaryClinicDataContext _dataContext;
             private readonly IJwtService _jwtService;
             private readonly IStringLocalizer<RefreshTokenCommand> _localizer;
+            private readonly ICacheService _cacheService;
 
-            public Handler(VeterinaryClinicDataContext dataContext, IJwtService jwtService, IStringLocalizer<RefreshTokenCommand> localizer)
+            public Handler(VeterinaryClinicDataContext dataContext, IJwtService jwtService, IStringLocalizer<RefreshTokenCommand> localizer, ICacheService cacheService)
             {
                 _dataContext = dataContext;
                 _jwtService = jwtService;
                 _localizer = localizer;
+                _cacheService = cacheService;
             }
 
             public async Task<LoginResponseModel> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
@@ -37,7 +39,7 @@ namespace VeterinaryClinic.Business
 
                 if (user == null || user.RefreshToken != request.Model.RefreshToken || user.RefreshTokenExpiryTime <= DateTime.Now)
                 {
-                    throw new UnauthorizedAccessException("Invalid refresh token");
+                    throw new ArgumentException("Invalid refresh token");
                 }
 
                 var newAccessToken = _jwtService.GenerateAccessToken(principal.Claims);
@@ -49,6 +51,8 @@ namespace VeterinaryClinic.Business
                 _dataContext.VcUsers.Update(user);
                 await _dataContext.SaveChangesAsync(cancellationToken);
 
+                _cacheService.Remove(AuthorizationConstant.BuildCacheKey());
+                
                 return new LoginResponseModel
                 {
                     Id = user.Id,

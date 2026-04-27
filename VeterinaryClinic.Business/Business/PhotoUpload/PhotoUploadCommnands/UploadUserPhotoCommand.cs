@@ -58,7 +58,7 @@ public class UploadUserPhotoCommand : IRequest<UploadUserPhotoModel>
 
             if (string.IsNullOrEmpty(avatarUrl))
             {
-                throw new Exception("Failed to upload photo.");
+                throw new ArgumentException("Failed to upload photo.");
             }
             
             //cap nhat du lieu vao db

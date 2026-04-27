@@ -39,7 +39,7 @@ namespace VeterinaryClinic.Business
 
                 if (entity == null)
                 {
-                    throw new KeyNotFoundException(_localizer["work_schedule.not_found"]);
+                    throw new ArgumentException(_localizer["work_schedule.not_found"]);
                 }
 
                 entity.IsActive = false;

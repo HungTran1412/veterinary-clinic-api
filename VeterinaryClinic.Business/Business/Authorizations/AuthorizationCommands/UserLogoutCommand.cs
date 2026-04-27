@@ -20,10 +20,11 @@ namespace VeterinaryClinic.Business
         public class Handler : IRequestHandler<UserLogoutCommand, Unit>
         {
             private readonly VeterinaryClinicDataContext _dataContext;
-
-            public Handler(VeterinaryClinicDataContext dataContext)
+            private readonly ICacheService _cacheService;
+            public Handler(VeterinaryClinicDataContext dataContext, ICacheService cacheService)
             {
                 _dataContext = dataContext;
+                _cacheService = cacheService;
             }
 
             public async Task<Unit> Handle(UserLogoutCommand request, CancellationToken cancellationToken)
@@ -39,6 +40,8 @@ namespace VeterinaryClinic.Business
                     await _dataContext.SaveChangesAsync(cancellationToken);
                 }
 
+                _cacheService.Remove(AuthorizationConstant.BuildCacheKey());
+                
                 return Unit.Value;
             }
         }

@@ -18,6 +18,8 @@
         public const string WORK_SCHEDULE = "work-schedule";
         public const string PETS = "pets";
         public const string DOCTOR_SPECIALIZATION = "doctor-specializations";
+        public const string APPOINMENT = "appointments";
+        public const string MEDICAL_RECORD = "medical-records";
 
         #endregion
     }   

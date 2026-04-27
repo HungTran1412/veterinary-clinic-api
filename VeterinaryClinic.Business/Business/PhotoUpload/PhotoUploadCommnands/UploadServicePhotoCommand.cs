@@ -63,7 +63,7 @@ namespace VeterinaryClinic.Business
 
                 if (string.IsNullOrEmpty(imageUrl))
                 {
-                    throw new Exception("Failed to upload photo.");
+                    throw new ArgumentException("Failed to upload photo.");
                 }
 
                 // 3. Update the service's ImageUrl in the database

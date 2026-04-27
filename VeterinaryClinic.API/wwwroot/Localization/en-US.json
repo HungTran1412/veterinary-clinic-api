@@ -57,6 +57,9 @@
   "work_schedule.schedule.conflict": "The work schedule conflicts with another existing schedule for this user.",
   "work_schedule.end_time.must_be_after_start_time": "End time must be after start time.",
   "work_schedule.work_date.cannot_be_in_the_past": "Cannot create a work schedule in the past.",
+  "work_schedule.receptionist.limit_exceeded": "The shift is already full with 2 receptionists.",
+  "work_schedule.doctor.limit_exceeded": "The shift is already full with 15 doctors.",
+  "work_schedule.user.shift_limit_exceeded": "The user has reached the limit of 3 shifts per day.",
 
   "pet.name.required": "Pet name is required.",
   "pet.species.required": "Species is required.",

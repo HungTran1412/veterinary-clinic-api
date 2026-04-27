@@ -4,7 +4,7 @@ namespace VeterinaryClinic.Business
 {
     public class AuthorizationConstant
     {
-        public const string CachePrefix = VeterinaryClinicCacheConstants.AUTHORIZATION;
+        public const string CachePrefix = VeterinaryClinicCacheConstants.APPOINMENT;
         public const string SelectItemCacheSubfix = VeterinaryClinicCacheConstants.LIST_SELECT;
         
         public static string BuildCacheKey(string id = "")

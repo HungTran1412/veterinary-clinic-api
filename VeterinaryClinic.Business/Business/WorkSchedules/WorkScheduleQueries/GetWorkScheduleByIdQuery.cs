@@ -28,16 +28,34 @@ namespace VeterinaryClinic.Business
 
             public async Task<WorkScheduleModel> Handle(GetWorkScheduleByIdQuery request, CancellationToken cancellationToken)
             {
-                var workSchedule = await _dataContext.VcWorkSchedules
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(ws => ws.Id == request.Id && ws.IsActive, cancellationToken);
+                var query = from ws in _dataContext.VcWorkSchedules
+                            join u in _dataContext.VcUsers on ws.UserId equals u.Id
+                            where ws.Id == request.Id && ws.IsActive
+                            select new WorkScheduleModel
+                            {
+                                Id = ws.Id,
+                                Code = ws.Code,
+                                UserId = ws.UserId,
+                                WorkDate = ws.WorkDate,
+                                StartTime = ws.StartTime,
+                                EndTime = ws.EndTime,
+                                ShiftName = ws.ShiftName,
+                                Note = ws.Note,
+                                IsActive = ws.IsActive,
+                                Order = ws.Order,
+                                CreatedDate = ws.CreatedDate,
+                                FullName = u.FullName,
+                                Role = u.Role
+                            };
+
+                var workSchedule = await query.AsNoTracking().FirstOrDefaultAsync(cancellationToken);
 
                 if (workSchedule == null)
                 {
-                    throw new KeyNotFoundException(_localizer["work_schedule.user.not_found"]);
+                    throw new KeyNotFoundException(_localizer["work_schedule.not_found"]);
                 }
 
-                return AutoMapperUtils.AutoMap<VcWorkSchedules, WorkScheduleModel>(workSchedule);
+                return workSchedule;
             }
         }
     }

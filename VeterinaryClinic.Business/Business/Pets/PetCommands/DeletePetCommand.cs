@@ -22,12 +22,14 @@ namespace VeterinaryClinic.Business
             private readonly VeterinaryClinicDataContext _dataContext;
             private readonly IContextAccessor _contextAccessor;
             private readonly IStringLocalizer<DeletePetCommand> _localizer;
+            private readonly ICacheService _cacheService;
 
-            public Handler(VeterinaryClinicDataContext dataContext, Func<IContextAccessor> contextAccessorFactory, IStringLocalizer<DeletePetCommand> localizer)
+            public Handler(VeterinaryClinicDataContext dataContext, Func<IContextAccessor> contextAccessorFactory, IStringLocalizer<DeletePetCommand> localizer, ICacheService cacheService)
             {
                 _dataContext = dataContext;
                 _contextAccessor = contextAccessorFactory();
                 _localizer = localizer;
+                _cacheService = cacheService;
             }
 
             public async Task<Unit> Handle(DeletePetCommand request, CancellationToken cancellationToken)
@@ -39,22 +41,22 @@ namespace VeterinaryClinic.Business
                 var entity = await _dataContext.VcPets.FindAsync(request.Id);
                 if (entity == null || !entity.IsActive)
                 {
-                    throw new KeyNotFoundException(_localizer["pet.not_found"]);
+                    throw new ArgumentException(_localizer["pet.not_found"]);
                 }
 
                 // Security Check: Only RECEPTIONIST or the pet's owner can delete.
                 if (userRole != Role.RECEPTIONIST.ToString() && entity.OwnerId != currentUserId)
                 {
-                    throw new UnauthorizedAccessException(_localizer["user.unauthorized"]);
+                    throw new ArgumentException(_localizer["user.unauthorized"]);
                 }
 
                 entity.IsActive = false; // Soft delete
-                entity.ModifiedUserId = currentUserId;
-                entity.ModifiedDate = DateTime.UtcNow;
-                entity.ModifiedUserName = _contextAccessor.UserName;
 
                 _dataContext.VcPets.Update(entity);
                 await _dataContext.SaveChangesAsync(cancellationToken);
+                
+                _cacheService.Remove(PetConstant.BuildCacheKey(entity.Id.ToString()));
+                
 
                 Log.Information($"Pet {request.Id} deleted (soft) successfully.");
                 return Unit.Value;

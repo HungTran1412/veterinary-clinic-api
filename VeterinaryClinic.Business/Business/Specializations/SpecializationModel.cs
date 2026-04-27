@@ -41,8 +41,6 @@ namespace VeterinaryClinic.Business
         {
             entity.Name = this.Name;
             entity.Description = this.Description;
-            entity.IsActive = this.IsActive;
-            entity.Order = this.Order;
             entity.ModifiedUserId = entity.ModifiedUserId;
         }
     }

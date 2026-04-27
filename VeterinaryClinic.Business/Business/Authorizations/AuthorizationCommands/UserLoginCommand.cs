@@ -28,17 +28,20 @@ namespace VeterinaryClinic.Business
             private readonly IBcryptPasswordHasher _passwordHasher;
             private readonly IStringLocalizer<UserLoginCommand> _localizer;
             private readonly IJwtService _jwtService;
-
+            private readonly ICacheService _cacheService;
+            
             public Handler(
                 VeterinaryClinicDataContext dataContext, 
                 IBcryptPasswordHasher passwordHasher,
                 IStringLocalizer<UserLoginCommand> localizer,
-                IJwtService jwtService)
+                IJwtService jwtService,
+                ICacheService cacheService)
             {
                 _dataContext = dataContext;
                 _passwordHasher = passwordHasher;
                 _localizer = localizer;
                 _jwtService = jwtService;
+                _cacheService = cacheService;
             }
 
             public async Task<LoginResponseModel> Handle(UserLoginCommand request, CancellationToken cancellationToken)
@@ -55,7 +58,7 @@ namespace VeterinaryClinic.Business
                 if (user == null || !_passwordHasher.VerifyPassword(model.Password, user.Password))
                 {
                     Log.Warning($"Login failed for user: {model.LoginIdentifier}");
-                    throw new UnauthorizedAccessException($"{_localizer["user.login.failed"]}");
+                    throw new ArgumentException($"{_localizer["user.login.failed"]}");
                 }
 
                 // Tạo claims
@@ -79,6 +82,8 @@ namespace VeterinaryClinic.Business
 
                 Log.Information($"User {user.Username} logged in successfully.");
 
+                _cacheService.Remove(AuthorizationConstant.BuildCacheKey());
+                
                 return new LoginResponseModel
                 {
                     Id = user.Id,

@@ -49,25 +49,22 @@ namespace VeterinaryClinic.Business
                 var entity = await _dataContext.VcPets.FindAsync(request.Id);
                 if (entity == null || !entity.IsActive)
                 {
-                    throw new KeyNotFoundException(_localizer["pet.not_found"]);
+                    throw new ArgumentException(_localizer["pet.not_found"]);
                 }
 
                 // Security Check: Only ADMIN, RECEPTIONIST, or the pet's owner can update.
                 if (userRole != Role.RECEPTIONIST.ToString() && entity.OwnerId != currentUserId)
                 {
-                    throw new UnauthorizedAccessException(_localizer["user.unauthorized"]);
+                    throw new ArgumentException(_localizer["user.unauthorized"]);
                 }
 
                 // Business Logic: Prevent changing the owner.
                 if (model.OwnerId != entity.OwnerId)
                 {
-                    throw new InvalidOperationException(_localizer["pet.update.cannot_change_owner"]);
+                    throw new ArgumentException(_localizer["pet.update.cannot_change_owner"]);
                 }
 
                 // Update the entity
-                entity.ModifiedUserId = currentUserId;
-                entity.ModifiedDate = DateTime.UtcNow;
-                entity.ModifiedUserName = _contextAccessor.UserName;
                 model.UpdateEntity(entity);
                 _dataContext.VcPets.Update(entity);
                 await _dataContext.SaveChangesAsync(cancellationToken);

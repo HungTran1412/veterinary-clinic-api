@@ -54,7 +54,7 @@ namespace VeterinaryClinic.Business
                 var isUsed = await _dataContext.VcServices.AnyAsync(s => s.SpecializationId == id && s.IsActive, cancellationToken);
                 if (isUsed)
                 {
-                    throw new InvalidOperationException("Không thể xóa chuyên ngành vì có dịch vụ đang sử dụng.");
+                    throw new ArgumentException("Không thể xóa chuyên ngành vì có dịch vụ đang sử dụng.");
                 }
 
                 //xoa mem

@@ -9,7 +9,7 @@ namespace VeterinaryClinic.API.Controllers
     [ApiController]
     [Route("veterinary-clinic/v1/pets")]
     [ApiExplorerSettings(GroupName = "06. Thú cưng (Quản lý thú cưng)")]
-    [Authorize] // Protect all endpoints in this controller
+    [Authorize] 
     public class PetController : ApiControllerBase
     {
         private readonly IMediator _mediator;

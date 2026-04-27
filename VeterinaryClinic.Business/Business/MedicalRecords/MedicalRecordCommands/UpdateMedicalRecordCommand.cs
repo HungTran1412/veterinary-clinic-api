@@ -11,10 +11,12 @@ namespace VeterinaryClinic.Business
 {
     public class UpdateMedicalRecordCommand : IRequest<Unit>
     {
+        public int Id { get; }
         public UpdateMedicalRecordModel Model { get; }
 
-        public UpdateMedicalRecordCommand(UpdateMedicalRecordModel model)
+        public UpdateMedicalRecordCommand(int id, UpdateMedicalRecordModel model)
         {
+            Id = id;
             Model = model;
         }
 
@@ -38,7 +40,7 @@ namespace VeterinaryClinic.Business
                 var model = request.Model;
                 Log.Information($"Update Medical Record: {JsonSerializer.Serialize(model)}");
 
-                var entity = await _dataContext.VcMedicalRecords.FindAsync(model.Id);
+                var entity = await _dataContext.VcMedicalRecords.FindAsync(request.Id);
                 if (entity == null)
                 {
                     throw new ArgumentException(_localizer["medical_record.not_found"]);

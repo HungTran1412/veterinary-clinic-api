@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using VeterinaryClinic.Data;
+using VeterinaryClinic.Shared;
 
 namespace VeterinaryClinic.Business
 {
@@ -16,9 +17,6 @@ namespace VeterinaryClinic.Business
 
         [Required(ErrorMessage = "appointment.service_id.required")]
         public int SerivceId { get; init; }
-
-        [Required(ErrorMessage = "appointment.doctor_id.required")]
-        public int DoctorId { get; init; }
 
         [Required(ErrorMessage = "appointment.appointment_date.required")]
         public DateTime AppointmentDate { get; init; }
@@ -37,6 +35,8 @@ namespace VeterinaryClinic.Business
     /// </summary>
     public record AppointmentModel : AppointmentEditableModel
     {
+        public int DoctorId { get; init; }
+
         // from TrackedChangeEntity
         public int Id { get; init; }
         public DateTime? CreatedDate { get; init; }
@@ -70,10 +70,24 @@ namespace VeterinaryClinic.Business
     }
 
     /// <summary>
+    /// DTO for processing appointment status transitions.
+    /// </summary>
+    public record ProcessAppointmentModel
+    {
+        [Required(ErrorMessage = "appointment.action.required")]
+        public AppointmentAction Action { get; init; }
+
+        public string? CancelReason { get; init; }
+    }
+
+    /// <summary>
     /// DTO for updating an existing appointment.
     /// </summary>
     public record UpdateAppointmentModel : AppointmentEditableModel
     {
+        [Required(ErrorMessage = "appointment.doctor_id.required")]
+        public int DoctorId { get; init; }
+
         [Required]
         public int Id { get; init; }
 

@@ -73,5 +73,27 @@
   "pet.create.cannot_create_for_others": "Bạn chỉ có thể tạo thú cưng cho chính mình.",
   "pet.owner.not_found_or_invalid": "Chủ sở hữu không tồn tại hoặc không phải là khách hàng.",
   "pet.update.cannot_change_owner": "Không thể thay đổi chủ sở hữu của thú cưng.",
-  "pet.birthdate.future": "Ngày sinh của thú cưng không thể là một ngày trong tương lai."
+  "pet.birthdate.future": "Ngày sinh của thú cưng không thể là một ngày trong tương lai.",
+
+  "appointment.not_found": "Không tìm thấy lịch hẹn.",
+  "appointment.customer_id.required": "Khách hàng là bắt buộc.",
+  "appointment.pet_id.required": "Thú cưng là bắt buộc.",
+  "appointment.service_id.required": "Dịch vụ là bắt buộc.",
+  "appointment.doctor_id.required": "Bác sĩ là bắt buộc.",
+  "appointment.appointment_date.required": "Ngày hẹn là bắt buộc.",
+  "appointment.start_time.required": "Thời gian bắt đầu là bắt buộc.",
+  "appointment.end_time.required": "Thời gian kết thúc là bắt buộc.",
+  "appointment.action.required": "Hành động xử lý lịch hẹn là bắt buộc.",
+  "appointment.time.invalid": "Thời gian kết thúc phải sau thời gian bắt đầu.",
+  "appointment.date.in_past": "Không thể tạo lịch hẹn trong quá khứ.",
+  "appointment.create.unauthorized": "Chỉ khách hàng, lễ tân hoặc quản trị viên mới được tạo lịch hẹn.",
+  "appointment.create.customer_only_self": "Khách hàng chỉ có thể tạo lịch cho chính mình.",
+  "appointment.customer.invalid": "Khách hàng không tồn tại hoặc không hợp lệ.",
+  "appointment.pet.not_belong_to_customer": "Thú cưng không thuộc về khách hàng đã chọn.",
+  "appointment.service.invalid": "Dịch vụ không tồn tại hoặc không khả dụng.",
+  "appointment.doctor.not_available": "Không có bác sĩ phù hợp đang làm việc cho dịch vụ và khung giờ đã chọn.",
+  "appointment.doctor.schedule.conflict": "Bác sĩ đã có lịch hẹn trùng khung thời gian.",
+  "appointment.transition.invalid": "Không thể chuyển trạng thái lịch hẹn theo hành động này.",
+  "appointment.cancel_reason.required": "Lý do hủy hoặc từ chối là bắt buộc.",
+  "appointment.state.invalid": "Trạng thái lịch hẹn hiện tại không hợp lệ."
 }

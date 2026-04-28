@@ -59,9 +59,7 @@ namespace VeterinaryClinic.Business
                     throw new ArgumentException(_localizer["appointment.date.in_past"]);
                 }
 
-                if (currentRole != Role.CUSTOMER.ToString() &&
-                    currentRole != Role.RECEPTIONIST.ToString() &&
-                    currentRole != Role.ADMIN.ToString())
+                if (currentRole == Role.DOCTOR.ToString())
                 {
                     throw new UnauthorizedAccessException(_localizer["appointment.create.unauthorized"]);
                 }

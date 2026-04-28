@@ -147,6 +147,7 @@ builder.Services.AddScoped<IBcryptPasswordHasher, PasswordHasher>();
 
 // Đăng ký JWT Service
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IAppointmentStateMachine, AppointmentStateMachine>();
 
 // Đăng ký các service từ tầng Infrastructure (bao gồm Cloudinary)
 builder.Services.AddApplicationServices(builder.Configuration);

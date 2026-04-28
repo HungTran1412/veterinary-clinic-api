@@ -1,12 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using VeterinaryClinic.Data;
+using VeterinaryClinic.Shared;
 
 namespace VeterinaryClinic.Business
 {
     /// <summary>
-    /// Base model for appointment properties that can be edited.
+    /// Base model for shared appointment input properties.
     /// </summary>
-    public abstract record AppointmentEditableModel
+    public abstract record AppointmentBaseModel
     {
         [Required(ErrorMessage = "appointment.customer_id.required")]
         public int CustomerId { get; init; }
@@ -17,17 +18,11 @@ namespace VeterinaryClinic.Business
         [Required(ErrorMessage = "appointment.service_id.required")]
         public int SerivceId { get; init; }
 
-        [Required(ErrorMessage = "appointment.doctor_id.required")]
-        public int DoctorId { get; init; }
-
         [Required(ErrorMessage = "appointment.appointment_date.required")]
         public DateTime AppointmentDate { get; init; }
 
         [Required(ErrorMessage = "appointment.start_time.required")]
         public DateTime StartTime { get; init; }
-
-        [Required(ErrorMessage = "appointment.end_time.required")]
-        public DateTime EndTime { get; init; }
 
         public string? Note { get; init; }
     }
@@ -35,8 +30,11 @@ namespace VeterinaryClinic.Business
     /// <summary>
     /// DTO for displaying full appointment details.
     /// </summary>
-    public record AppointmentModel : AppointmentEditableModel
+    public record AppointmentModel : AppointmentBaseModel
     {
+        public int DoctorId { get; init; }
+        public DateTime EndTime { get; init; }
+
         // from TrackedChangeEntity
         public int Id { get; init; }
         public DateTime? CreatedDate { get; init; }
@@ -63,17 +61,34 @@ namespace VeterinaryClinic.Business
     }
 
     /// <summary>
-    /// DTO for creating a new appointment.
+    /// DTO for creating a new appointment. Doctor and end time are assigned by the system.
     /// </summary>
-    public record CreateAppointmentModel : AppointmentEditableModel
+    public record CreateAppointmentModel : AppointmentBaseModel
     {
+    }
+
+    /// <summary>
+    /// DTO for processing appointment status transitions.
+    /// </summary>
+    public record ProcessAppointmentModel
+    {
+        [Required(ErrorMessage = "appointment.action.required")]
+        public AppointmentAction Action { get; init; }
+
+        public string? CancelReason { get; init; }
     }
 
     /// <summary>
     /// DTO for updating an existing appointment.
     /// </summary>
-    public record UpdateAppointmentModel : AppointmentEditableModel
+    public record UpdateAppointmentModel : AppointmentBaseModel
     {
+        [Required(ErrorMessage = "appointment.doctor_id.required")]
+        public int DoctorId { get; init; }
+
+        [Required(ErrorMessage = "appointment.end_time.required")]
+        public DateTime EndTime { get; init; }
+
         [Required]
         public int Id { get; init; }
 

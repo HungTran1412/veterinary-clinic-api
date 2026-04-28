@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared;
 
@@ -37,12 +37,6 @@ namespace VeterinaryClinic.Business
 
         // from TrackedChangeEntity
         public int Id { get; init; }
-        public DateTime? CreatedDate { get; init; }
-        public int? CreatedUserId { get; init; }
-        public string? CreatedUserName { get; init; }
-        public DateTime? ModifiedDate { get; init; }
-        public int? ModifiedUserId { get; init; }
-        public string? ModifiedUserName { get; init; }
 
         // from BaseEntity
         public int Order { get; init; }
@@ -103,5 +97,16 @@ namespace VeterinaryClinic.Business
             entity.EndTime = this.EndTime;
             entity.Note = this.Note ?? string.Empty;
         }
+    }
+
+    public record AppoinntmentFilterModel : BaseQueryFilterModel
+    {
+        public int? CustomerId { get; init; }
+        public int? PetId { get; init; }
+        public int? ServiceId { get; init; }
+        public int? DoctorId { get; init; }
+        public DateTime? FromDate { get; init; }
+        public DateTime? ToDate { get; init; }
+        public string? State { get; init; }
     }
 }

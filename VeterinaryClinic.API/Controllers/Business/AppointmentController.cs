@@ -9,7 +9,7 @@ namespace VeterinaryClinic.API.Controllers
     [ApiController]
     [Route("veterinary-clinic/v1/appointments")]
     [ApiExplorerSettings(GroupName = "09. Đặt lịch khám (Quản lý lịch khám)")]
-    [Authorize]
+    // [Authorize]
     public class AppointmentController : ApiControllerBase
     {
         private readonly IMediator _mediator;
@@ -42,6 +42,36 @@ namespace VeterinaryClinic.API.Controllers
             return await ExecuteFunction(async () =>
             {
                 return await _mediator.Send(new ProcessAppointmentCommand(id, model));
+            });
+        }
+
+        /// <summary>
+        /// Lấy thông tin lịch hẹn theo id
+        /// </summary>
+        /// <param name="id">id lịch hẹn</param>
+        /// <returns></returns>
+        [HttpGet, Route("{id}")]
+        [ProducesResponseType(typeof(ResponseObject<AppointmentModel>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetById([FromRoute] int id)
+        {
+            return await ExecuteFunction(async () =>
+            {
+                return await _mediator.Send(new GetAppointmentByIdQuery(id));
+            });
+        }
+
+        /// <summary>
+        /// Lọc danh sách lịch hẹn
+        /// </summary>
+        /// <param name="filter">Điều kiện lọc</param>
+        /// <returns></returns>
+        [HttpPost, Route("filter")]
+        [ProducesResponseType(typeof(ResponseObject<PaginationList<AppointmentModel>>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> Filter([FromBody] AppoinntmentFilterModel filter)
+        {
+            return await ExecuteFunction(async () =>
+            {
+                return await _mediator.Send(new GetFilterAppointmentQuery(filter));
             });
         }
     }

@@ -32,6 +32,8 @@ namespace VeterinaryClinic.Business
                     .AsNoTracking()
                     .FirstOrDefaultAsync(mr => mr.Id == request.Id, cancellationToken);
 
+                string cacheKey = MedicalRecordConstant.BuildCacheKey(request.Id.ToString());
+                
                 if (medicalRecord == null)
                 {
                     throw new KeyNotFoundException(_localizer["medical_record.not_found"]);

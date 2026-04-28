@@ -91,8 +91,10 @@
   "appointment.customer.invalid": "Customer does not exist or is invalid.",
   "appointment.pet.not_belong_to_customer": "The selected pet does not belong to the selected customer.",
   "appointment.service.invalid": "Service does not exist or is unavailable.",
+  "appointment.service.duration.invalid": "Service duration is invalid.",
   "appointment.doctor.not_available": "No suitable doctor is working for the selected service and time slot.",
   "appointment.doctor.schedule.conflict": "The doctor already has an overlapping appointment.",
+  "appointment.end_time.out_of_day": "Appointment end time must not exceed the selected day.",
   "appointment.transition.invalid": "The appointment status cannot be changed with this action.",
   "appointment.cancel_reason.required": "A cancellation or rejection reason is required.",
   "appointment.state.invalid": "The current appointment state is invalid."

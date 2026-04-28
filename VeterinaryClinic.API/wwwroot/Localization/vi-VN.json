@@ -91,8 +91,10 @@
   "appointment.customer.invalid": "Khách hàng không tồn tại hoặc không hợp lệ.",
   "appointment.pet.not_belong_to_customer": "Thú cưng không thuộc về khách hàng đã chọn.",
   "appointment.service.invalid": "Dịch vụ không tồn tại hoặc không khả dụng.",
+  "appointment.service.duration.invalid": "Thời lượng dịch vụ không hợp lệ.",
   "appointment.doctor.not_available": "Không có bác sĩ phù hợp đang làm việc cho dịch vụ và khung giờ đã chọn.",
   "appointment.doctor.schedule.conflict": "Bác sĩ đã có lịch hẹn trùng khung thời gian.",
+  "appointment.end_time.out_of_day": "Giờ kết thúc lịch hẹn không được vượt quá ngày đã chọn.",
   "appointment.transition.invalid": "Không thể chuyển trạng thái lịch hẹn theo hành động này.",
   "appointment.cancel_reason.required": "Lý do hủy hoặc từ chối là bắt buộc.",
   "appointment.state.invalid": "Trạng thái lịch hẹn hiện tại không hợp lệ."

@@ -9,7 +9,7 @@ using VeterinaryClinic.Shared.ContextAccessor;
 
 namespace VeterinaryClinic.Business
 {
-    public class CreateAppointmentCommand : IRequest<int>
+    public class CreateAppointmentCommand : IRequest<Unit>
     {
         public CreateAppointmentModel Model { get; }
 
@@ -18,8 +18,15 @@ namespace VeterinaryClinic.Business
             Model = model;
         }
 
-        public class Handler : IRequestHandler<CreateAppointmentCommand, int>
+        public class Handler : IRequestHandler<CreateAppointmentCommand, Unit>
         {
+            private static readonly string[] TimeZoneIds =
+            [
+                "SE Asia Standard Time",
+                "Asia/Ho_Chi_Minh",
+                "Asia/Saigon"
+            ];
+
             private readonly VeterinaryClinicDataContext _dataContext;
             private readonly IContextAccessor _contextAccessor;
             private readonly IStringLocalizer<CreateAppointmentCommand> _localizer;
@@ -40,17 +47,12 @@ namespace VeterinaryClinic.Business
                 _appointmentStateMachine = appointmentStateMachine;
             }
 
-            public async Task<int> Handle(CreateAppointmentCommand request, CancellationToken cancellationToken)
+            public async Task<Unit> Handle(CreateAppointmentCommand request, CancellationToken cancellationToken)
             {
                 var model = request.Model;
                 var currentUserId = _contextAccessor.UserId;
                 var currentRole = _contextAccessor.Role;
                 Log.Information($"Create Appointment attempt by User {currentUserId}: {JsonSerializer.Serialize(model)}");
-
-                if (model.StartTime >= model.EndTime)
-                {
-                    throw new ArgumentException(_localizer["appointment.time.invalid"]);
-                }
 
                 if (model.AppointmentDate.Date < DateTime.UtcNow.Date)
                 {
@@ -100,13 +102,33 @@ namespace VeterinaryClinic.Business
                                      select new
                                      {
                                          svc.Id,
-                                         svc.SpecializationId
+                                         svc.SpecializationId,
+                                         svc.DurationMinutes
                                      })
                     .FirstOrDefaultAsync(cancellationToken);
 
                 if (service == null)
                 {
                     throw new ArgumentException(_localizer["appointment.service.invalid"]);
+                }
+
+                if (service.DurationMinutes <= 0)
+                {
+                    throw new ArgumentException(_localizer["appointment.service.duration.invalid"]);
+                }
+
+                var appointmentDate = NormalizeToClinicTime(model.AppointmentDate).Date;
+                var startTime = appointmentDate.Add(NormalizeToClinicTime(model.StartTime).TimeOfDay);
+                var endTime = startTime.AddMinutes(service.DurationMinutes);
+
+                if (startTime >= endTime)
+                {
+                    throw new ArgumentException(_localizer["appointment.time.invalid"]);
+                }
+
+                if (endTime.Date != appointmentDate)
+                {
+                    throw new ArgumentException(_localizer["appointment.end_time.out_of_day"]);
                 }
 
                 var candidateDoctors = await (from ws in _dataContext.VcWorkSchedules.AsNoTracking()
@@ -121,9 +143,9 @@ namespace VeterinaryClinic.Business
                                                     sp.IsActive &&
                                                     doctor.Role == Role.DOCTOR.ToString() &&
                                                     ds.SpecializationId == service.SpecializationId &&
-                                                    ws.WorkDate.Date == model.AppointmentDate.Date &&
-                                                    model.StartTime >= ws.StartTime &&
-                                                    model.EndTime <= ws.EndTime
+                                                    ws.WorkDate.Date == appointmentDate &&
+                                                    ws.StartTime <= startTime &&
+                                                    ws.EndTime >= endTime
                                               select doctor.Id)
                     .Distinct()
                     .ToListAsync(cancellationToken);
@@ -137,12 +159,12 @@ namespace VeterinaryClinic.Business
                     .AsNoTracking()
                     .Where(x =>
                         candidateDoctors.Contains(x.DoctorId) &&
-                        x.AppointmentDate.Date == model.AppointmentDate.Date &&
+                        x.AppointmentDate.Date == appointmentDate &&
                         x.State != AppointmentStatus.CANCELLED.ToString() &&
                         x.State != AppointmentStatus.REJECTED.ToString() &&
                         x.State != AppointmentStatus.NO_SHOW.ToString() &&
-                        model.StartTime < x.EndTime &&
-                        model.EndTime > x.StartTime)
+                        startTime < x.EndTime &&
+                        endTime > x.StartTime)
                     .Select(x => x.DoctorId)
                     .Distinct()
                     .ToListAsync(cancellationToken);
@@ -160,7 +182,7 @@ namespace VeterinaryClinic.Business
                     .AsNoTracking()
                     .Where(x =>
                         availableDoctors.Contains(x.DoctorId) &&
-                        x.AppointmentDate.Date == model.AppointmentDate.Date &&
+                        x.AppointmentDate.Date == appointmentDate &&
                         x.State != AppointmentStatus.CANCELLED.ToString() &&
                         x.State != AppointmentStatus.REJECTED.ToString() &&
                         x.State != AppointmentStatus.NO_SHOW.ToString())
@@ -191,9 +213,9 @@ namespace VeterinaryClinic.Business
                     PetId = model.PetId,
                     SerivceId = model.SerivceId,
                     DoctorId = selectedDoctorId,
-                    AppointmentDate = model.AppointmentDate,
-                    StartTime = model.StartTime,
-                    EndTime = model.EndTime,
+                    AppointmentDate = appointmentDate,
+                    StartTime = startTime,
+                    EndTime = endTime,
                     CancelReason = string.Empty,
                     Note = model.Note ?? string.Empty,
                     AuthorId = currentUserId?.ToString() ?? string.Empty,
@@ -214,7 +236,36 @@ namespace VeterinaryClinic.Business
                 _cacheService.Remove(AppointmentConstant.BuildCacheKey());
                 Log.Information($"Appointment created successfully with Id: {entity.Id}, DoctorId: {entity.DoctorId}");
 
-                return entity.Id;
+                return Unit.Value;
+            }
+
+            private static DateTime NormalizeToClinicTime(DateTime value)
+            {
+                if (value.Kind == DateTimeKind.Unspecified)
+                {
+                    return value;
+                }
+
+                return TimeZoneInfo.ConvertTime(value, GetClinicTimeZone());
+            }
+
+            private static TimeZoneInfo GetClinicTimeZone()
+            {
+                foreach (var id in TimeZoneIds)
+                {
+                    try
+                    {
+                        return TimeZoneInfo.FindSystemTimeZoneById(id);
+                    }
+                    catch (TimeZoneNotFoundException)
+                    {
+                    }
+                    catch (InvalidTimeZoneException)
+                    {
+                    }
+                }
+
+                return TimeZoneInfo.Local;
             }
         }
     }

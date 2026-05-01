@@ -25,6 +25,8 @@ namespace VeterinaryClinic.Business
         public DateTime StartTime { get; init; }
 
         public string? Note { get; init; }
+        
+        public DateTime? CreatedDate { get; init; }
     }
 
     /// <summary>
@@ -52,6 +54,13 @@ namespace VeterinaryClinic.Business
         // from VcAppointments
         public string? Code { get; init; }
         public string? CancelReason { get; init; }
+
+        public string? CustomerName { get; init; }
+        public string? PetName { get; init; }
+        public string? ServiceName { get; init; }
+        public string? DoctorName { get; init; }
+
+        public List<WorkflowCommandModel> Commands { get; init; } = new();
     }
 
     /// <summary>
@@ -101,8 +110,6 @@ namespace VeterinaryClinic.Business
 
     public record AppoinntmentFilterModel : BaseQueryFilterModel
     {
-        public int? CustomerId { get; init; }
-        public int? PetId { get; init; }
         public int? ServiceId { get; init; }
         public int? DoctorId { get; init; }
         public DateTime? FromDate { get; init; }

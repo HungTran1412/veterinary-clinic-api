@@ -33,7 +33,7 @@ namespace VeterinaryClinic.Business
                 var count = request.Count;
                 var textSearch = request.TextSearch;
 
-                string cacheKey = "UserCombobox"; // Define a cache key
+                string cacheKey = UserConstant.BuildCacheKey();
                 var list = await _cacheService.GetOrCreate(cacheKey, async () =>
                 {
                     var rolesToInclude = new[] { Role.DOCTOR.ToString(), Role.RECEPTIONIST.ToString() };
@@ -45,7 +45,7 @@ namespace VeterinaryClinic.Business
                         .Select(item => new UserSelectItemModel()
                         {
                             Id = item.Id,
-                            Name = item.FullName,
+                            Name = item.Code + " - " + item.FullName,
                             Code = item.Code,
                             Role = item.Role
                         }).ToListAsync(cancellationToken);

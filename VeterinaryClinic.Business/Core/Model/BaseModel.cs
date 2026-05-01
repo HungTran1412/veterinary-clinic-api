@@ -18,4 +18,6 @@ namespace VeterinaryClinic.Business
             PageSize = QueryFilter.DefaultPageSize;
         }
     }
+
+    public record WorkflowCommandModel(string Key, string Value);
 }

@@ -58,12 +58,6 @@ namespace VeterinaryClinic.Business
                     throw new ArgumentException(_localizer["user.unauthorized"]);
                 }
 
-                // Business Logic: Prevent changing the owner.
-                if (model.OwnerId != entity.OwnerId)
-                {
-                    throw new ArgumentException(_localizer["pet.update.cannot_change_owner"]);
-                }
-
                 // Update the entity
                 model.UpdateEntity(entity);
                 _dataContext.VcPets.Update(entity);

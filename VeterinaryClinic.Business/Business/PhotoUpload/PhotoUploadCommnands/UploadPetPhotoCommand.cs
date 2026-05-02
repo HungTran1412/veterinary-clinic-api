@@ -61,8 +61,8 @@ public class UploadPetPhotoCommand : IRequest<UploadPetPhotoModel>
             
             //cap nhat anh vao database
             data.ImageUrl = imageUrl;
-            _dataContext.VcPets.Update(data);
-            await _dataContext.SaveChangesAsync(cancellationToken);
+            // _dataContext.VcPets.Update(data);
+            // await _dataContext.SaveChangesAsync(cancellationToken);
             
             //xoa cache
             _cacheService.Remove(PhotoUploadConstant.BuildCacheKey(data.Id.ToString()));

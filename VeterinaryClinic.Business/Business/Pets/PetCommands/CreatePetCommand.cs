@@ -90,7 +90,6 @@ namespace VeterinaryClinic.Business
                     OwnerId = ownerId.Value,
                     Note = model.Note ?? string.Empty,
                     IsActive = true,
-                    Order = model.Order,
                     CreatedDate = DateTime.UtcNow,
                     CreatedUserId = currentUserId,
                     CreatedUserName = _contextAccessor.UserName

@@ -84,6 +84,7 @@
   "appointment.start_time.required": "Start time is required.",
   "appointment.end_time.required": "End time is required.",
   "appointment.action.required": "Appointment action is required.",
+  "appointment.action.invalid": "Appointment action is invalid.",
   "appointment.time.invalid": "End time must be after start time.",
   "appointment.date.in_past": "Cannot create an appointment in the past.",
   "appointment.create.unauthorized": "Only customers, receptionists, or administrators can create appointments.",

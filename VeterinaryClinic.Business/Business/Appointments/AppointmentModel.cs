@@ -76,7 +76,7 @@ namespace VeterinaryClinic.Business
     public record ProcessAppointmentModel
     {
         [Required(ErrorMessage = "appointment.action.required")]
-        public AppointmentAction Action { get; init; }
+        public string Action { get; init; } = string.Empty;
 
         public string? CancelReason { get; init; }
     }

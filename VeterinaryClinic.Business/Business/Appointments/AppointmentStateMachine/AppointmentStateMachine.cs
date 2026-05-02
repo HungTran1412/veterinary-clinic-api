@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Localization;
 using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared;
+using VeterinaryClinic.Shared.ContextAccessor;
 
 namespace VeterinaryClinic.Business
 {
@@ -51,9 +52,12 @@ namespace VeterinaryClinic.Business
                 }
             };
 
-        public AppointmentStateMachine(IStringLocalizer<AppointmentStateMachine> localizer)
+        public AppointmentStateMachine(
+            IStringLocalizer<AppointmentStateMachine> localizer,
+            Func<IContextAccessor> contextAccessorFactory)
         {
             _localizer = localizer;
+            _contextAccessor = contextAccessorFactory();
         }
 
         public AppointmentStatus GetInitialStatus()
@@ -113,7 +117,11 @@ namespace VeterinaryClinic.Business
         public void Apply(VcAppointments appointment, AppointmentAction action, string? cancelReason = null)
         {
             var currentStatus = ParseStatus(appointment.State);
-            var role = Enum.Parse<Role>(_contextAccessor.Role);
+            if (string.IsNullOrWhiteSpace(_contextAccessor.Role) ||
+                !Enum.TryParse<Role>(_contextAccessor.Role, true, out var role))
+            {
+                throw new UnauthorizedAccessException(_localizer["user.unauthorized"]);
+            }
 
             if (action == AppointmentAction.REQUEST_CANCELLATION)
             {

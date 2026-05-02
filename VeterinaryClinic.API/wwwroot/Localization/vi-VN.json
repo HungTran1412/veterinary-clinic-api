@@ -84,6 +84,7 @@
   "appointment.start_time.required": "Thời gian bắt đầu là bắt buộc.",
   "appointment.end_time.required": "Thời gian kết thúc là bắt buộc.",
   "appointment.action.required": "Hành động xử lý lịch hẹn là bắt buộc.",
+  "appointment.action.invalid": "Hành động xử lý lịch hẹn không hợp lệ.",
   "appointment.time.invalid": "Thời gian kết thúc phải sau thời gian bắt đầu.",
   "appointment.date.in_past": "Không thể tạo lịch hẹn trong quá khứ.",
   "appointment.create.unauthorized": "Chỉ khách hàng, lễ tân hoặc quản trị viên mới được tạo lịch hẹn.",

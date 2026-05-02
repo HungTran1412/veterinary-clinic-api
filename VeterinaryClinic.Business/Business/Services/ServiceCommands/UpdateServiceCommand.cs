@@ -39,7 +39,15 @@ namespace VeterinaryClinic.Business
             public async Task<Unit> Handle(UpdateServiceCommand request, CancellationToken cancellationToken)
             {
                 var model = request.Model;
-                Log.Information($"Update {ServiceConstant.CachePrefix}: " + JsonSerializer.Serialize(model));
+                var currentUserId = _contextAccessor.UserId;
+                var userRole = _contextAccessor.Role;
+                Log.Information($"Update Service {model.Id} attempt by User {currentUserId}: {JsonSerializer.Serialize(model)}");
+
+                // Security Check: Only ADMIN or RECEPTIONIST can update.
+                if (userRole != Role.ADMIN.ToString())
+                {
+                    throw new ArgumentException(_localizer["user.unauthorized"]);
+                }
                 
                 //Kiem tra ton tai khong
                 var entity = await _dataContext.VcServices.FirstOrDefaultAsync(x => x.Id == model.Id);
@@ -49,7 +57,7 @@ namespace VeterinaryClinic.Business
                 }
                 
                 //cap nhat entity
-                entity.ModifiedUserId = _contextAccessor.UserId;
+                entity.ModifiedUserId = currentUserId;
                 model.UpdateEntity(entity);
                 
                 //luu vao db

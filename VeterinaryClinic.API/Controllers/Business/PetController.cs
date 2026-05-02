@@ -106,7 +106,7 @@ namespace VeterinaryClinic.API.Controllers
         {
             return await ExecuteFunction(async () =>
             {
-                return await _mediator.Send(new GetComboboxPetQuery { OwnerId = ownerId });
+                return await _mediator.Send(new GetComboboxPetQuery(ownerId));
             });
         }
     }

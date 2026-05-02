@@ -168,8 +168,8 @@ namespace VeterinaryClinic.Business
                         ? listData.OrderBy(x => prop.GetValue(x, null)).ToList()
                         : listData.OrderByDescending(x => prop.GetValue(x, null)).ToList();
                 }
-                
-                var currentRole = Enum.Parse<Role>(_contextAccessor.Role);
+
+                var currentRole = role;
                 listData = listData.Select(item =>
                 {
                     if (!Enum.TryParse<AppointmentStatus>(item.State, true, out var status))

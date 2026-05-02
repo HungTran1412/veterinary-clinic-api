@@ -54,13 +54,10 @@ namespace VeterinaryClinic.Business
         public string? ImageUrl { get; init; }
         public int? OwnerId { get; init; } // Nullable, not required
         public string? Note { get; init; }
-        public int Order { get; init; }
     }
 
     public record UpdatePetModel : PetBaseModel
     {
-        [Required(ErrorMessage = "pet.owner_id.required")]
-        public int OwnerId { get; init; }
         public int? ModifiedUserId { get; init; }
 
         public void UpdateEntity(VcPets entity)
@@ -72,10 +69,9 @@ namespace VeterinaryClinic.Business
             entity.IsNeutered = this.IsNeutered;
             entity.BirthDate = this.BirthDate;
             entity.Weight = this.Weight;
-            entity.Color = this.Color;
-            entity.ImageUrl = this.ImageUrl;
-            entity.OwnerId = this.OwnerId;
-            entity.Note = this.Note;
+            entity.Color = this.Color ?? string.Empty;
+            entity.ImageUrl = this.ImageUrl ?? string.Empty;
+            entity.Note = this.Note ?? string.Empty;
             entity.Order = this.Order;
             entity.ModifiedUserId = this.ModifiedUserId;
         }

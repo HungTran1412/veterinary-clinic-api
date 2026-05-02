@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Localization;
 using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared;
+using VeterinaryClinic.Shared.ContextAccessor;
 
 namespace VeterinaryClinic.Business
 {
@@ -27,50 +28,47 @@ namespace VeterinaryClinic.Business
             AppointmentStatus.NO_SHOW
         };
 
-        private static readonly Dictionary<AppointmentStatus, IReadOnlyCollection<AppointmentAction>> AllowedActions = new()
-        {
-            [AppointmentStatus.PENDING_CONFIRMATION] = new[]
+        private static readonly Dictionary<AppointmentStatus, IReadOnlyCollection<AppointmentAction>> AllowedActions =
+            new()
             {
-                AppointmentAction.CONFIRM,
-                AppointmentAction.REJECT,
-                AppointmentAction.CUSTOMER_CANCEL
-            },
-            [AppointmentStatus.CONFIRMED] = new[]
-            {
-                AppointmentAction.START_CONSULTATION,
-                AppointmentAction.REQUEST_CANCELLATION,
-                AppointmentAction.MARK_NO_SHOW
-            },
-            [AppointmentStatus.CANCELLATION_REQUESTED] = new[]
-            {
-                AppointmentAction.APPROVE_CANCELLATION,
-                AppointmentAction.REJECT_CANCELLATION_REQUEST
-            },
-            [AppointmentStatus.IN_PROGRESS] = new[]
-            {
-                AppointmentAction.COMPLETE_CONSULTATION
-            },
-            [AppointmentStatus.PAYMENT_PENDING] = new[]
-            {
-                AppointmentAction.COMPLETE_PAYMENT
-            }
-        };
+                [AppointmentStatus.CONFIRMED] = new[]
+                {
+                    AppointmentAction.START_CONSULTATION,
+                    AppointmentAction.REQUEST_CANCELLATION,
+                    AppointmentAction.MARK_NO_SHOW
+                },
+                [AppointmentStatus.CANCELLATION_REQUESTED] = new[]
+                {
+                    AppointmentAction.APPROVE_CANCELLATION,
+                    AppointmentAction.REJECT_CANCELLATION_REQUEST
+                },
+                [AppointmentStatus.IN_PROGRESS] = new[]
+                {
+                    AppointmentAction.COMPLETE_CONSULTATION
+                },
+                [AppointmentStatus.PAYMENT_PENDING] = new[]
+                {
+                    AppointmentAction.COMPLETE_PAYMENT
+                }
+            };
 
-        public AppointmentStateMachine(IStringLocalizer<AppointmentStateMachine> localizer)
+        public AppointmentStateMachine(
+            IStringLocalizer<AppointmentStateMachine> localizer,
+            Func<IContextAccessor> contextAccessorFactory)
         {
             _localizer = localizer;
+            _contextAccessor = contextAccessorFactory();
         }
 
         public AppointmentStatus GetInitialStatus()
         {
-            return AppointmentStatus.PENDING_CONFIRMATION;
+            return AppointmentStatus.CONFIRMED;
         }
 
         public string GetStateDisplayName(AppointmentStatus status)
         {
             return status switch
             {
-                AppointmentStatus.PENDING_CONFIRMATION => "Chờ xác nhận",
                 AppointmentStatus.CONFIRMED => "Đã xác nhận",
                 AppointmentStatus.REJECTED => "Từ chối",
                 AppointmentStatus.CANCELLED => "Đã hủy",
@@ -96,8 +94,7 @@ namespace VeterinaryClinic.Business
             return role switch
             {
                 Role.CUSTOMER => actions.Where(x =>
-                    x == AppointmentAction.REQUEST_CANCELLATION ||
-                    x == AppointmentAction.CUSTOMER_CANCEL
+                    x == AppointmentAction.REQUEST_CANCELLATION
                 ).ToList(),
 
                 Role.DOCTOR => actions.Where(x =>
@@ -106,25 +103,46 @@ namespace VeterinaryClinic.Business
                     x == AppointmentAction.MARK_NO_SHOW
                 ).ToList(),
 
-                Role.ADMIN => actions,
-
                 Role.RECEPTIONIST => actions.Where(x =>
-                    x == AppointmentAction.CONFIRM ||
-                    x == AppointmentAction.REJECT ||
                     x == AppointmentAction.APPROVE_CANCELLATION ||
                     x == AppointmentAction.REJECT_CANCELLATION_REQUEST
                 ).ToList(),
-
-                _ => Array.Empty<AppointmentAction>()
+                
+                Role.ADMIN => new List<AppointmentAction>(),
+                
+                _ => new List<AppointmentAction>()
             };
         }
 
         public void Apply(VcAppointments appointment, AppointmentAction action, string? cancelReason = null)
         {
             var currentStatus = ParseStatus(appointment.State);
-            var role = Enum.Parse<Role>(_contextAccessor.Role);
+            if (string.IsNullOrWhiteSpace(_contextAccessor.Role) ||
+                !Enum.TryParse<Role>(_contextAccessor.Role, true, out var role))
+            {
+                throw new UnauthorizedAccessException(_localizer["user.unauthorized"]);
+            }
+
+            if (action == AppointmentAction.REQUEST_CANCELLATION)
+            {
+                var now = DateTime.UtcNow;
+
+                if (appointment.StartTime <= now)
+                {
+                    throw new InvalidOperationException("Lịch đã bắt đầu hoặc đã qua, không thể hủy.");
+                }
+
+                var timeDiff = appointment.StartTime - now;
+
+                if (timeDiff.TotalHours < 1)
+                {
+                    throw new InvalidOperationException("Chỉ được hủy lịch trước 1 giờ.");
+                }
+            }
+
             var nextStatus = GetNextStatus(currentStatus, action, role);
 
+            // 🔥 validate lý do hủy
             if ((nextStatus == AppointmentStatus.CANCELLED ||
                  nextStatus == AppointmentStatus.REJECTED) &&
                 string.IsNullOrWhiteSpace(cancelReason))
@@ -162,20 +180,24 @@ namespace VeterinaryClinic.Business
 
             return (currentStatus, action) switch
             {
-                (AppointmentStatus.PENDING_CONFIRMATION, AppointmentAction.CONFIRM) => AppointmentStatus.CONFIRMED,
-                (AppointmentStatus.PENDING_CONFIRMATION, AppointmentAction.REJECT) => AppointmentStatus.REJECTED,
-                (AppointmentStatus.PENDING_CONFIRMATION, AppointmentAction.CUSTOMER_CANCEL) => AppointmentStatus.CANCELLED,
+                // (AppointmentStatus.PENDING_CONFIRMATION, AppointmentAction.CONFIRM) => AppointmentStatus.CONFIRMED,
+                // (AppointmentStatus.PENDING_CONFIRMATION, AppointmentAction.REJECT) => AppointmentStatus.REJECTED,
+                // (AppointmentStatus.PENDING_CONFIRMATION, AppointmentAction.CUSTOMER_CANCEL) => AppointmentStatus.CANCELLED,
                 (AppointmentStatus.CONFIRMED, AppointmentAction.START_CONSULTATION) => AppointmentStatus.IN_PROGRESS,
-                (AppointmentStatus.CONFIRMED, AppointmentAction.REQUEST_CANCELLATION) => AppointmentStatus.CANCELLATION_REQUESTED,
+                (AppointmentStatus.CONFIRMED, AppointmentAction.REQUEST_CANCELLATION) => AppointmentStatus
+                    .CANCELLATION_REQUESTED,
                 (AppointmentStatus.CONFIRMED, AppointmentAction.MARK_NO_SHOW) => AppointmentStatus.NO_SHOW,
-                (AppointmentStatus.CANCELLATION_REQUESTED, AppointmentAction.APPROVE_CANCELLATION) => AppointmentStatus.CANCELLED,
-                (AppointmentStatus.CANCELLATION_REQUESTED, AppointmentAction.REJECT_CANCELLATION_REQUEST) => AppointmentStatus.CONFIRMED,
-                (AppointmentStatus.IN_PROGRESS, AppointmentAction.COMPLETE_CONSULTATION) => AppointmentStatus.PAYMENT_PENDING,
+                (AppointmentStatus.CANCELLATION_REQUESTED, AppointmentAction.APPROVE_CANCELLATION) => AppointmentStatus
+                    .CANCELLED,
+                (AppointmentStatus.CANCELLATION_REQUESTED, AppointmentAction.REJECT_CANCELLATION_REQUEST) =>
+                    AppointmentStatus.CONFIRMED,
+                (AppointmentStatus.IN_PROGRESS, AppointmentAction.COMPLETE_CONSULTATION) => AppointmentStatus
+                    .PAYMENT_PENDING,
                 (AppointmentStatus.PAYMENT_PENDING, AppointmentAction.COMPLETE_PAYMENT) => AppointmentStatus.COMPLETED,
                 _ => throw new InvalidOperationException(_localizer["appointment.transition.invalid"])
             };
         }
-        
+
         public string GetActionDisplayName(AppointmentAction action)
         {
             return action switch

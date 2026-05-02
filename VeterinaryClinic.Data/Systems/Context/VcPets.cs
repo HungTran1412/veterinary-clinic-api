@@ -68,13 +68,13 @@ namespace VeterinaryClinic.Data
         /// mau long
         /// </summary>
         [Column("color"), MaxLength(50)]
-        public string Color { get; set; }
+        public string? Color { get; set; }
         
         /// <summary>
         /// Duong dan anh
         /// </summary>
-        [Column("image_url"), MaxLength(50)]
-        public string ImageUrl { get; set; }
+        [Column("image_url"), MaxLength(500)]
+        public string? ImageUrl { get; set; }
         
         /// <summary>
         /// Chu so huu, FK → Users(id)
@@ -86,6 +86,6 @@ namespace VeterinaryClinic.Data
         /// Ghi chu
         /// </summary>
         [Column("note")]
-        public string Note { get; set; }
+        public string? Note { get; set; }
     }   
 }

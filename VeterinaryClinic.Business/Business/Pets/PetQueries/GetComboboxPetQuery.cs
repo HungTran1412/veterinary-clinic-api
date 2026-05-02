@@ -13,47 +13,54 @@ namespace VeterinaryClinic.Business
     public class GetComboboxPetQuery : IRequest<List<SelectItemModel>>
     {
         public int? OwnerId { get; set; }
-    }
 
-    public class GetComboboxPetQueryHandler : IRequestHandler<GetComboboxPetQuery, List<SelectItemModel>>
-    {
-        private readonly VeterinaryClinicReadDataContext _dataContext;
-        private readonly IContextAccessor _contextAccessor;
-
-        public GetComboboxPetQueryHandler(VeterinaryClinicReadDataContext dataContext, Func<IContextAccessor> contextAccessorFactory)
+        public GetComboboxPetQuery(int? ownerId)
         {
-            _dataContext = dataContext;
-            _contextAccessor = contextAccessorFactory();
+            OwnerId = ownerId;
         }
 
-        public async Task<List<SelectItemModel>> Handle(GetComboboxPetQuery request, CancellationToken cancellationToken)
+        public class GetComboboxPetQueryHandler : IRequestHandler<GetComboboxPetQuery, List<SelectItemModel>>
         {
-            var query = _dataContext.VcPets.AsNoTracking().Where(p => p.IsActive);
-            var currentUserId = _contextAccessor.UserId;
-            var userRole = _contextAccessor.Role;
+            private readonly VeterinaryClinicReadDataContext _dataContext;
+            private readonly IContextAccessor _contextAccessor;
 
-            // If the user is a CUSTOMER, only show their own pets.
-            if (userRole == Role.CUSTOMER.ToString())
+            public GetComboboxPetQueryHandler(VeterinaryClinicReadDataContext dataContext,
+                Func<IContextAccessor> contextAccessorFactory)
             {
-                query = query.Where(p => p.OwnerId == currentUserId);
-            }
-            // For other roles, if an OwnerId is specified, filter by it.
-            else if (request.OwnerId.HasValue)
-            {
-                query = query.Where(p => p.OwnerId == request.OwnerId.Value);
+                _dataContext = dataContext;
+                _contextAccessor = contextAccessorFactory();
             }
 
-            var pets = await query
-                .OrderBy(p => p.Name)
-                .Select(p => new SelectItemModel
+            public async Task<List<SelectItemModel>> Handle(GetComboboxPetQuery request,
+                CancellationToken cancellationToken)
+            {
+                var query = _dataContext.VcPets.AsNoTracking().Where(p => p.IsActive);
+                var currentUserId = _contextAccessor.UserId;
+                var userRole = _contextAccessor.Role;
+
+                // If the user is a CUSTOMER, only show their own pets.
+                if (userRole == Role.CUSTOMER.ToString())
                 {
-                    Id = p.Id,
-                    Name = p.Name,
-                    Code = p.Code
-                })
-                .ToListAsync(cancellationToken);
+                    query = query.Where(p => p.OwnerId == currentUserId);
+                }
+                // For other roles, if an OwnerId is specified, filter by it.
+                else if (request.OwnerId.HasValue)
+                {
+                    query = query.Where(p => p.OwnerId == request.OwnerId.Value);
+                }
 
-            return pets;
+                var pets = await query
+                    .OrderBy(p => p.Name)
+                    .Select(p => new SelectItemModel
+                    {
+                        Id = p.Id,
+                        Name = p.Name,
+                        Code = p.Code
+                    })
+                    .ToListAsync(cancellationToken);
+
+                return pets;
+            }
         }
     }
 }

@@ -42,14 +42,25 @@ namespace VeterinaryClinic.Business
 
             public async Task<Unit> Handle(ProcessAppointmentCommand request, CancellationToken cancellationToken)
             {
+                if (request.Model == null)
+                {
+                    throw new ArgumentException(_localizer["appointment.action.required"]);
+                }
+
                 var appointment = await _dataContext.VcAppointments.FindAsync(new object[] { request.AppointmentId }, cancellationToken);
                 if (appointment == null || !appointment.IsActive)
                 {
                     throw new KeyNotFoundException(_localizer["appointment.not_found"]);
                 }
 
-                ValidatePermission(appointment, request.Model.Action);
-                _appointmentStateMachine.Apply(appointment, request.Model.Action, request.Model.CancelReason);
+                if (string.IsNullOrWhiteSpace(request.Model.Action) ||
+                    !Enum.TryParse<AppointmentAction>(request.Model.Action, true, out var action))
+                {
+                    throw new ArgumentException(_localizer["appointment.action.invalid"]);
+                }
+
+                ValidatePermission(appointment, action);
+                _appointmentStateMachine.Apply(appointment, action, request.Model.CancelReason);
 
                 appointment.ModifiedDate = DateTime.UtcNow;
                 appointment.ModifiedUserId = _contextAccessor.UserId;

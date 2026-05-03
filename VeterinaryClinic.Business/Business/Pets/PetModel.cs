@@ -20,7 +20,7 @@ namespace VeterinaryClinic.Business
         public bool IsNeutered { get; init; } = false;
         [Required(ErrorMessage = "pet.birth_date.required")]
         public DateTime BirthDate { get; init; }
-        public decimal? Weight { get; init; }
+        public double? Weight { get; init; }
         public string? Color { get; init; }
         public string? ImageUrl { get; init; }
         public string? Note { get; init; }
@@ -49,7 +49,7 @@ namespace VeterinaryClinic.Business
         public bool IsNeutered { get; init; } = false;
         [Required(ErrorMessage = "pet.birth_date.required")]
         public DateTime BirthDate { get; init; }
-        public decimal? Weight { get; init; }
+        public double? Weight { get; init; }
         public string? Color { get; init; }
         public string? ImageUrl { get; init; }
         public int? OwnerId { get; init; } // Nullable, not required

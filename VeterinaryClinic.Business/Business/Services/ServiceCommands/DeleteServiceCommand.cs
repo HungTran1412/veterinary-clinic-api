@@ -38,7 +38,15 @@ namespace VeterinaryClinic.Business
             public async Task<Unit> Handle(DeleteServiceCommand request, CancellationToken cancellationToken)
             {
                 var id = request.Id;
-                Log.Information($"Delete {ServiceConstant.CachePrefix}: {id}");
+                var currentUserId = _contextAccessor.UserId;
+                var userRole = _contextAccessor.Role;
+                Log.Information($"Delete Service {id} attempt by User {currentUserId}");
+
+                // Security Check: Only ADMIN or RECEPTIONIST can delete.
+                if (userRole != Role.ADMIN.ToString())
+                {
+                    throw new ArgumentException(_localizer["user.unauthorized"]);
+                }
                 
                 //kiem tra data co ton tai khong
                 var dt = await _dataContext.VcServices.FirstOrDefaultAsync(x => x.Id == id);
@@ -48,7 +56,7 @@ namespace VeterinaryClinic.Business
                 }
 
                 //xoa mem
-                dt.ModifiedUserId = _contextAccessor.UserId;
+                dt.ModifiedUserId = currentUserId;
                 dt.IsActive = false;
                 
                 //luu vao db
@@ -58,7 +66,7 @@ namespace VeterinaryClinic.Business
                 _cacheService.Remove(ServiceConstant.BuildCacheKey(id.ToString()));
                 _cacheService.Remove(ServiceConstant.BuildCacheKey());
 
-                Log.Information($"Delete {ServiceConstant.CachePrefix} completed");
+                Log.Information($"Delete Service {id} completed");
                 
                 return Unit.Value;
             }

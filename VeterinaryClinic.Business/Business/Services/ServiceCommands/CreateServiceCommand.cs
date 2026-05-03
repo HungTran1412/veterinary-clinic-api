@@ -39,7 +39,15 @@ namespace VeterinaryClinic.Business
             public async Task<Unit> Handle(CreateServiceCommand request, CancellationToken cancellationToken)
             {
                 var model = request.Model;
-                Log.Information($"Create Service: " + JsonSerializer.Serialize(model));
+                var currentUserId = _contextAccessor.UserId;
+                var userRole = _contextAccessor.Role;
+                Log.Information($"Create Service attempt by User {currentUserId}: {JsonSerializer.Serialize(model)}");
+
+                // Security Check: Only ADMIN or RECEPTIONIST can create.
+                if (userRole != Role.ADMIN.ToString())
+                {
+                    throw new ArgumentException(_localizer["user.unauthorized"]);
+                }
                 
                 //map du lieu
                 var entity = AutoMapperUtils.AutoMap<CreateServiceModel, VcServices>(model);
@@ -57,7 +65,6 @@ namespace VeterinaryClinic.Business
                 }
 
                 //luu vao database
-                entity.CreatedUserId = _contextAccessor.UserId;
                 await _dataContext.VcServices.AddAsync(entity, cancellationToken);
                 await _dataContext.SaveChangesAsync(cancellationToken);
                 

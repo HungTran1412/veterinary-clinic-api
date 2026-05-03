@@ -61,8 +61,8 @@ namespace VeterinaryClinic.Data
         /// <summary>
         /// Can nang thu cung
         /// </summary>
-        [Column("weight", TypeName = "decimal(5,2)")]
-        public decimal? Weight { get; set; }
+        [Column("weight")]
+        public double? Weight { get; set; }
         
         /// <summary>
         /// mau long

@@ -14,6 +14,7 @@ namespace VeterinaryClinic.Business
         public string Subject { get; init; }
         public string SentStatus { init; get; }
         public string ErrorMessage { get; init; } 
+        public DateTime? CreatedDate { get; init; }
     }
 
     public record EmailLogModel : EmailLogBaseModel

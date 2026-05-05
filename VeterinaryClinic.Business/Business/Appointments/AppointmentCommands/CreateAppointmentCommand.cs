@@ -33,7 +33,8 @@ namespace VeterinaryClinic.Business
             private readonly ICacheService _cacheService;
             private readonly IAppointmentStateMachine _appointmentStateMachine;
             private readonly IEmailService _emailService; 
-            private readonly MailSettings _mailSettings; 
+            private readonly MailSettings _mailSettings;
+            private readonly IMediator _mediator;
 
             public Handler(
                 VeterinaryClinicDataContext dataContext,
@@ -42,7 +43,9 @@ namespace VeterinaryClinic.Business
                 ICacheService cacheService,
                 IAppointmentStateMachine appointmentStateMachine,
                 IEmailService emailService, 
-                IOptions<MailSettings> mailSettings) 
+                IOptions<MailSettings> mailSettings,
+                IMediator mediator
+                ) 
             {
                 _dataContext = dataContext;
                 _contextAccessor = contextAccessorFactory();
@@ -50,7 +53,8 @@ namespace VeterinaryClinic.Business
                 _cacheService = cacheService;
                 _appointmentStateMachine = appointmentStateMachine;
                 _emailService = emailService; 
-                _mailSettings = mailSettings.Value; 
+                _mailSettings = mailSettings.Value;
+                _mediator = mediator;
             }
 
             public async Task<Unit> Handle(CreateAppointmentCommand request, CancellationToken cancellationToken)
@@ -229,19 +233,35 @@ namespace VeterinaryClinic.Business
                     State = initialStatus.ToString(),
                     StateName = _appointmentStateMachine.GetStateDisplayName(initialStatus),
                     IsFinalState = _appointmentStateMachine.IsFinalStatus(initialStatus),
-                    IsActive = true,
-                    Order = 0,
-                    CreatedDate = DateTime.UtcNow,
-                    CreatedUserId = currentUserId,
-                    CreatedUserName = _contextAccessor.UserName
                 };
 
+                //luu vào db
                 await _dataContext.VcAppointments.AddAsync(entity, cancellationToken);
                 await _dataContext.SaveChangesAsync(cancellationToken);
+                
+                
+                //tạo  mới hồ sơ khám bệnh
+                using var transaction = await _dataContext.Database.BeginTransactionAsync(cancellationToken);
 
-                _cacheService.Remove(AppointmentConstant.BuildCacheKey());
-                Log.Information($"Appointment created successfully with Id: {entity.Id}, DoctorId: {entity.DoctorId}");
+                try
+                {
+                    await _dataContext.SaveChangesAsync(cancellationToken);
+                    var medicalRecord = new CreateMedicalRecordModel
+                    {
+                        DoctorId = entity.DoctorId,
+                        AppointmentId = entity.Id
+                    };
+                    await _mediator.Send(new CreateMedicalRecordCommand(medicalRecord));
 
+                    await transaction.CommitAsync(cancellationToken);
+                }
+                catch (Exception e)
+                {
+                    await transaction.RollbackAsync(cancellationToken);
+                    Console.WriteLine(e);
+                    throw;
+                }
+                
                 // Send email notifications
                 try
                 {
@@ -279,7 +299,11 @@ namespace VeterinaryClinic.Business
                 {
                     Log.Error(ex, $"Failed to send appointment confirmation emails for appointment {entity.Id}.");
                 }
-
+                
+                // xóa cache
+                _cacheService.Remove(AppointmentConstant.BuildCacheKey());
+                Log.Information($"Appointment created successfully with Id: {entity.Id}, DoctorId: {entity.DoctorId}");
+                
                 return Unit.Value;
             }
 

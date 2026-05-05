@@ -70,11 +70,6 @@ namespace VeterinaryClinic.Business
                     Prescription = model.Prescription,
                     DoctorNote = model.DoctorNote,
                     CompletedDate = model.CompletedDate,
-                    IsActive = true,
-                    Order = 0,
-                    CreatedDate = DateTime.UtcNow,
-                    CreatedUserId = _contextAccessor.UserId,
-                    CreatedUserName = _contextAccessor.UserName
                 };
 
                 await _dataContext.VcMedicalRecords.AddAsync(entity, cancellationToken);

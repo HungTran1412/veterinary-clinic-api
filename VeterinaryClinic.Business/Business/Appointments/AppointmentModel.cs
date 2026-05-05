@@ -60,6 +60,8 @@ namespace VeterinaryClinic.Business
         public string? ServiceName { get; init; }
         public string? DoctorName { get; init; }
 
+        public int MedicalRecordId { get; init; }
+        
         public List<WorkflowCommandModel> Commands { get; init; } = new();
     }
 

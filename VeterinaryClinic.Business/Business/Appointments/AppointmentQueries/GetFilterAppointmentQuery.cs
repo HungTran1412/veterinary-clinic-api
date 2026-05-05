@@ -63,6 +63,9 @@ namespace VeterinaryClinic.Business
                     join pet in _dataContext.VcPets on a.PetId equals pet.Id into 
                         p from pet in p.DefaultIfEmpty()
                     
+                    //join bang medical record lay id
+                    join mr in _dataContext.VcMedicalRecords on a.Id equals mr.AppointmentId into m from mr in m.DefaultIfEmpty()
+                    
                     where a.IsActive
                     select new AppointmentModel
                     {
@@ -72,6 +75,7 @@ namespace VeterinaryClinic.Business
                         PetId = a.PetId,
                         SerivceId = a.SerivceId,
                         DoctorId = a.DoctorId,
+                        MedicalRecordId = mr.Id,
                         AppointmentDate = a.AppointmentDate,
                         StartTime = a.StartTime,
                         EndTime = a.EndTime,

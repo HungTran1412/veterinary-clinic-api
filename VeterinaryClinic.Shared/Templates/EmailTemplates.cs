@@ -90,5 +90,79 @@
                 </div>
             ";
         }
+
+        /// <summary>
+        /// Template email xác nhận lịch hẹn cho khách hàng
+        /// </summary>
+        public static string GetAppointmentConfirmationEmailForCustomer(
+            string customerName,
+            string petName,
+            string serviceName,
+            string appointmentDate,
+            string startTime,
+            string endTime,
+            string doctorName,
+            string appointmentCode)
+        {
+            return $@"
+                <div style='font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px;'>
+                    <h2 style='color: #0056b3; text-align: center;'>Xác nhận lịch hẹn của bạn</h2>
+                    <p>Xin chào {customerName},</p>
+                    <p>Lịch hẹn của bạn tại Veterinary Clinic đã được xác nhận thành công với các chi tiết sau:</p>
+                    <div style='background-color: #f9f9f9; padding: 15px; border-left: 4px solid #0056b3; margin: 20px 0;'>
+                        <p style='margin: 0;'><strong>Mã lịch hẹn:</strong> {appointmentCode}</p>
+                        <p style='margin: 0;'><strong>Thú cưng:</strong> {petName}</p>
+                        <p style='margin: 0;'><strong>Dịch vụ:</strong> {serviceName}</p>
+                        <p style='margin: 0;'><strong>Ngày hẹn:</strong> {appointmentDate}</p>
+                        <p style='margin: 0;'><strong>Thời gian:</strong> {startTime} - {endTime}</p>
+                        <p style='margin: 0;'><strong>Bác sĩ phụ trách:</strong> {doctorName}</p>
+                    </div>
+                    <p>Vui lòng đến đúng giờ để đảm bảo thú cưng của bạn được phục vụ tốt nhất.</p>
+                    <br/>
+                    <hr style='border: none; border-top: 1px solid #eee;' />
+                    <p style='font-size: 0.9em; color: #777;'>
+                        Trân trọng,<br/>
+                        <strong>Ban quản trị hệ thống Veterinary Clinic</strong>
+                    </p>
+                </div>
+            ";
+        }
+
+        /// <summary>
+        /// Template email thông báo lịch hẹn mới cho bác sĩ
+        /// </summary>
+        public static string GetAppointmentConfirmationEmailForDoctor(
+            string doctorName,
+            string customerName,
+            string petName,
+            string serviceName,
+            string appointmentDate,
+            string startTime,
+            string endTime,
+            string appointmentCode)
+        {
+            return $@"
+                <div style='font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px;'>
+                    <h2 style='color: #0056b3; text-align: center;'>Bạn có lịch hẹn mới</h2>
+                    <p>Xin chào Bác sĩ {doctorName},</p>
+                    <p>Bạn có một lịch hẹn mới được tạo với các chi tiết sau:</p>
+                    <div style='background-color: #f9f9f9; padding: 15px; border-left: 4px solid #0056b3; margin: 20px 0;'>
+                        <p style='margin: 0;'><strong>Mã lịch hẹn:</strong> {appointmentCode}</p>
+                        <p style='margin: 0;'><strong>Khách hàng:</strong> {customerName}</p>
+                        <p style='margin: 0;'><strong>Thú cưng:</strong> {petName}</p>
+                        <p style='margin: 0;'><strong>Dịch vụ:</strong> {serviceName}</p>
+                        <p style='margin: 0;'><strong>Ngày hẹn:</strong> {appointmentDate}</p>
+                        <p style='margin: 0;'><strong>Thời gian:</strong> {startTime} - {endTime}</p>
+                    </div>
+                    <p>Vui lòng kiểm tra lịch làm việc của bạn.</p>
+                    <br/>
+                    <hr style='border: none; border-top: 1px solid #eee;' />
+                    <p style='font-size: 0.9em; color: #777;'>
+                        Trân trọng,<br/>
+                        <strong>Ban quản trị hệ thống Veterinary Clinic</strong>
+                    </p>
+                </div>
+            ";
+        }
     }
 }

@@ -1,11 +1,11 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Options;
 using Serilog;
 using System.Text.Json;
 using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared;
-using VeterinaryClinic.Shared.ContextAccessor;
 
 namespace VeterinaryClinic.Business
 {
@@ -32,19 +32,29 @@ namespace VeterinaryClinic.Business
             private readonly IStringLocalizer<CreateAppointmentCommand> _localizer;
             private readonly ICacheService _cacheService;
             private readonly IAppointmentStateMachine _appointmentStateMachine;
+            private readonly IEmailService _emailService; 
+            private readonly MailSettings _mailSettings;
+            private readonly IMediator _mediator;
 
             public Handler(
                 VeterinaryClinicDataContext dataContext,
                 Func<IContextAccessor> contextAccessorFactory,
                 IStringLocalizer<CreateAppointmentCommand> localizer,
                 ICacheService cacheService,
-                IAppointmentStateMachine appointmentStateMachine)
+                IAppointmentStateMachine appointmentStateMachine,
+                IEmailService emailService, 
+                IOptions<MailSettings> mailSettings,
+                IMediator mediator
+                ) 
             {
                 _dataContext = dataContext;
                 _contextAccessor = contextAccessorFactory();
                 _localizer = localizer;
                 _cacheService = cacheService;
                 _appointmentStateMachine = appointmentStateMachine;
+                _emailService = emailService; 
+                _mailSettings = mailSettings.Value;
+                _mediator = mediator;
             }
 
             public async Task<Unit> Handle(CreateAppointmentCommand request, CancellationToken cancellationToken)
@@ -101,7 +111,8 @@ namespace VeterinaryClinic.Business
                                      {
                                          svc.Id,
                                          svc.SpecializationId,
-                                         svc.DurationMinutes
+                                         svc.DurationMinutes,
+                                         svc.Name 
                                      })
                     .FirstOrDefaultAsync(cancellationToken);
 
@@ -144,7 +155,7 @@ namespace VeterinaryClinic.Business
                                                     ws.WorkDate.Date == appointmentDate &&
                                                     ws.StartTime <= startTime &&
                                                     ws.EndTime >= endTime
-                                              select doctor.Id)
+                                              select new { doctor.Id, doctor.Email, doctor.FullName }) 
                     .Distinct()
                     .ToListAsync(cancellationToken);
 
@@ -156,7 +167,7 @@ namespace VeterinaryClinic.Business
                 var conflictingDoctorIds = await _dataContext.VcAppointments
                     .AsNoTracking()
                     .Where(x =>
-                        candidateDoctors.Contains(x.DoctorId) &&
+                        candidateDoctors.Select(d => d.Id).Contains(x.DoctorId) && // Use Select(d => d.Id)
                         x.AppointmentDate.Date == appointmentDate &&
                         x.State != AppointmentStatus.CANCELLED.ToString() &&
                         x.State != AppointmentStatus.REJECTED.ToString() &&
@@ -168,7 +179,7 @@ namespace VeterinaryClinic.Business
                     .ToListAsync(cancellationToken);
 
                 var availableDoctors = candidateDoctors
-                    .Except(conflictingDoctorIds)
+                    .Where(d => !conflictingDoctorIds.Contains(d.Id))
                     .ToList();
 
                 if (!availableDoctors.Any())
@@ -179,7 +190,7 @@ namespace VeterinaryClinic.Business
                 var doctorAppointmentLoads = await _dataContext.VcAppointments
                     .AsNoTracking()
                     .Where(x =>
-                        availableDoctors.Contains(x.DoctorId) &&
+                        availableDoctors.Select(d => d.Id).Contains(x.DoctorId) && // Use Select(d => d.Id)
                         x.AppointmentDate.Date == appointmentDate &&
                         x.State != AppointmentStatus.CANCELLED.ToString() &&
                         x.State != AppointmentStatus.REJECTED.ToString() &&
@@ -192,15 +203,16 @@ namespace VeterinaryClinic.Business
                     })
                     .ToListAsync(cancellationToken);
 
-                var selectedDoctorId = availableDoctors
-                    .Select(id => new
+                var selectedDoctor = availableDoctors
+                    .Select(d => new
                     {
-                        DoctorId = id,
-                        Count = doctorAppointmentLoads.FirstOrDefault(x => x.DoctorId == id)?.Count ?? 0
+                        d.Id,
+                        d.Email,
+                        d.FullName,
+                        Count = doctorAppointmentLoads.FirstOrDefault(x => x.DoctorId == d.Id)?.Count ?? 0
                     })
                     .OrderBy(x => x.Count)
-                    .ThenBy(x => x.DoctorId)
-                    .Select(x => x.DoctorId)
+                    .ThenBy(x => x.Id)
                     .First();
 
                 var initialStatus = _appointmentStateMachine.GetInitialStatus();
@@ -210,7 +222,7 @@ namespace VeterinaryClinic.Business
                     CustomerId = model.CustomerId,
                     PetId = model.PetId,
                     SerivceId = model.SerivceId,
-                    DoctorId = selectedDoctorId,
+                    DoctorId = selectedDoctor.Id,
                     AppointmentDate = appointmentDate,
                     StartTime = startTime,
                     EndTime = endTime,
@@ -221,19 +233,77 @@ namespace VeterinaryClinic.Business
                     State = initialStatus.ToString(),
                     StateName = _appointmentStateMachine.GetStateDisplayName(initialStatus),
                     IsFinalState = _appointmentStateMachine.IsFinalStatus(initialStatus),
-                    IsActive = true,
-                    Order = 0,
-                    CreatedDate = DateTime.UtcNow,
-                    CreatedUserId = currentUserId,
-                    CreatedUserName = _contextAccessor.UserName
                 };
 
+                //luu vào db
                 await _dataContext.VcAppointments.AddAsync(entity, cancellationToken);
                 await _dataContext.SaveChangesAsync(cancellationToken);
+                
+                
+                //tạo  mới hồ sơ khám bệnh
+                using var transaction = await _dataContext.Database.BeginTransactionAsync(cancellationToken);
 
+                try
+                {
+                    await _dataContext.SaveChangesAsync(cancellationToken);
+                    var medicalRecord = new CreateMedicalRecordModel
+                    {
+                        DoctorId = entity.DoctorId,
+                        AppointmentId = entity.Id
+                    };
+                    await _mediator.Send(new CreateMedicalRecordCommand(medicalRecord));
+
+                    await transaction.CommitAsync(cancellationToken);
+                }
+                catch (Exception e)
+                {
+                    await transaction.RollbackAsync(cancellationToken);
+                    Console.WriteLine(e);
+                    throw;
+                }
+                
+                // Send email notifications
+                try
+                {
+                    // Email to Customer
+                    string customerSubject = "Xác nhận lịch hẹn của bạn - Phòng khám thú y";
+                    string customerBody = EmailTemplates.GetAppointmentConfirmationEmailForCustomer(
+                        customer.FullName,
+                        pet.Name,
+                        service.Name,
+                        entity.AppointmentDate.ToShortDateString(),
+                        entity.StartTime.ToShortTimeString(),
+                        entity.EndTime.ToShortTimeString(),
+                        selectedDoctor.FullName,
+                        entity.Code
+                    );
+                    await _emailService.SendEmailAsync(customer.Email, customerSubject, customerBody);
+
+                    // Email to Doctor
+                    string doctorSubject = "Lịch hẹn mới được tạo - Phòng khám thú y";
+                    string doctorBody = EmailTemplates.GetAppointmentConfirmationEmailForDoctor(
+                        selectedDoctor.FullName,
+                        customer.FullName,
+                        pet.Name,
+                        service.Name,
+                        entity.AppointmentDate.ToShortDateString(),
+                        entity.StartTime.ToShortTimeString(),
+                        entity.EndTime.ToShortTimeString(),
+                        entity.Code
+                    );
+                    await _emailService.SendEmailAsync(selectedDoctor.Email, doctorSubject, doctorBody);
+
+                    Log.Information($"Appointment confirmation emails sent to customer {customer.Email} and doctor {selectedDoctor.Email}.");
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, $"Failed to send appointment confirmation emails for appointment {entity.Id}.");
+                }
+                
+                // xóa cache
                 _cacheService.Remove(AppointmentConstant.BuildCacheKey());
                 Log.Information($"Appointment created successfully with Id: {entity.Id}, DoctorId: {entity.DoctorId}");
-
+                
                 return Unit.Value;
             }
 

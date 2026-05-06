@@ -41,6 +41,7 @@
   "user.verify.success": "Your account has been successfully activated! You can log in now.",
   "user.invalid.role_must_be_doctor": "The specified user is not a doctor.",
   "user.specialization.not_for_receptionist": "Specializations can only be assigned to doctors.",
+  "user.not_found": "User not found.",
 
   "doctor.not_found": "Doctor not found or is inactive.",
   "doctor_specialization.doctor_id.required": "Doctor ID is required.",
@@ -98,5 +99,10 @@
   "appointment.end_time.out_of_day": "Appointment end time must not exceed the selected day.",
   "appointment.transition.invalid": "The appointment status cannot be changed with this action.",
   "appointment.cancel_reason.required": "A cancellation or rejection reason is required.",
-  "appointment.state.invalid": "The current appointment state is invalid."
+  "appointment.state.invalid": "The current appointment state is invalid.",
+
+  "otp.invalid": "Invalid OTP.",
+  "otp.expired": "OTP has expired.",
+  "otp.not_verified": "OTP has not been verified.",
+  "otp.session_expired": "Session has expired. Please verify OTP again."
 }

@@ -164,5 +164,32 @@
                 </div>
             ";
         }
+
+        /// <summary>
+        /// Template email gửi mã OTP
+        /// </summary>
+        /// <param name="fullName">Họ tên người nhận</param>
+        /// <param name="otp">Mã OTP</param>
+        /// <returns>Nội dung HTML của email</returns>
+        public static string GetOtpEmail(string fullName, string otp)
+        {
+            return $@"
+                <div style='font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px;'>
+                    <h2 style='color: #0056b3; text-align: center;'>Mã OTP để đặt lại mật khẩu</h2>
+                    <p>Xin chào {fullName},</p>
+                    <p>Bạn đã yêu cầu đặt lại mật khẩu. Vui lòng sử dụng mã OTP dưới đây để hoàn tất quá trình.</p>
+                    <div style='text-align: center; margin: 30px 0;'>
+                        <p style='font-size: 2em; font-weight: bold; letter-spacing: 5px; color: #28a745; border: 2px dashed #28a745; padding: 10px; display: inline-block;'>{otp}</p>
+                    </div>
+                    <p>Mã OTP này sẽ hết hạn sau 5 phút. Vui lòng không chia sẻ mã này với bất kỳ ai.</p>
+                    <br/>
+                    <hr style='border: none; border-top: 1px solid #eee;' />
+                    <p style='font-size: 0.9em; color: #777;'>
+                        Trân trọng,<br/>
+                        <strong>Ban quản trị hệ thống Veterinary Clinic</strong>
+                    </p>
+                </div>
+            ";
+        }
     }
 }

@@ -4,27 +4,25 @@ namespace VeterinaryClinic.Business
 {
     public abstract record AuthorizationBaseModel
     {
-        [Required]
-        public string LoginIdentifier { get; init; }
+        [Required] public string LoginIdentifier { get; init; }
 
-        [Required] 
-        public string Password { get; init; }
+        [Required] public string Password { get; init; }
     }
 
     public abstract record ResponseBaseModel
     {
-        public int Id { get; init; }
-        public string UserName { get; init; }
-        public string FullName { get; init; }
-        public string Email { get; init; }
-        public string Role { get; init; }
-        public string AvatarUrl { get; init; }
+        public int? Id { get; init; }
+        public string? UserName { get; init; }
+        public string? FullName { get; init; }
+        public string? Email { get; init; }
+        public string? Role { get; init; }
+        public string? AvatarUrl { get; init; }
     }
-    
+
     public record LoginModel : AuthorizationBaseModel
     {
     }
-    
+
     public record LoginResponseModel : ResponseBaseModel
     {
         public string AccessToken { get; init; }
@@ -37,16 +35,39 @@ namespace VeterinaryClinic.Business
 
         [Required] public string RefreshToken { get; init; }
     }
+
     public record LogoutModel
     {
         public string RefreshToken { get; set; }
     }
-    
+
     /// <summary>
     /// Response model for checking a token, returning user information.
     /// </summary>
     public record CheckTokenResponseModel : ResponseBaseModel
     {
-      
+    }
+
+    public record ForgotPasswordModel
+    {
+        public string LoginIdentifier { get; init; }
+    }
+
+    public record SendOtpResponseModel : ResponseBaseModel;
+
+    public record VerifyOtpModel
+    {
+        [Required]
+        public string Otp { get; init; }
+    }
+
+    public record ResetPasswordModel
+    {
+        [Required]
+        public string Email { get; init; }
+        [Required]
+        public string NewPassword { get; init; }
+        [Required]
+        public string ConfirmPassword { get; init; }
     }
 }

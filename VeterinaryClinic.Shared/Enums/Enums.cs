@@ -34,4 +34,15 @@
         COMPLETE_CONSULTATION,
         COMPLETE_PAYMENT
     }
+
+    public enum NotificationType
+    {
+        MESSAGE
+    }
+
+    public enum TokenType
+    {
+        OTP,
+        VERIFY
+    }
 }

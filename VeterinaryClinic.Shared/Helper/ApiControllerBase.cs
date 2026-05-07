@@ -1,11 +1,33 @@
 using System.Diagnostics;
+using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Localization;
 
 namespace VeterinaryClinic.Shared
 {
     [ApiController]
     public class ApiControllerBase : ControllerBase
     {
+        protected readonly Func<IContextAccessor> _contextAccessorFactory;
+        protected readonly IMediator _mediator;
+        protected readonly IStringLocalizer<Resources> _localizer;
+        protected readonly IConfiguration _config;
+
+        // Constructor for controllers that need dependencies
+        public ApiControllerBase(Func<IContextAccessor> contextAccessorFactory, IMediator mediator, IStringLocalizer<Resources> localizer, IConfiguration config)
+        {
+            _contextAccessorFactory = contextAccessorFactory;
+            _mediator = mediator;
+            _localizer = localizer;
+            _config = config;
+        }
+
+        public ApiControllerBase()
+        {
+        }
+
         protected async Task<IActionResult> ExecuteFunction<T>(Func<Task<T>> action)
         {
             var stopwatch = Stopwatch.StartNew();

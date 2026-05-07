@@ -18,6 +18,8 @@ using VeterinaryClinic.Shared;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using VeterinaryClinic.Business.Core;
+using VeterinaryClinic.Infrastructure.Redis;
 
 // Cấu hình Serilog tối thiểu để ghi ra Console
 Log.Logger = new LoggerConfiguration()
@@ -134,6 +136,9 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Creat
 
 // 3. Đăng ký Cache Service
 builder.Services.AddScoped<ICacheService, RedisCacheService>();
+
+// Đăng ký Redis Handler
+builder.Services.AddScoped<IRedisHandler, RedisHandler>();
 
 // 4. Đăng ký Email Service (Infrastructure)
 builder.Services.AddScoped<IEmailService, EmailService>();

@@ -140,6 +140,9 @@ builder.Services.AddScoped<ICacheService, RedisCacheService>();
 // Đăng ký Redis Handler
 builder.Services.AddScoped<IRedisHandler, RedisHandler>();
 
+// Đăng ký Stored Procedure Helper
+builder.Services.AddScoped<IVeterinaryClinicCallStoreHelper, VeterinaryClinicCallStoreHelperHandler>();
+
 // 4. Đăng ký Email Service (Infrastructure)
 builder.Services.AddScoped<IEmailService, EmailService>();
 

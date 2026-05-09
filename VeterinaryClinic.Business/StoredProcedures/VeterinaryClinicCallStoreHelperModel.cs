@@ -1,6 +1,6 @@
 using System.Data;
 
-namespace VeterinaryClinic.Infrastructure;
+namespace VeterinaryClinic.Business;
 
 public record VeterinaryClinicCallStoreHelperModel
 {

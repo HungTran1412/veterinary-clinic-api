@@ -89,6 +89,9 @@ namespace VeterinaryClinic.Business
         [DataColumn("appointment_id")] 
         public int AppointmentId { get; set; }
 
+        [DataColumn("appointment_code")] 
+        public string AppointmentCode { get; set; }
+        
         [DataColumn("appointment_date")] 
         public DateTime? AppointmentDate { get; set; }
 

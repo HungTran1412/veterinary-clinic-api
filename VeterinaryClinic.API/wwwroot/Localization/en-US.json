@@ -104,5 +104,9 @@
   "otp.invalid": "Invalid OTP.",
   "otp.expired": "OTP has expired.",
   "otp.not_verified": "OTP has not been verified.",
-  "otp.session_expired": "Session has expired. Please verify OTP again."
+  "otp.session_expired": "Session has expired. Please verify OTP again.",
+
+  "medical_record.not_found": "Medical record not found.",
+  "medical_record.already_exists_for_appointment": "A medical record for this appointment already exists.",
+  "medical_record.no-permission": "You do not have permission to perform this action on the medical record."
 }

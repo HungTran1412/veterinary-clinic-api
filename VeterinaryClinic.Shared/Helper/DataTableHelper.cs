@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Reflection;
 
+
 namespace VeterinaryClinic.Shared
 {
     public static class DataTableHelper
@@ -21,7 +22,14 @@ namespace VeterinaryClinic.Shared
                     var value = row[attr.ColumnName];
                     if (value != DBNull.Value)
                     {
-                        prop.SetValue(obj, Convert.ChangeType(value, prop.PropertyType));
+                        // Get the underlying type if the property is nullable
+                        var targetType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
+                        
+                        // Convert to the target type
+                        var convertedValue = Convert.ChangeType(value, targetType);
+                        
+                        // Set the property value
+                        prop.SetValue(obj, convertedValue, null);
                     }
                 }
             }

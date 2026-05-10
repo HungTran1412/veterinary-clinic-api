@@ -104,5 +104,9 @@
   "otp.invalid": "Mã OTP không hợp lệ.",
   "otp.expired": "Mã OTP đã hết hạn.",
   "otp.not_verified": "Mã OTP chưa được xác thực.",
-  "otp.session_expired": "Phiên làm việc đã hết hạn. Vui lòng xác thực lại OTP."
+  "otp.session_expired": "Phiên làm việc đã hết hạn. Vui lòng xác thực lại OTP.",
+
+  "medical_record.not_found": "Không tìm thấy hồ sơ bệnh án.",
+  "medical_record.already_exists_for_appointment": "Hồ sơ bệnh án cho lịch hẹn này đã tồn tại.",
+  "medical_record.no-permission": "Bạn không có quyền thực hiện thao tác này trên hồ sơ bệnh án."
 }

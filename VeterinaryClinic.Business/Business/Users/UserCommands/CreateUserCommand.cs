@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Hangfire;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Serilog;
@@ -28,7 +29,6 @@ namespace VeterinaryClinic.Business
             private readonly IStringLocalizer<CreateUserCommand> _localizer;
             private readonly IContextAccessor _contextAccessor;
             private readonly IBcryptPasswordHasher _passwordHasher;
-            private readonly IEmailService _emailService;
             private readonly IMediator _mediator;
 
             public Handler(
@@ -37,7 +37,6 @@ namespace VeterinaryClinic.Business
                 IStringLocalizer<CreateUserCommand> localizer,
                 Func<IContextAccessor> contextAccessorFactory,
                 IBcryptPasswordHasher passwordHasher,
-                IEmailService emailService,
                 IMediator mediator)
             {
                 _dataContext = dataContext;
@@ -45,7 +44,6 @@ namespace VeterinaryClinic.Business
                 _localizer = localizer;
                 _contextAccessor = contextAccessorFactory();
                 _passwordHasher = passwordHasher;
-                _emailService = emailService;
                 _mediator = mediator;
             }
 
@@ -150,22 +148,18 @@ namespace VeterinaryClinic.Business
                     await _mediator.Send(new CreateDoctorSpecializationCommand(specializationModel), cancellationToken);
                 }
 
-                try
-                {
-                    string subject = "Thông báo cấp tài khoản - Phòng khám thú y";
-                    string body = EmailTemplates.GetAccountCreatedEmail(
-                        entity.FullName,
-                        entity.Username,
-                        password,
-                        entity.Role
-                    );
+                // Gửi email sử dụng Hangfire
+                string subject = "Thông báo cấp tài khoản - Phòng khám thú y";
+                string body = EmailTemplates.GetAccountCreatedEmail(
+                    entity.FullName,
+                    entity.Username,
+                    password,
+                    entity.Role
+                );
 
-                    await _emailService.SendEmailAsync(entity.Email, subject, body);
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, $"Failed to send email to {entity.Email}");
-                }
+                BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendEmailAsync(entity.Email, subject, body));
+
+                Log.Information($"Account created email job enqueued for {entity.Email}");
 
                 _cacheService.Remove(UserConstant.BuildCacheKey());
 

@@ -20,6 +20,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using VeterinaryClinic.Business.Core;
 using VeterinaryClinic.Infrastructure.Redis;
+using Hangfire; // Added for Hangfire
 
 // Cấu hình Serilog tối thiểu để ghi ra Console
 Log.Logger = new LoggerConfiguration()
@@ -185,6 +186,16 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     options.SupportedUICultures = supportedCultures;
 });
 
+// 8. Cấu hình Hangfire
+builder.Services.AddHangfire(configuration => configuration
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Add the processing server as IHostedService
+builder.Services.AddHangfireServer();
+
 var app = builder.Build();
 
 // Seed data
@@ -220,6 +231,12 @@ app.UseRequestLocalization();
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+// Enable Hangfire Dashboard
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    // Authorization = new[] { new MyAuthorizationFilter() } // Có thể cấu hình bảo mật ở đây sau
+});
 
 app.MapControllers();
 

@@ -32,7 +32,9 @@
         REJECT_CANCELLATION_REQUEST,
         MARK_NO_SHOW,
         COMPLETE_CONSULTATION,
-        COMPLETE_PAYMENT
+        COMPLETE_PAYMENT,
+        CASH_PAYMENT,
+        BANK_TRANSFER
     }
 
     public enum NotificationType

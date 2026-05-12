@@ -86,6 +86,7 @@ namespace VeterinaryClinic.Business
                 var isAdmin = role == Role.ADMIN.ToString();
                 var isDoctor = role == Role.DOCTOR.ToString();
                 var isCustomer = role == Role.CUSTOMER.ToString();
+                var isReceptionist = role == Role.RECEPTIONIST.ToString();
 
                 var allowed = action switch
                 {
@@ -94,11 +95,13 @@ namespace VeterinaryClinic.Business
                     AppointmentAction.CUSTOMER_CANCEL => isCustomer && appointment.CustomerId == userId,
                     AppointmentAction.START_CONSULTATION => isDoctor && appointment.DoctorId == userId,
                     AppointmentAction.REQUEST_CANCELLATION => isCustomer && appointment.CustomerId == userId,
-                    AppointmentAction.APPROVE_CANCELLATION => isAdmin,
-                    AppointmentAction.REJECT_CANCELLATION_REQUEST => isAdmin,
+                    AppointmentAction.APPROVE_CANCELLATION => isAdmin || isReceptionist,
+                    AppointmentAction.REJECT_CANCELLATION_REQUEST => isAdmin || isReceptionist,
                     AppointmentAction.MARK_NO_SHOW => isAdmin || (isDoctor && appointment.DoctorId == userId),
                     AppointmentAction.COMPLETE_CONSULTATION => isDoctor && appointment.DoctorId == userId,
-                    AppointmentAction.COMPLETE_PAYMENT => isAdmin || role == Role.RECEPTIONIST.ToString(),
+                    AppointmentAction.COMPLETE_PAYMENT => isAdmin || isReceptionist,
+                    AppointmentAction.CASH_PAYMENT => isAdmin || isReceptionist,
+                    AppointmentAction.BANK_TRANSFER => isAdmin || isReceptionist,
                     _ => false
                 };
 

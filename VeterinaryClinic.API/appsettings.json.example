@@ -50,5 +50,10 @@
     "CurrCode": "VND",
     "Version": "2.1.0",
     "Locale": "vn"
+  },
+  "SignalR": {
+    "Hubs": {
+      "NotificationUrl": "/hubs/notifications"
+    }
   }
 }

@@ -47,14 +47,14 @@ namespace VeterinaryClinic.Business
                 // Validation cơ bản
                 if (entity == null)
                 {
-                    throw new ArgumentException("Failed to map data.");
+                    throw new ArgumentException(_localizer["data.not_found"]);
                 }
 
                 //kiem tra ma trung
                 var checkCode = await _dataContext.VcSpecializations.AnyAsync(x => x.Code == entity.Code, cancellationToken);
                 if (checkCode)
                 {
-                    throw new ArgumentException($"{_localizer["Specialization.existed.code;"]}");
+                    throw new ArgumentException($"{_localizer["Specialization.existed.code"]}");
                 }
 
                 //luu vao database

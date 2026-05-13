@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Serilog;
 using VeterinaryClinic.Data;
@@ -7,7 +8,7 @@ using VeterinaryClinic.Shared.ContextAccessor;
 
 namespace VeterinaryClinic.Business
 {
-    public class ProcessAppointmentCommand : IRequest<Unit>
+    public class ProcessAppointmentCommand : IRequest<object>
     {
         public int AppointmentId { get; }
         public ProcessAppointmentModel Model { get; }
@@ -18,29 +19,32 @@ namespace VeterinaryClinic.Business
             Model = model;
         }
 
-        public class Handler : IRequestHandler<ProcessAppointmentCommand, Unit>
+        public class Handler : IRequestHandler<ProcessAppointmentCommand, object>
         {
             private readonly VeterinaryClinicDataContext _dataContext;
             private readonly IContextAccessor _contextAccessor;
             private readonly IStringLocalizer<ProcessAppointmentCommand> _localizer;
             private readonly ICacheService _cacheService;
             private readonly IAppointmentStateMachine _appointmentStateMachine;
+            private readonly IMediator _mediator;
 
             public Handler(
                 VeterinaryClinicDataContext dataContext,
                 Func<IContextAccessor> contextAccessorFactory,
                 IStringLocalizer<ProcessAppointmentCommand> localizer,
                 ICacheService cacheService,
-                IAppointmentStateMachine appointmentStateMachine)
+                IAppointmentStateMachine appointmentStateMachine,
+                IMediator mediator)
             {
                 _dataContext = dataContext;
                 _contextAccessor = contextAccessorFactory();
                 _localizer = localizer;
                 _cacheService = cacheService;
                 _appointmentStateMachine = appointmentStateMachine;
+                _mediator = mediator;
             }
 
-            public async Task<Unit> Handle(ProcessAppointmentCommand request, CancellationToken cancellationToken)
+            public async Task<object> Handle(ProcessAppointmentCommand request, CancellationToken cancellationToken)
             {
                 if (request.Model == null)
                 {
@@ -60,7 +64,23 @@ namespace VeterinaryClinic.Business
                 }
 
                 ValidatePermission(appointment, action);
+
+                if (action == AppointmentAction.BANK_TRANSFER)
+                {
+                    return await _mediator.Send(
+                        new CreateVnPayPaymentCommand(new CreateVnPayPaymentModel
+                        {
+                            AppointmentId = appointment.Id
+                        }),
+                        cancellationToken);
+                }
+
                 _appointmentStateMachine.Apply(appointment, action, request.Model.CancelReason);
+
+                if (action == AppointmentAction.CASH_PAYMENT)
+                {
+                    await ApplyCashPayment(appointment, cancellationToken);
+                }
 
                 appointment.ModifiedDate = DateTime.UtcNow;
                 appointment.ModifiedUserId = _contextAccessor.UserId;
@@ -100,8 +120,8 @@ namespace VeterinaryClinic.Business
                     AppointmentAction.MARK_NO_SHOW => isAdmin || (isDoctor && appointment.DoctorId == userId),
                     AppointmentAction.COMPLETE_CONSULTATION => isDoctor && appointment.DoctorId == userId,
                     AppointmentAction.COMPLETE_PAYMENT => isAdmin || isReceptionist,
+                    AppointmentAction.BANK_TRANSFER => isAdmin || isReceptionist || (isCustomer && appointment.CustomerId == userId),
                     AppointmentAction.CASH_PAYMENT => isAdmin || isReceptionist,
-                    AppointmentAction.BANK_TRANSFER => isAdmin || isReceptionist,
                     _ => false
                 };
 
@@ -109,6 +129,49 @@ namespace VeterinaryClinic.Business
                 {
                     throw new UnauthorizedAccessException(_localizer["user.unauthorized"]);
                 }
+            }
+
+            private async Task ApplyCashPayment(VcAppointments appointment, CancellationToken cancellationToken)
+            {
+                var invoice = await _dataContext.VcInvoices
+                    .FirstOrDefaultAsync(x => x.AppointmentId == appointment.Id && x.IsActive, cancellationToken);
+                if (invoice == null)
+                {
+                    throw new ArgumentException(_localizer["invoice.not_found"]);
+                }
+
+                if (invoice.TotalAmount <= 0)
+                {
+                    throw new ArgumentException(_localizer["invoice.amount.invalid"]);
+                }
+
+                if (invoice.Status == PaymentStatus.SUCCESS.ToString())
+                {
+                    throw new ArgumentException(_localizer["invoice.already_paid"]);
+                }
+
+                var payment = new VcPayments
+                {
+                    InvoiceId = invoice.Id,
+                    Code = GenerateCodeUtils.GenerateUserCode("PAY"),
+                    PaymentMethod = PaymentMethod.CASH.ToString(),
+                    PaymentStatus = PaymentStatus.SUCCESS.ToString(),
+                    Amount = invoice.TotalAmount,
+                    GatewayTransactionId = null,
+                    ResponseCode = null,
+                    GatewayResponse = null,
+                    PaymentDate = DateTime.UtcNow,
+                    IsActive = true,
+                    Order = 0,
+                    CreatedDate = DateTime.UtcNow,
+                    CreatedUserId = _contextAccessor.UserId,
+                    CreatedUserName = _contextAccessor.UserName
+                };
+
+                invoice.Status = PaymentStatus.SUCCESS.ToString();
+                invoice.PaidDate = DateTime.UtcNow;
+
+                await _dataContext.VcPayments.AddAsync(payment, cancellationToken);
             }
         }
     }

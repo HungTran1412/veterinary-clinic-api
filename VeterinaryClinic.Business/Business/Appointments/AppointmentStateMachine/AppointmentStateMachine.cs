@@ -69,14 +69,14 @@ namespace VeterinaryClinic.Business
         {
             return status switch
             {
-                AppointmentStatus.CONFIRMED => "Da xac nhan",
-                AppointmentStatus.REJECTED => "Tu choi",
-                AppointmentStatus.CANCELLED => "Da huy",
-                AppointmentStatus.CANCELLATION_REQUESTED => "Cho duyet huy",
-                AppointmentStatus.IN_PROGRESS => "Dang thuc hien",
-                AppointmentStatus.PAYMENT_PENDING => "Cho thanh toan",
-                AppointmentStatus.COMPLETED => "Hoan thanh",
-                AppointmentStatus.NO_SHOW => "Khong den",
+                AppointmentStatus.CONFIRMED => "Đã xác nhận",
+                AppointmentStatus.REJECTED => "Từ chối",
+                AppointmentStatus.CANCELLED => "Đã hủy",
+                AppointmentStatus.CANCELLATION_REQUESTED => "Chờ duyệt hủy",
+                AppointmentStatus.IN_PROGRESS => "Đang thực hiện",
+                AppointmentStatus.PAYMENT_PENDING => "Chờ thanh toán",
+                AppointmentStatus.COMPLETED => "Hoàn thành",
+                AppointmentStatus.NO_SHOW => "Không đến",
                 _ => status.ToString()
             };
         }
@@ -96,7 +96,8 @@ namespace VeterinaryClinic.Business
             return role switch
             {
                 Role.CUSTOMER => actions.Where(x =>
-                    x == AppointmentAction.REQUEST_CANCELLATION
+                    x == AppointmentAction.REQUEST_CANCELLATION ||
+                    x == AppointmentAction.BANK_TRANSFER
                 ).ToList(),
 
                 Role.DOCTOR => actions.Where(x =>

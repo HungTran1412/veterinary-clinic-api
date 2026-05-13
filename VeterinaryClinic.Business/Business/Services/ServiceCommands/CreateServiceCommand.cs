@@ -54,7 +54,7 @@ namespace VeterinaryClinic.Business
                 
                 if (entity == null)
                 {
-                    throw new ArgumentException("Failed to map data.");
+                    throw new ArgumentException(_localizer["data.not_found"]);
                 }
 
                 //kiem tra ma trung

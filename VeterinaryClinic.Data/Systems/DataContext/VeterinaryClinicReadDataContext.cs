@@ -28,6 +28,7 @@ namespace VeterinaryClinic.Data
         public virtual DbSet<VcSpecializations> VcSpecializations { get; set; }
         public virtual DbSet<VcDoctorSpecializations> VcDoctorSpecializations { get; set; }
         public virtual DbSet<VcUserVerificationTokens> VcUserVerificationTokens { get; set; }
+        public DbSet<VcPayments> VcPayments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

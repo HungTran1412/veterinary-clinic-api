@@ -12,7 +12,7 @@ namespace VeterinaryClinic.Data
         {
             _contextAccessor = contextAccessorFactory?.Invoke();
         }
-
+        
         public DbSet<VcPets> VcPets { get; set; }
         public DbSet<VcUsers> VcUsers { get; set; }
         public DbSet<VcInvoices> VcInvoices { get; set; }
@@ -25,6 +25,7 @@ namespace VeterinaryClinic.Data
         public DbSet<VcSpecializations> VcSpecializations { get; set; }
         public DbSet<VcDoctorSpecializations> VcDoctorSpecializations { get; set; }
         public DbSet<VcUserVerificationTokens> VcUserVerificationTokens { get; set; }
+        public DbSet<VcPayments> VcPayments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

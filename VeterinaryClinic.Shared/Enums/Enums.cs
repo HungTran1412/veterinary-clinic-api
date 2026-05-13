@@ -1,5 +1,8 @@
 ﻿namespace VeterinaryClinic.Shared
 {
+    /// <summary>
+    /// Vai trò
+    /// </summary>
     public enum Role
     {
         ADMIN,
@@ -8,6 +11,9 @@
         CUSTOMER,
     }
 
+    /// <summary>
+    /// Trạng thái quy trình
+    /// </summary>
     public enum AppointmentStatus
     {
         PENDING_CONFIRMATION,
@@ -21,6 +27,9 @@
         NO_SHOW
     }
 
+    /// <summary>
+    /// Hành động của quy trình
+    /// </summary>
     public enum AppointmentAction
     {
         CONFIRM,
@@ -37,14 +46,33 @@
         BANK_TRANSFER
     }
 
+    /// <summary>
+    /// Loại thông báo
+    /// </summary>
     public enum NotificationType
     {
         MESSAGE
     }
 
+    /// <summary>
+    /// Token xác thực
+    /// </summary>
     public enum TokenType
     {
         OTP,
         VERIFY
+    }
+
+    public enum PaymentMethod
+    {
+        CASH,
+        VNPAY
+    }
+
+    public enum PaymentStatus
+    {
+        PENDING,
+        SUCCESS,
+        FAILED
     }
 }

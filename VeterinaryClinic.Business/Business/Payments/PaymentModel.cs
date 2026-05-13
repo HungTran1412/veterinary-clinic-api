@@ -6,6 +6,9 @@ namespace VeterinaryClinic.Business
     {
         public int Id { get; init; }
         
+        [Required(ErrorMessage = "payment.invoice_id.required")]
+        public int InvoiceId { get; init; }
+        
         [Required(ErrorMessage = "payment.code.required")]
         public string Code { get; init; }
       

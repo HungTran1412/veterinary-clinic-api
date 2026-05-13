@@ -40,6 +40,13 @@ public class CreatePaymentCommand : IRequest<Unit>
             var model = request.Model;
             Log.Information($"Create Payment: " + JsonSerializer.Serialize(model));
             
+            // Check if Invoice exists
+            var checkInvoice = await _dataContext.VcInvoices.AnyAsync(x => x.Id == model.InvoiceId && x.IsActive, cancellationToken);
+            if (!checkInvoice)
+            {
+                throw new ArgumentException(_localizer["invoice.not_found"]);
+            }
+
             //map du lieu
             var entity = AutoMapperUtils.AutoMap<CreatePaymentModel, VcPayments>(model);
 

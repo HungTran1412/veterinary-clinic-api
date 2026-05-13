@@ -110,5 +110,14 @@
 
   "medical_record.not_found": "Medical record not found.",
   "medical_record.already_exists_for_appointment": "A medical record for this appointment already exists.",
-  "medical_record.no-permission": "You do not have permission to perform this action on the medical record."
+  "medical_record.no-permission": "You do not have permission to perform this action on the medical record.",
+  
+  "invoice.not_found": "Invoice not found.",
+  "invoice.existed.code": "Invoice code already exists.",
+  "invoice.payment_id.required": "Payment ID is required.",
+  "invoice.code.required": "Invoice code is required.",
+  "invoice.status.required": "Invoice status is required.",
+  "invoice.total_amount.required": "Total amount is required.",
+
+  "Payment.existed.code;": "Payment code already exists."
 }

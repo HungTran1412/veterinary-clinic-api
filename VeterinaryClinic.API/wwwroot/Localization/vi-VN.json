@@ -58,7 +58,7 @@
   "work_schedule.user.invalid_role": "Chỉ có thể tạo lịch cho Bác sĩ hoặc Lễ tân.",
   "work_schedule.schedule.conflict": "Lịch làm việc bị trùng với một lịch khác của người dùng này.",
   "work_schedule.end_time.must_be_after_start_time": "Thời gian kết thúc phải sau thời gian bắt đầu.",
-  "work_schedule.work_date.cannot_be_in_the_past": "Không thể tạo lịch làm việc trong quá khứ.",
+  "work_schedule.work_date.cannot_be_in_the_past": "Không thể tạo lịch làm việc trong quá quá khứ.",
   "work_schedule.receptionist.limit_exceeded": "Ca làm việc đã đủ 2 lễ tân.",
   "work_schedule.doctor.limit_exceeded": "Ca làm việc đã đủ 15 bác sĩ.",
   "work_schedule.user.shift_limit_exceeded": "Người dùng đã đạt đến giới hạn 3 ca làm việc mỗi ngày.",
@@ -110,5 +110,14 @@
 
   "medical_record.not_found": "Không tìm thấy hồ sơ bệnh án.",
   "medical_record.already_exists_for_appointment": "Hồ sơ bệnh án cho lịch hẹn này đã tồn tại.",
-  "medical_record.no-permission": "Bạn không có quyền thực hiện thao tác này trên hồ sơ bệnh án."
+  "medical_record.no-permission": "Bạn không có quyền thực hiện thao tác này trên hồ sơ bệnh án.",
+  
+  "invoice.not_found": "Không tìm thấy hóa đơn.",
+  "invoice.existed.code": "Mã hóa đơn đã tồn tại.",
+  "invoice.payment_id.required": "Mã thanh toán không được để trống.",
+  "invoice.code.required": "Mã hóa đơn không được để trống.",
+  "invoice.status.required": "Trạng thái hóa đơn không được để trống.",
+  "invoice.total_amount.required": "Tổng tiền không được để trống.",
+  
+  "Payment.existed.code;": "Mã thanh toán đã tồn tại."
 }

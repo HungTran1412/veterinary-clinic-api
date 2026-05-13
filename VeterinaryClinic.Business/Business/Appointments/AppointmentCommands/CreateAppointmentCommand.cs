@@ -113,7 +113,8 @@ namespace VeterinaryClinic.Business
                                          svc.Id,
                                          svc.SpecializationId,
                                          svc.DurationMinutes,
-                                         svc.Name 
+                                         svc.Name ,
+                                         svc.Price
                                      })
                     .FirstOrDefaultAsync(cancellationToken);
 
@@ -191,7 +192,7 @@ namespace VeterinaryClinic.Business
                     CustomerId = model.CustomerId,
                     PetId = model.PetId,
                     SerivceId = model.SerivceId,
-                    DoctorId = selectedDoctor.DoctorId, // Updated this
+                    DoctorId = selectedDoctor.DoctorId, 
                     AppointmentDate = appointmentDate,
                     StartTime = startTime,
                     EndTime = endTime,
@@ -208,6 +209,19 @@ namespace VeterinaryClinic.Business
                 await _dataContext.VcAppointments.AddAsync(entity, cancellationToken);
                 await _dataContext.SaveChangesAsync(cancellationToken);
                 
+                
+                // tạo hóa đơn mặc định cho appointment
+                var invoice = new VcInvoices
+                {
+                    AppointmentId = entity.Id,
+                    Code = GenerateCodeUtils.GenerateUserCode("INV"),
+                    Status = PaymentStatus.PENDING.ToString(),
+                    TotalAmount = service.Price,
+                    PaidDate = default,
+                };
+
+                await _dataContext.VcInvoices.AddAsync(invoice, cancellationToken);
+                await _dataContext.SaveChangesAsync(cancellationToken);
                 
                 //tạo  mới hồ sơ khám bệnh
                 using var transaction = await _dataContext.Database.BeginTransactionAsync(cancellationToken);
@@ -241,7 +255,7 @@ namespace VeterinaryClinic.Business
                     entity.AppointmentDate.ToShortDateString(),
                     entity.StartTime.ToShortTimeString(),
                     entity.EndTime.ToShortTimeString(),
-                    selectedDoctor.DoctorName, // Updated this
+                    selectedDoctor.DoctorName, 
                     entity.Code
                 );
                 BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendEmailAsync(customer.Email, customerSubject, customerBody));
@@ -249,7 +263,7 @@ namespace VeterinaryClinic.Business
                 // Email to Doctor
                 string doctorSubject = "Lịch hẹn mới được tạo - Phòng khám thú y";
                 string doctorBody = EmailTemplates.GetAppointmentConfirmationEmailForDoctor(
-                    selectedDoctor.DoctorName, // Updated this
+                    selectedDoctor.DoctorName, 
                     customer.FullName,
                     pet.Name,
                     service.Name,
@@ -258,7 +272,7 @@ namespace VeterinaryClinic.Business
                     entity.EndTime.ToShortTimeString(),
                     entity.Code
                 );
-                BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendEmailAsync(selectedDoctor.DoctorEmail, doctorSubject, doctorBody)); // Updated this
+                BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendEmailAsync(selectedDoctor.DoctorEmail, doctorSubject, doctorBody)); 
 
                 Log.Information($"Appointment confirmation email jobs enqueued for customer {customer.Email} and doctor {selectedDoctor.DoctorEmail}.");
                 

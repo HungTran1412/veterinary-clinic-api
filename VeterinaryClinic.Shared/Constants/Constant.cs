@@ -20,6 +20,8 @@
         public const string DOCTOR_SPECIALIZATION = "doctor-specializations";
         public const string APPOINMENT = "appointments";
         public const string MEDICAL_RECORD = "medical-records";
+        public const string PAYMENT = "payments";
+        public const string INVOICE = "invoices";
 
         #endregion
     }   

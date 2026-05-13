@@ -118,6 +118,13 @@
   "invoice.code.required": "Mã hóa đơn không được để trống.",
   "invoice.status.required": "Trạng thái hóa đơn không được để trống.",
   "invoice.total_amount.required": "Tổng tiền không được để trống.",
+  "invoice.amount.invalid": "Tổng tiền hóa đơn không hợp lệ.",
+  "invoice.already_paid": "Hóa đơn đã được thanh toán.",
+  "appointment.payment.not_pending": "Lịch hẹn không ở trạng thái chờ thanh toán.",
   
-  "Payment.existed.code;": "Mã thanh toán đã tồn tại."
+  "Payment.existed.code;": "Mã thanh toán đã tồn tại.",
+  "payment.not_found": "Không tìm thấy thanh toán.",
+  "payment.vnpay.input_required": "Dữ liệu phản hồi VNPay là bắt buộc.",
+  "payment.vnpay.invalid_signature": "Chữ ký VNPay không hợp lệ.",
+  "payment.vnpay.invalid_amount": "Số tiền thanh toán VNPay không hợp lệ."
 }

@@ -35,6 +35,7 @@ namespace VeterinaryClinic.Business
             private readonly IAppointmentStateMachine _appointmentStateMachine;
             private readonly MailSettings _mailSettings;
             private readonly IMediator _mediator;
+            private readonly IVeterinaryClinicCallStoreHelper _callStoreHelper;
 
             public Handler(
                 VeterinaryClinicDataContext dataContext,
@@ -43,7 +44,8 @@ namespace VeterinaryClinic.Business
                 ICacheService cacheService,
                 IAppointmentStateMachine appointmentStateMachine,
                 IOptions<MailSettings> mailSettings,
-                IMediator mediator
+                IMediator mediator,
+                IVeterinaryClinicCallStoreHelper callStoreHelper
                 ) 
             {
                 _dataContext = dataContext;
@@ -53,6 +55,7 @@ namespace VeterinaryClinic.Business
                 _appointmentStateMachine = appointmentStateMachine;
                 _mailSettings = mailSettings.Value;
                 _mediator = mediator;
+                _callStoreHelper = callStoreHelper;
             }
 
             public async Task<Unit> Handle(CreateAppointmentCommand request, CancellationToken cancellationToken)
@@ -138,57 +141,25 @@ namespace VeterinaryClinic.Business
                     throw new ArgumentException(_localizer["appointment.end_time.out_of_day"]);
                 }
 
-                var candidateDoctors = await (from ws in _dataContext.VcWorkSchedules.AsNoTracking()
-                                              join doctor in _dataContext.VcUsers.AsNoTracking()
-                                                  on ws.UserId equals doctor.Id
-                                              join ds in _dataContext.VcDoctorSpecializations.AsNoTracking()
-                                                  on doctor.Id equals ds.DoctorId
-                                              join sp in _dataContext.VcSpecializations.AsNoTracking()
-                                                  on ds.SpecializationId equals sp.Id
-                                              where ws.IsActive &&
-                                                    doctor.IsActive &&
-                                                    sp.IsActive &&
-                                                    doctor.Role == Role.DOCTOR.ToString() &&
-                                                    ds.SpecializationId == service.SpecializationId &&
-                                                    ws.WorkDate.Date == appointmentDate &&
-                                                    ws.StartTime <= startTime &&
-                                                    ws.EndTime >= endTime
-                                              select new { doctor.Id, doctor.Email, doctor.FullName }) 
-                    .Distinct()
-                    .ToListAsync(cancellationToken);
+                // call store find doctor
+                var dataTable = _callStoreHelper.CallStoreGetCandidateDoctorsAsync(
+                    service.SpecializationId, 
+                    appointmentDate, 
+                    startTime, 
+                    endTime);
 
-                if (!candidateDoctors.Any())
+                if (dataTable == null || dataTable.Rows.Count == 0)
                 {
                     throw new ArgumentException(_localizer["appointment.doctor.not_available"]);
                 }
 
-                var conflictingDoctorIds = await _dataContext.VcAppointments
-                    .AsNoTracking()
-                    .Where(x =>
-                        candidateDoctors.Select(d => d.Id).Contains(x.DoctorId) && // Use Select(d => d.Id)
-                        x.AppointmentDate.Date == appointmentDate &&
-                        x.State != AppointmentStatus.CANCELLED.ToString() &&
-                        x.State != AppointmentStatus.REJECTED.ToString() &&
-                        x.State != AppointmentStatus.NO_SHOW.ToString() &&
-                        startTime < x.EndTime &&
-                        endTime > x.StartTime)
-                    .Select(x => x.DoctorId)
-                    .Distinct()
-                    .ToListAsync(cancellationToken);
-
-                var availableDoctors = candidateDoctors
-                    .Where(d => !conflictingDoctorIds.Contains(d.Id))
-                    .ToList();
-
-                if (!availableDoctors.Any())
-                {
-                    throw new ArgumentException(_localizer["appointment.doctor.schedule.conflict"]);
-                }
+                var availableDoctors = dataTable.ToList<CandidateDoctorModel>();
+                
 
                 var doctorAppointmentLoads = await _dataContext.VcAppointments
                     .AsNoTracking()
                     .Where(x =>
-                        availableDoctors.Select(d => d.Id).Contains(x.DoctorId) && // Use Select(d => d.Id)
+                        availableDoctors.Select(d => d.DoctorId).Contains(x.DoctorId) && // Use Select(d => d.Id)
                         x.AppointmentDate.Date == appointmentDate &&
                         x.State != AppointmentStatus.CANCELLED.ToString() &&
                         x.State != AppointmentStatus.REJECTED.ToString() &&
@@ -204,13 +175,13 @@ namespace VeterinaryClinic.Business
                 var selectedDoctor = availableDoctors
                     .Select(d => new
                     {
-                        d.Id,
-                        d.Email,
-                        d.FullName,
-                        Count = doctorAppointmentLoads.FirstOrDefault(x => x.DoctorId == d.Id)?.Count ?? 0
+                        d.DoctorId,
+                        d.DoctorEmail,
+                        d.DoctorName,
+                        Count = doctorAppointmentLoads.FirstOrDefault(x => x.DoctorId == d.DoctorId)?.Count ?? 0
                     })
                     .OrderBy(x => x.Count)
-                    .ThenBy(x => x.Id)
+                    .ThenBy(x => x.DoctorId)
                     .First();
 
                 var initialStatus = _appointmentStateMachine.GetInitialStatus();
@@ -220,7 +191,7 @@ namespace VeterinaryClinic.Business
                     CustomerId = model.CustomerId,
                     PetId = model.PetId,
                     SerivceId = model.SerivceId,
-                    DoctorId = selectedDoctor.Id,
+                    DoctorId = selectedDoctor.DoctorId, // Updated this
                     AppointmentDate = appointmentDate,
                     StartTime = startTime,
                     EndTime = endTime,
@@ -270,7 +241,7 @@ namespace VeterinaryClinic.Business
                     entity.AppointmentDate.ToShortDateString(),
                     entity.StartTime.ToShortTimeString(),
                     entity.EndTime.ToShortTimeString(),
-                    selectedDoctor.FullName,
+                    selectedDoctor.DoctorName, // Updated this
                     entity.Code
                 );
                 BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendEmailAsync(customer.Email, customerSubject, customerBody));
@@ -278,7 +249,7 @@ namespace VeterinaryClinic.Business
                 // Email to Doctor
                 string doctorSubject = "Lịch hẹn mới được tạo - Phòng khám thú y";
                 string doctorBody = EmailTemplates.GetAppointmentConfirmationEmailForDoctor(
-                    selectedDoctor.FullName,
+                    selectedDoctor.DoctorName, // Updated this
                     customer.FullName,
                     pet.Name,
                     service.Name,
@@ -287,9 +258,9 @@ namespace VeterinaryClinic.Business
                     entity.EndTime.ToShortTimeString(),
                     entity.Code
                 );
-                BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendEmailAsync(selectedDoctor.Email, doctorSubject, doctorBody));
+                BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendEmailAsync(selectedDoctor.DoctorEmail, doctorSubject, doctorBody)); // Updated this
 
-                Log.Information($"Appointment confirmation email jobs enqueued for customer {customer.Email} and doctor {selectedDoctor.Email}.");
+                Log.Information($"Appointment confirmation email jobs enqueued for customer {customer.Email} and doctor {selectedDoctor.DoctorEmail}.");
                 
                 // xóa cache
                 _cacheService.Remove(AppointmentConstant.BuildCacheKey());

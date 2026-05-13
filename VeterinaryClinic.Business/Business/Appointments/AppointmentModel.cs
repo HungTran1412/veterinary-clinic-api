@@ -118,4 +118,20 @@ namespace VeterinaryClinic.Business
         public DateTime? ToDate { get; init; }
         public string? State { get; init; }
     }
+    
+    // Added model to map from DataTable
+    public record CandidateDoctorModel
+    {
+        [DataColumn("doctor_id")]
+        public int DoctorId { get; set; }
+        
+        [DataColumn("doctor_name")]
+        public string DoctorName { get; set; }
+        
+        [DataColumn("doctor_email")]
+        public string DoctorEmail { get; set; }
+        
+        [DataColumn("doctor_phone")]
+        public string DoctorPhone { get; set; }
+    }
 }

@@ -118,6 +118,13 @@
   "invoice.code.required": "Invoice code is required.",
   "invoice.status.required": "Invoice status is required.",
   "invoice.total_amount.required": "Total amount is required.",
+  "invoice.amount.invalid": "Invoice amount is invalid.",
+  "invoice.already_paid": "Invoice has already been paid.",
+  "appointment.payment.not_pending": "Appointment is not waiting for payment.",
 
-  "Payment.existed.code;": "Payment code already exists."
+  "Payment.existed.code;": "Payment code already exists.",
+  "payment.not_found": "Payment not found.",
+  "payment.vnpay.input_required": "VNPay response data is required.",
+  "payment.vnpay.invalid_signature": "VNPay signature is invalid.",
+  "payment.vnpay.invalid_amount": "VNPay payment amount is invalid."
 }

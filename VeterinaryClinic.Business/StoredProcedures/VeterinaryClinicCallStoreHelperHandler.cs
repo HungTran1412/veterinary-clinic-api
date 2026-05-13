@@ -43,4 +43,36 @@ public class VeterinaryClinicCallStoreHelperHandler : IVeterinaryClinicCallStore
 
         return dt;
     }
+
+    public DataTable CallStoreGetCandidateDoctorsAsync(
+        int SpecializatoinId, 
+        DateTime AppointmentDate,
+        DateTime StartTime,
+        DateTime EndTime)
+    {
+        using var conn = new SqlConnection(DatabaseConnectionString());
+        using var cmd = new SqlCommand("sp_GetCandidateDoctors", conn);
+
+        cmd.CommandType = CommandType.StoredProcedure;
+        cmd.Parameters.AddWithValue("@SpecializationId", SpecializatoinId);
+        cmd.Parameters.AddWithValue("@AppointmentDate", AppointmentDate);
+        cmd.Parameters.AddWithValue("@StartTime", StartTime);
+        cmd.Parameters.AddWithValue("@EndTime", EndTime);
+
+        var dt = new DataTable();
+
+        try
+        {
+            conn.Open();
+            using var reader = cmd.ExecuteReader();
+            dt.Load(reader);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "CallStore Error");
+            throw;
+        }
+
+        return dt;
+    }
 }

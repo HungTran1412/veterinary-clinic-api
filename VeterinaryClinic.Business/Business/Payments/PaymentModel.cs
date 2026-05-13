@@ -43,4 +43,30 @@ namespace VeterinaryClinic.Business
     {
         public int? CreatedUserId { get; init; }
     }
+
+    public record CreateVnPayPaymentModel
+    {
+        [Required(ErrorMessage = "appointment.id.required")]
+        public int AppointmentId { get; init; }
+
+        public string? ClientIpAddress { get; init; }
+    }
+
+    public record VnPayPaymentUrlModel
+    {
+        public string PaymentUrl { get; init; }
+        public int InvoiceId { get; init; }
+        public int PaymentId { get; init; }
+        public decimal Amount { get; init; }
+    }
+
+    public record VnPayReturnModel
+    {
+        public bool IsSuccess { get; init; }
+        public string ResponseCode { get; init; }
+        public string Message { get; init; }
+        public int? InvoiceId { get; init; }
+        public int? PaymentId { get; init; }
+        public int? AppointmentId { get; init; }
+    }
 }

@@ -13,6 +13,7 @@ namespace VeterinaryClinic.Infrastructure
             // Đăng ký các lớp cấu hình từ Shared
             services.Configure<CloudinarySettings>(config.GetSection("CloudinarySettings"));
             services.Configure<MailSettings>(config.GetSection("EmailSettings"));
+            services.Configure<VnPaySettings>(config.GetSection("VnPaySettings"));
             
             // Đăng ký các service của Infrastructure
             services.AddScoped<ICloudinaryService, PhotoService>();

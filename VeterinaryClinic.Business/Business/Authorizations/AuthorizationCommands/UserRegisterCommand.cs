@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Hangfire;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
@@ -30,7 +31,6 @@ namespace VeterinaryClinic.Busines
             private readonly VeterinaryClinicDataContext _dataContext;
             private readonly IStringLocalizer<UserRegisterCommand> _localizer;
             private readonly IBcryptPasswordHasher _passwordHasher;
-            private readonly IEmailService _emailService;
             private readonly MailSettings _mailSettings;
             private readonly ICacheService _cacheService;
 
@@ -38,14 +38,12 @@ namespace VeterinaryClinic.Busines
                 VeterinaryClinicDataContext dataContext,
                 IStringLocalizer<UserRegisterCommand> localizer,
                 IBcryptPasswordHasher passwordHasher,
-                IEmailService emailService,
                 IOptions<MailSettings> mailSettings,
                 ICacheService cacheService)
             {
                 _dataContext = dataContext;
                 _localizer = localizer;
                 _passwordHasher = passwordHasher;
-                _emailService = emailService;
                 _mailSettings = mailSettings.Value;
                 _cacheService = cacheService;
             }
@@ -118,23 +116,15 @@ namespace VeterinaryClinic.Busines
                 await _dataContext.VcUsers.AddAsync(entity, cancellationToken);
                 await _dataContext.SaveChangesAsync(cancellationToken);
 
-                // Gửi email xác thực
-                try
-                {
-                    // Create a link to the frontend page for verification
-                    var frontendUrl = _mailSettings.FrontendBaseUrl.TrimEnd('/');
-                    var verificationLink = $"{frontendUrl}/verify-email?token={verificationToken}";
-                    string subject = "Xác thực tài khoản của bạn - Phòng khám thú y";
-                    string body = EmailTemplates.GetVerificationEmail(entity.FullName, verificationLink);
+                // Gửi email xác thực sử dụng Hangfire
+                var frontendUrl = _mailSettings.FrontendBaseUrl.TrimEnd('/');
+                var verificationLink = $"{frontendUrl}/verify-email?token={verificationToken}";
+                string subject = "Xác thực tài khoản của bạn - Phòng khám thú y";
+                string body = EmailTemplates.GetVerificationEmail(entity.FullName, verificationLink);
 
-                    await _emailService.SendEmailAsync(entity.Email, subject, body);
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, $"Failed to send verification email to {entity.Email}");
-                }
+                BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendEmailAsync(entity.Email, subject, body));
 
-                Log.Information($"User {model.UserName} registered successfully. Verification email sent.");
+                Log.Information($"User {model.UserName} registered successfully. Verification email job enqueued.");
 
                 _cacheService.Remove(AuthorizationConstant.BuildCacheKey());
                 

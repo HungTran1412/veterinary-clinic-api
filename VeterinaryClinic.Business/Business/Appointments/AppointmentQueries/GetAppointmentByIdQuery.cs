@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared;
+using VeterinaryClinic.Shared.ContextAccessor;
 
 namespace VeterinaryClinic.Business
 {
@@ -21,11 +22,19 @@ namespace VeterinaryClinic.Business
         {
             private readonly VeterinaryClinicReadDataContext _dataContext;
             private readonly ICacheService _cacheService;
+            private readonly IAppointmentStateMachine _stateMachine;
+            private readonly IContextAccessor _contextAccessor;
 
-            public Handler(VeterinaryClinicReadDataContext dataContext, ICacheService cacheService)
+            public Handler(
+                VeterinaryClinicReadDataContext dataContext,
+                ICacheService cacheService,
+                IAppointmentStateMachine stateMachine,
+                Func<IContextAccessor> contextAccessorFactory)
             {
                 _dataContext = dataContext;
                 _cacheService = cacheService;
+                _stateMachine = stateMachine;
+                _contextAccessor = contextAccessorFactory();
             }
 
             public async Task<AppointmentModel> Handle(GetAppointmentByIdQuery request, CancellationToken cancellationToken)
@@ -61,6 +70,22 @@ namespace VeterinaryClinic.Business
 
                     return await query.FirstOrDefaultAsync(cancellationToken);
                 });
+
+                if (item != null &&
+                    Enum.TryParse<AppointmentStatus>(item.State, true, out var status) &&
+                    Enum.TryParse<Role>(_contextAccessor.Role, true, out var role))
+                {
+                    item = item with
+                    {
+                        Commands = _stateMachine
+                            .GetAvailableActions(status, role)
+                            .Select(action => new WorkflowCommandModel(
+                                action.ToString(),
+                                _stateMachine.GetActionDisplayName(action)
+                            ))
+                            .ToList()
+                    };
+                }
 
                 return item;
             }

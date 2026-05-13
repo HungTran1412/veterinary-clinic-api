@@ -99,6 +99,8 @@
   "appointment.end_time.out_of_day": "Appointment end time must not exceed the selected day.",
   "appointment.transition.invalid": "The appointment status cannot be changed with this action.",
   "appointment.cancel_reason.required": "A cancellation or rejection reason is required.",
+  "appointment.cancel.started_or_past": "The appointment has already started or passed and cannot be cancelled.",
+  "appointment.cancel.less_than_one_hour": "Appointments can only be cancelled at least 1 hour before start time.",
   "appointment.state.invalid": "The current appointment state is invalid.",
 
   "otp.invalid": "Invalid OTP.",

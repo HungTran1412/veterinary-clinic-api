@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Hangfire;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
@@ -31,18 +32,15 @@ namespace VeterinaryClinic.Business
         {
             private readonly VeterinaryClinicDataContext _dataContext;
             private readonly IStringLocalizer<SendOtpCommand> _localizer;
-            private readonly IEmailService _emailService;
             private readonly MailSettings _mailSettings;
 
             public Handler(
                 VeterinaryClinicDataContext dataContext,
                 IStringLocalizer<SendOtpCommand> localizer,
-                IEmailService emailService,
                 IOptions<MailSettings> mailSettings)
             {
                 _dataContext = dataContext;
                 _localizer = localizer;
-                _emailService = emailService;
                 _mailSettings = mailSettings.Value;
             }
 
@@ -79,19 +77,12 @@ namespace VeterinaryClinic.Business
                 await _dataContext.VcUserVerificationTokens.AddAsync(verificationToken, cancellationToken);
                 await _dataContext.SaveChangesAsync(cancellationToken);
 
-                // Send OTP email
-                try
-                {
-                    string subject = "Mã OTP để đặt lại mật khẩu của bạn";
-                    string body = EmailTemplates.GetOtpEmail(user.FullName, otp);
-                    await _emailService.SendEmailAsync(user.Email, subject, body);
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, $"Failed to send OTP email to {user.Email}");
-                }
+                // Send OTP email using Hangfire
+                string subject = "Mã OTP để đặt lại mật khẩu của bạn";
+                string body = EmailTemplates.GetOtpEmail(user.FullName, otp);
+                BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendEmailAsync(user.Email, subject, body));
 
-                Log.Information($"OTP sent successfully to {user.Email}.");
+                Log.Information($"OTP email job enqueued for {user.Email}.");
 
                 return new SendOtpResponseModel
                 {

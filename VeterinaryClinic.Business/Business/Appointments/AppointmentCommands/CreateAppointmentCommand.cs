@@ -1,3 +1,4 @@
+using Hangfire;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
@@ -32,7 +33,6 @@ namespace VeterinaryClinic.Business
             private readonly IStringLocalizer<CreateAppointmentCommand> _localizer;
             private readonly ICacheService _cacheService;
             private readonly IAppointmentStateMachine _appointmentStateMachine;
-            private readonly IEmailService _emailService; 
             private readonly MailSettings _mailSettings;
             private readonly IMediator _mediator;
 
@@ -42,7 +42,6 @@ namespace VeterinaryClinic.Business
                 IStringLocalizer<CreateAppointmentCommand> localizer,
                 ICacheService cacheService,
                 IAppointmentStateMachine appointmentStateMachine,
-                IEmailService emailService, 
                 IOptions<MailSettings> mailSettings,
                 IMediator mediator
                 ) 
@@ -52,7 +51,6 @@ namespace VeterinaryClinic.Business
                 _localizer = localizer;
                 _cacheService = cacheService;
                 _appointmentStateMachine = appointmentStateMachine;
-                _emailService = emailService; 
                 _mailSettings = mailSettings.Value;
                 _mediator = mediator;
             }
@@ -262,43 +260,36 @@ namespace VeterinaryClinic.Business
                     throw;
                 }
                 
-                // Send email notifications
-                try
-                {
-                    // Email to Customer
-                    string customerSubject = "Xác nhận lịch hẹn của bạn - Phòng khám thú y";
-                    string customerBody = EmailTemplates.GetAppointmentConfirmationEmailForCustomer(
-                        customer.FullName,
-                        pet.Name,
-                        service.Name,
-                        entity.AppointmentDate.ToShortDateString(),
-                        entity.StartTime.ToShortTimeString(),
-                        entity.EndTime.ToShortTimeString(),
-                        selectedDoctor.FullName,
-                        entity.Code
-                    );
-                    await _emailService.SendEmailAsync(customer.Email, customerSubject, customerBody);
+                // Send email notifications using Hangfire
+                // Email to Customer
+                string customerSubject = "Xác nhận lịch hẹn của bạn - Phòng khám thú y";
+                string customerBody = EmailTemplates.GetAppointmentConfirmationEmailForCustomer(
+                    customer.FullName,
+                    pet.Name,
+                    service.Name,
+                    entity.AppointmentDate.ToShortDateString(),
+                    entity.StartTime.ToShortTimeString(),
+                    entity.EndTime.ToShortTimeString(),
+                    selectedDoctor.FullName,
+                    entity.Code
+                );
+                BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendEmailAsync(customer.Email, customerSubject, customerBody));
 
-                    // Email to Doctor
-                    string doctorSubject = "Lịch hẹn mới được tạo - Phòng khám thú y";
-                    string doctorBody = EmailTemplates.GetAppointmentConfirmationEmailForDoctor(
-                        selectedDoctor.FullName,
-                        customer.FullName,
-                        pet.Name,
-                        service.Name,
-                        entity.AppointmentDate.ToShortDateString(),
-                        entity.StartTime.ToShortTimeString(),
-                        entity.EndTime.ToShortTimeString(),
-                        entity.Code
-                    );
-                    await _emailService.SendEmailAsync(selectedDoctor.Email, doctorSubject, doctorBody);
+                // Email to Doctor
+                string doctorSubject = "Lịch hẹn mới được tạo - Phòng khám thú y";
+                string doctorBody = EmailTemplates.GetAppointmentConfirmationEmailForDoctor(
+                    selectedDoctor.FullName,
+                    customer.FullName,
+                    pet.Name,
+                    service.Name,
+                    entity.AppointmentDate.ToShortDateString(),
+                    entity.StartTime.ToShortTimeString(),
+                    entity.EndTime.ToShortTimeString(),
+                    entity.Code
+                );
+                BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendEmailAsync(selectedDoctor.Email, doctorSubject, doctorBody));
 
-                    Log.Information($"Appointment confirmation emails sent to customer {customer.Email} and doctor {selectedDoctor.Email}.");
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, $"Failed to send appointment confirmation emails for appointment {entity.Id}.");
-                }
+                Log.Information($"Appointment confirmation email jobs enqueued for customer {customer.Email} and doctor {selectedDoctor.Email}.");
                 
                 // xóa cache
                 _cacheService.Remove(AppointmentConstant.BuildCacheKey());

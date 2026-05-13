@@ -16,7 +16,6 @@ namespace VeterinaryClinic.Data
             
         }
         
-        public virtual DbSet<Permission> Permissions { get; set; }
         public virtual DbSet<VcPets> VcPets { get; set; }
         public virtual DbSet<VcUsers> VcUsers { get; set; }
         public virtual DbSet<VcInvoices> VcInvoices { get; set; }
@@ -29,6 +28,7 @@ namespace VeterinaryClinic.Data
         public virtual DbSet<VcSpecializations> VcSpecializations { get; set; }
         public virtual DbSet<VcDoctorSpecializations> VcDoctorSpecializations { get; set; }
         public virtual DbSet<VcUserVerificationTokens> VcUserVerificationTokens { get; set; }
+        public DbSet<VcPayments> VcPayments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

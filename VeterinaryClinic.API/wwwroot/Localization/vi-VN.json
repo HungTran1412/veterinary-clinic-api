@@ -99,6 +99,8 @@
   "appointment.end_time.out_of_day": "Giờ kết thúc lịch hẹn không được vượt quá ngày đã chọn.",
   "appointment.transition.invalid": "Không thể chuyển trạng thái lịch hẹn theo hành động này.",
   "appointment.cancel_reason.required": "Lý do hủy hoặc từ chối là bắt buộc.",
+  "appointment.cancel.started_or_past": "Lịch hẹn đã bắt đầu hoặc đã qua, không thể hủy.",
+  "appointment.cancel.less_than_one_hour": "Chỉ được hủy lịch trước giờ bắt đầu ít nhất 1 giờ.",
   "appointment.state.invalid": "Trạng thái lịch hẹn hiện tại không hợp lệ.",
 
   "otp.invalid": "Mã OTP không hợp lệ.",

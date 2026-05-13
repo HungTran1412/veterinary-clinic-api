@@ -28,29 +28,29 @@ namespace VeterinaryClinic.Business
             AppointmentStatus.NO_SHOW
         };
 
-        private static readonly Dictionary<AppointmentStatus, IReadOnlyCollection<AppointmentAction>> AllowedActions =
-            new()
+        private static readonly Dictionary<AppointmentStatus, IReadOnlyCollection<AppointmentAction>> AllowedActions = new()
+        {
+            [AppointmentStatus.CONFIRMED] = new[]
             {
-                [AppointmentStatus.CONFIRMED] = new[]
-                {
-                    AppointmentAction.START_CONSULTATION,
-                    AppointmentAction.REQUEST_CANCELLATION,
-                    AppointmentAction.MARK_NO_SHOW
-                },
-                [AppointmentStatus.CANCELLATION_REQUESTED] = new[]
-                {
-                    AppointmentAction.APPROVE_CANCELLATION,
-                    AppointmentAction.REJECT_CANCELLATION_REQUEST
-                },
-                [AppointmentStatus.IN_PROGRESS] = new[]
-                {
-                    AppointmentAction.COMPLETE_CONSULTATION
-                },
-                [AppointmentStatus.PAYMENT_PENDING] = new[]
-                {
-                    AppointmentAction.COMPLETE_PAYMENT
-                }
-            };
+                AppointmentAction.START_CONSULTATION,
+                AppointmentAction.REQUEST_CANCELLATION,
+                AppointmentAction.MARK_NO_SHOW
+            },
+            [AppointmentStatus.CANCELLATION_REQUESTED] = new[]
+            {
+                AppointmentAction.APPROVE_CANCELLATION,
+                AppointmentAction.REJECT_CANCELLATION_REQUEST
+            },
+            [AppointmentStatus.IN_PROGRESS] = new[]
+            {
+                AppointmentAction.COMPLETE_CONSULTATION
+            },
+            [AppointmentStatus.PAYMENT_PENDING] = new[]
+            {
+                AppointmentAction.CASH_PAYMENT,
+                AppointmentAction.BANK_TRANSFER
+            }
+        };
 
         public AppointmentStateMachine(
             IStringLocalizer<AppointmentStateMachine> localizer,
@@ -69,14 +69,14 @@ namespace VeterinaryClinic.Business
         {
             return status switch
             {
-                AppointmentStatus.CONFIRMED => "Đã xác nhận",
-                AppointmentStatus.REJECTED => "Từ chối",
-                AppointmentStatus.CANCELLED => "Đã hủy",
-                AppointmentStatus.CANCELLATION_REQUESTED => "Chờ duyệt hủy",
-                AppointmentStatus.IN_PROGRESS => "Đang thực hiện",
-                AppointmentStatus.PAYMENT_PENDING => "Chờ thanh toán",
-                AppointmentStatus.COMPLETED => "Hoàn thành",
-                AppointmentStatus.NO_SHOW => "Không đến",
+                AppointmentStatus.CONFIRMED => "Da xac nhan",
+                AppointmentStatus.REJECTED => "Tu choi",
+                AppointmentStatus.CANCELLED => "Da huy",
+                AppointmentStatus.CANCELLATION_REQUESTED => "Cho duyet huy",
+                AppointmentStatus.IN_PROGRESS => "Dang thuc hien",
+                AppointmentStatus.PAYMENT_PENDING => "Cho thanh toan",
+                AppointmentStatus.COMPLETED => "Hoan thanh",
+                AppointmentStatus.NO_SHOW => "Khong den",
                 _ => status.ToString()
             };
         }
@@ -89,7 +89,9 @@ namespace VeterinaryClinic.Business
         public IReadOnlyCollection<AppointmentAction> GetAvailableActions(AppointmentStatus status, Role role)
         {
             if (!AllowedActions.TryGetValue(status, out var actions))
+            {
                 return Array.Empty<AppointmentAction>();
+            }
 
             return role switch
             {
@@ -105,11 +107,13 @@ namespace VeterinaryClinic.Business
 
                 Role.RECEPTIONIST => actions.Where(x =>
                     x == AppointmentAction.APPROVE_CANCELLATION ||
-                    x == AppointmentAction.REJECT_CANCELLATION_REQUEST
+                    x == AppointmentAction.REJECT_CANCELLATION_REQUEST ||
+                    x == AppointmentAction.CASH_PAYMENT ||
+                    x == AppointmentAction.BANK_TRANSFER
                 ).ToList(),
-                
-                Role.ADMIN => new List<AppointmentAction>(),
-                
+
+                Role.ADMIN => actions.ToList(),
+
                 _ => new List<AppointmentAction>()
             };
         }
@@ -129,23 +133,27 @@ namespace VeterinaryClinic.Business
 
                 if (appointment.StartTime <= now)
                 {
-                    throw new InvalidOperationException("Lịch đã bắt đầu hoặc đã qua, không thể hủy.");
+                    throw new InvalidOperationException(_localizer["appointment.cancel.started_or_past"]);
                 }
 
                 var timeDiff = appointment.StartTime - now;
 
                 if (timeDiff.TotalHours < 1)
                 {
-                    throw new InvalidOperationException("Chỉ được hủy lịch trước 1 giờ.");
+                    throw new InvalidOperationException(_localizer["appointment.cancel.less_than_one_hour"]);
+                }
+
+                if (!string.IsNullOrWhiteSpace(cancelReason))
+                {
+                    appointment.CancelReason = cancelReason.Trim();
                 }
             }
 
             var nextStatus = GetNextStatus(currentStatus, action, role);
 
-            // 🔥 validate lý do hủy
-            if ((nextStatus == AppointmentStatus.CANCELLED ||
-                 nextStatus == AppointmentStatus.REJECTED) &&
-                string.IsNullOrWhiteSpace(cancelReason))
+            if (nextStatus == AppointmentStatus.CANCELLED &&
+                string.IsNullOrWhiteSpace(cancelReason) &&
+                string.IsNullOrWhiteSpace(appointment.CancelReason))
             {
                 throw new ArgumentException(_localizer["appointment.cancel_reason.required"]);
             }
@@ -154,9 +162,11 @@ namespace VeterinaryClinic.Business
             appointment.StateName = GetStateDisplayName(nextStatus);
             appointment.IsFinalState = IsFinalStatus(nextStatus);
 
-            if (nextStatus is AppointmentStatus.CANCELLED or AppointmentStatus.REJECTED)
+            if (nextStatus == AppointmentStatus.CANCELLED)
             {
-                appointment.CancelReason = cancelReason!.Trim();
+                appointment.CancelReason = string.IsNullOrWhiteSpace(cancelReason)
+                    ? appointment.CancelReason
+                    : cancelReason.Trim();
             }
         }
 
@@ -180,20 +190,15 @@ namespace VeterinaryClinic.Business
 
             return (currentStatus, action) switch
             {
-                // (AppointmentStatus.PENDING_CONFIRMATION, AppointmentAction.CONFIRM) => AppointmentStatus.CONFIRMED,
-                // (AppointmentStatus.PENDING_CONFIRMATION, AppointmentAction.REJECT) => AppointmentStatus.REJECTED,
-                // (AppointmentStatus.PENDING_CONFIRMATION, AppointmentAction.CUSTOMER_CANCEL) => AppointmentStatus.CANCELLED,
                 (AppointmentStatus.CONFIRMED, AppointmentAction.START_CONSULTATION) => AppointmentStatus.IN_PROGRESS,
-                (AppointmentStatus.CONFIRMED, AppointmentAction.REQUEST_CANCELLATION) => AppointmentStatus
-                    .CANCELLATION_REQUESTED,
+                (AppointmentStatus.CONFIRMED, AppointmentAction.REQUEST_CANCELLATION) => AppointmentStatus.CANCELLATION_REQUESTED,
                 (AppointmentStatus.CONFIRMED, AppointmentAction.MARK_NO_SHOW) => AppointmentStatus.NO_SHOW,
-                (AppointmentStatus.CANCELLATION_REQUESTED, AppointmentAction.APPROVE_CANCELLATION) => AppointmentStatus
-                    .CANCELLED,
-                (AppointmentStatus.CANCELLATION_REQUESTED, AppointmentAction.REJECT_CANCELLATION_REQUEST) =>
-                    AppointmentStatus.CONFIRMED,
-                (AppointmentStatus.IN_PROGRESS, AppointmentAction.COMPLETE_CONSULTATION) => AppointmentStatus
-                    .PAYMENT_PENDING,
+                (AppointmentStatus.CANCELLATION_REQUESTED, AppointmentAction.APPROVE_CANCELLATION) => AppointmentStatus.CANCELLED,
+                (AppointmentStatus.CANCELLATION_REQUESTED, AppointmentAction.REJECT_CANCELLATION_REQUEST) => AppointmentStatus.CONFIRMED,
+                (AppointmentStatus.IN_PROGRESS, AppointmentAction.COMPLETE_CONSULTATION) => AppointmentStatus.PAYMENT_PENDING,
                 (AppointmentStatus.PAYMENT_PENDING, AppointmentAction.COMPLETE_PAYMENT) => AppointmentStatus.COMPLETED,
+                (AppointmentStatus.PAYMENT_PENDING, AppointmentAction.CASH_PAYMENT) => AppointmentStatus.COMPLETED,
+                (AppointmentStatus.PAYMENT_PENDING, AppointmentAction.BANK_TRANSFER) => AppointmentStatus.COMPLETED,
                 _ => throw new InvalidOperationException(_localizer["appointment.transition.invalid"])
             };
         }
@@ -205,17 +210,15 @@ namespace VeterinaryClinic.Business
                 AppointmentAction.CONFIRM => "Xác nhận",
                 AppointmentAction.REJECT => "Từ chối",
                 AppointmentAction.CUSTOMER_CANCEL => "Hủy lịch",
-
                 AppointmentAction.START_CONSULTATION => "Bắt đầu khám",
                 AppointmentAction.REQUEST_CANCELLATION => "Yêu cầu hủy",
                 AppointmentAction.MARK_NO_SHOW => "Không đến",
-
                 AppointmentAction.APPROVE_CANCELLATION => "Xác nhận hủy",
-                AppointmentAction.REJECT_CANCELLATION_REQUEST => "Từ chối hủy",
-
+                AppointmentAction.REJECT_CANCELLATION_REQUEST => "Từ chối từ chỗi hủy",
                 AppointmentAction.COMPLETE_CONSULTATION => "Hoàn thành khám",
                 AppointmentAction.COMPLETE_PAYMENT => "Thanh toán",
-
+                AppointmentAction.CASH_PAYMENT => "Thanh toán tiền mặt",
+                AppointmentAction.BANK_TRANSFER => "Chuyển khoản",
                 _ => action.ToString()
             };
         }

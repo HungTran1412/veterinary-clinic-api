@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Net;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
@@ -24,6 +26,8 @@ namespace VeterinaryClinic.Business
             private readonly IStringLocalizer<CreateVnPayPaymentCommand> _localizer;
             private readonly IContextAccessor _contextAccessor;
             private readonly VnPaySettings _vnpaySettings;
+            private static readonly TimeSpan VietnamUtcOffset = TimeSpan.FromHours(7);
+            private const int DefaultExpireMinutes = 15;
 
             public Handler(
                 VeterinaryClinicDataContext dataContext,
@@ -74,38 +78,25 @@ namespace VeterinaryClinic.Business
                     throw new ArgumentException(_localizer["invoice.already_paid"]);
                 }
 
-                var payment = await _dataContext.VcPayments
-                    .FirstOrDefaultAsync(x =>
-                        x.InvoiceId == invoice.Id &&
-                        x.PaymentMethod == PaymentMethod.VNPAY.ToString() &&
-                        x.PaymentStatus == PaymentStatus.PENDING.ToString() &&
-                        x.IsActive,
-                        cancellationToken);
-
-                if (payment == null)
+                var payment = new VcPayments
                 {
-                    payment = new VcPayments
-                    {
-                        InvoiceId = invoice.Id,
-                        Code = GenerateCodeUtils.GenerateUserCode("PAY"),
-                        PaymentMethod = PaymentMethod.VNPAY.ToString(),
-                        PaymentStatus = PaymentStatus.PENDING.ToString(),
-                        Amount = invoice.TotalAmount,
-                        GatewayTransactionId = null,
-                        ResponseCode = null,
-                        GatewayResponse = null,
-                        PaymentDate = null,
-                        IsActive = true,
-                        Order = 0,
-                        CreatedDate = DateTime.UtcNow,
-                        CreatedUserId = _contextAccessor.UserId,
-                        CreatedUserName = _contextAccessor.UserName
-                    };
+                    InvoiceId = invoice.Id,
+                    Code = GenerateCodeUtils.GenerateUserCode("PAY"),
+                    PaymentMethod = PaymentMethod.VNPAY.ToString(),
+                    PaymentStatus = PaymentStatus.PENDING.ToString(),
+                    Amount = invoice.TotalAmount,
+                    GatewayTransactionId = null,
+                    ResponseCode = null,
+                    GatewayResponse = null,
+                    PaymentDate = null,
+                    IsActive = true,
+                    Order = 0,
+                    CreatedDate = DateTime.UtcNow,
+                    CreatedUserId = _contextAccessor.UserId,
+                    CreatedUserName = _contextAccessor.UserName
+                };
 
-                    await _dataContext.VcPayments.AddAsync(payment, cancellationToken);
-                    await _dataContext.SaveChangesAsync(cancellationToken);
-                }
-
+                await _dataContext.VcPayments.AddAsync(payment, cancellationToken);
                 invoice.Status = PaymentStatus.PENDING.ToString();
                 await _dataContext.SaveChangesAsync(cancellationToken);
 
@@ -124,22 +115,45 @@ namespace VeterinaryClinic.Business
             private string CreatePaymentUrl(VcInvoices invoice, VcPayments payment, string? clientIpAddress)
             {
                 var vnpay = new VnPayLibrary();
-                var now = DateTime.UtcNow;
+                var now = DateTime.UtcNow.Add(VietnamUtcOffset);
+                var expireDate = now.AddMinutes(_vnpaySettings.ExpireMinutes > 0 ? _vnpaySettings.ExpireMinutes : DefaultExpireMinutes);
+                var amount = decimal.ToInt64(decimal.Round(invoice.TotalAmount * 100, 0, MidpointRounding.AwayFromZero));
 
                 vnpay.AddRequestData("vnp_Version", _vnpaySettings.Version);
                 vnpay.AddRequestData("vnp_Command", _vnpaySettings.Command);
                 vnpay.AddRequestData("vnp_TmnCode", _vnpaySettings.TmnCode);
-                vnpay.AddRequestData("vnp_Amount", ((long)(invoice.TotalAmount * 100)).ToString());
-                vnpay.AddRequestData("vnp_CreateDate", now.ToString("yyyyMMddHHmmss"));
+                vnpay.AddRequestData("vnp_Amount", amount.ToString(CultureInfo.InvariantCulture));
+                vnpay.AddRequestData("vnp_CreateDate", now.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture));
                 vnpay.AddRequestData("vnp_CurrCode", _vnpaySettings.CurrCode);
-                vnpay.AddRequestData("vnp_IpAddr", string.IsNullOrWhiteSpace(clientIpAddress) ? "127.0.0.1" : clientIpAddress);
+                vnpay.AddRequestData("vnp_IpAddr", NormalizeClientIpAddress(clientIpAddress));
                 vnpay.AddRequestData("vnp_Locale", _vnpaySettings.Locale);
                 vnpay.AddRequestData("vnp_OrderInfo", $"Thanh toan hoa don {invoice.Code}");
                 vnpay.AddRequestData("vnp_OrderType", "other");
                 vnpay.AddRequestData("vnp_ReturnUrl", _vnpaySettings.ReturnUrl);
-                vnpay.AddRequestData("vnp_TxnRef", payment.Id.ToString());
+                vnpay.AddRequestData("vnp_TxnRef", payment.Id.ToString(CultureInfo.InvariantCulture));
+                vnpay.AddRequestData("vnp_ExpireDate", expireDate.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture));
 
                 return vnpay.CreateRequestUrl(_vnpaySettings.BaseUrl, _vnpaySettings.HashSecret);
+            }
+
+            private static string NormalizeClientIpAddress(string? clientIpAddress)
+            {
+                if (string.IsNullOrWhiteSpace(clientIpAddress))
+                {
+                    return "127.0.0.1";
+                }
+
+                if (!IPAddress.TryParse(clientIpAddress, out var ipAddress))
+                {
+                    return "127.0.0.1";
+                }
+
+                if (ipAddress.IsIPv4MappedToIPv6)
+                {
+                    return ipAddress.MapToIPv4().ToString();
+                }
+
+                return IPAddress.IsLoopback(ipAddress) ? "127.0.0.1" : ipAddress.ToString();
             }
         }
     }

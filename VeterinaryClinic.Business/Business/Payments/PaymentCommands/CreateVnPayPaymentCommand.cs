@@ -27,7 +27,7 @@ namespace VeterinaryClinic.Business
             private readonly IContextAccessor _contextAccessor;
             private readonly VnPaySettings _vnpaySettings;
             private static readonly TimeSpan VietnamUtcOffset = TimeSpan.FromHours(7);
-            private const int DefaultExpireMinutes = 60;
+            private const int DefaultExpireMinutes = 15;
 
             public Handler(
                 VeterinaryClinicDataContext dataContext,

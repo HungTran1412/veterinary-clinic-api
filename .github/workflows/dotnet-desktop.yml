@@ -32,10 +32,3 @@ jobs:
       - name: Publish API
         run: dotnet publish VeterinaryClinic.API/VeterinaryClinic.API.csproj --configuration Release --output ./publish
 
-      # Nếu cần artifact thì giữ lại
-      - name: Upload publish artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: veterinaryclinic-api
-          path: ./publish
-          retention-days: 1

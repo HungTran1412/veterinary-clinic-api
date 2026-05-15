@@ -80,6 +80,7 @@ namespace VeterinaryClinic.Business
                 var responseCode = vnpay.GetResponseData("vnp_ResponseCode");
                 var transactionStatus = vnpay.GetResponseData("vnp_TransactionStatus");
                 var gatewayTransactionId = vnpay.GetResponseData("vnp_TransactionNo");
+                var invoiceAlreadyPaid = invoice.Status == PaymentStatus.SUCCESS.ToString();
 
                 if (!long.TryParse(vnpay.GetResponseData("vnp_Amount"), out var vnpAmountValue) ||
                     vnpAmountValue / 100m != invoice.TotalAmount)
@@ -88,7 +89,11 @@ namespace VeterinaryClinic.Business
                     payment.ResponseCode = responseCode;
                     payment.GatewayTransactionId = gatewayTransactionId;
                     payment.GatewayResponse = JsonSerializer.Serialize(request.QueryData);
-                    invoice.Status = PaymentStatus.FAILED.ToString();
+                    if (!invoiceAlreadyPaid)
+                    {
+                        invoice.Status = PaymentStatus.FAILED.ToString();
+                    }
+
                     await _dataContext.SaveChangesAsync(cancellationToken);
 
                     throw new ArgumentException(_localizer["payment.vnpay.invalid_amount"]);
@@ -103,7 +108,11 @@ namespace VeterinaryClinic.Business
                 payment.GatewayResponse = JsonSerializer.Serialize(request.QueryData);
                 payment.PaymentDate = DateTime.UtcNow;
 
-                invoice.Status = payment.PaymentStatus;
+                if (isSuccess || !invoiceAlreadyPaid)
+                {
+                    invoice.Status = payment.PaymentStatus;
+                }
+
                 if (isSuccess)
                 {
                     invoice.PaidDate = DateTime.UtcNow;

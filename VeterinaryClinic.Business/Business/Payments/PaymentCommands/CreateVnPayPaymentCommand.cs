@@ -27,7 +27,7 @@ namespace VeterinaryClinic.Business
             private readonly IContextAccessor _contextAccessor;
             private readonly VnPaySettings _vnpaySettings;
             private static readonly TimeSpan VietnamUtcOffset = TimeSpan.FromHours(7);
-            private const int DefaultExpireMinutes = 15;
+            private const int DefaultExpireMinutes = 60;
 
             public Handler(
                 VeterinaryClinicDataContext dataContext,
@@ -78,38 +78,25 @@ namespace VeterinaryClinic.Business
                     throw new ArgumentException(_localizer["invoice.already_paid"]);
                 }
 
-                var payment = await _dataContext.VcPayments
-                    .FirstOrDefaultAsync(x =>
-                        x.InvoiceId == invoice.Id &&
-                        x.PaymentMethod == PaymentMethod.VNPAY.ToString() &&
-                        x.PaymentStatus == PaymentStatus.PENDING.ToString() &&
-                        x.IsActive,
-                        cancellationToken);
-
-                if (payment == null)
+                var payment = new VcPayments
                 {
-                    payment = new VcPayments
-                    {
-                        InvoiceId = invoice.Id,
-                        Code = GenerateCodeUtils.GenerateUserCode("PAY"),
-                        PaymentMethod = PaymentMethod.VNPAY.ToString(),
-                        PaymentStatus = PaymentStatus.PENDING.ToString(),
-                        Amount = invoice.TotalAmount,
-                        GatewayTransactionId = null,
-                        ResponseCode = null,
-                        GatewayResponse = null,
-                        PaymentDate = null,
-                        IsActive = true,
-                        Order = 0,
-                        CreatedDate = DateTime.UtcNow,
-                        CreatedUserId = _contextAccessor.UserId,
-                        CreatedUserName = _contextAccessor.UserName
-                    };
+                    InvoiceId = invoice.Id,
+                    Code = GenerateCodeUtils.GenerateUserCode("PAY"),
+                    PaymentMethod = PaymentMethod.VNPAY.ToString(),
+                    PaymentStatus = PaymentStatus.PENDING.ToString(),
+                    Amount = invoice.TotalAmount,
+                    GatewayTransactionId = null,
+                    ResponseCode = null,
+                    GatewayResponse = null,
+                    PaymentDate = null,
+                    IsActive = true,
+                    Order = 0,
+                    CreatedDate = DateTime.UtcNow,
+                    CreatedUserId = _contextAccessor.UserId,
+                    CreatedUserName = _contextAccessor.UserName
+                };
 
-                    await _dataContext.VcPayments.AddAsync(payment, cancellationToken);
-                    await _dataContext.SaveChangesAsync(cancellationToken);
-                }
-
+                await _dataContext.VcPayments.AddAsync(payment, cancellationToken);
                 invoice.Status = PaymentStatus.PENDING.ToString();
                 await _dataContext.SaveChangesAsync(cancellationToken);
 

@@ -77,6 +77,9 @@ namespace VeterinaryClinic.Business
 
                 _appointmentStateMachine.Apply(appointment, action, request.Model.CancelReason);
 
+                // Đảm bảo StateName luôn được cập nhật đúng chính tả từ StateMachine
+                appointment.StateName = _appointmentStateMachine.GetStateDisplayName(Enum.Parse<AppointmentStatus>(appointment.State));
+
                 if (action == AppointmentAction.CASH_PAYMENT)
                 {
                     await ApplyCashPayment(appointment, cancellationToken);

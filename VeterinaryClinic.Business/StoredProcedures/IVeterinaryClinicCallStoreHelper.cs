@@ -21,4 +21,12 @@ public interface IVeterinaryClinicCallStoreHelper
     /// <returns></returns>
     DataTable CallStoreGetCandidateDoctorsAsync(int SpecializatoinId, DateTime AppointmentDate, DateTime StartTime,
         DateTime EndTime);
+
+
+    /// <summary>
+    /// lay thong tin thong ke doanh thu
+    /// </summary>
+    /// <param name="Month">Thang</param>
+    /// <returns></returns>
+    DataTable CallStoreDashboardRevenueOverviewAsync(int Month);
 }

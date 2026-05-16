@@ -37,7 +37,7 @@ namespace VeterinaryClinic.Data
         /// <summary>
         /// Số tiền thanh toán
         /// </summary>
-        [Column(TypeName = "decimal(18,2)")]
+        [Column("amount", TypeName = "decimal(18,2)")]
         public decimal Amount { get; set; }
 
         /// <summary>

@@ -7,16 +7,16 @@ using Serilog; // Thêm using cho Serilog
 
 namespace VeterinaryClinic.Business
 {
-    public class GetOverviewStatisticQuery : IRequest<OverviewStatisticModel>
+    public class GetDashboardOverviewStatisticQuery : IRequest<OverviewStatisticModel>
     {
-        public class Handler : IRequestHandler<GetOverviewStatisticQuery, OverviewStatisticModel>
+        public class Handler : IRequestHandler<GetDashboardOverviewStatisticQuery, OverviewStatisticModel>
         {
             private readonly VeterinaryClinicReadDataContext _dataContext;
             private readonly ICacheService _cacheService;
-            private readonly IStringLocalizer<GetOverviewStatisticQuery> _localizer;
+            private readonly IStringLocalizer<GetDashboardOverviewStatisticQuery> _localizer;
             private readonly IContextAccessor _contextAccessor;
 
-            public Handler(VeterinaryClinicReadDataContext dataContext, ICacheService cacheService, IStringLocalizer<GetOverviewStatisticQuery> localizer, Func<IContextAccessor> contextAccessorFactory)
+            public Handler(VeterinaryClinicReadDataContext dataContext, ICacheService cacheService, IStringLocalizer<GetDashboardOverviewStatisticQuery> localizer, Func<IContextAccessor> contextAccessorFactory)
             {
                 _dataContext = dataContext;
                 _cacheService = cacheService;
@@ -24,7 +24,7 @@ namespace VeterinaryClinic.Business
                 _contextAccessor = contextAccessorFactory();
             }
 
-            public async Task<OverviewStatisticModel> Handle(GetOverviewStatisticQuery request, CancellationToken cancellationToken)
+            public async Task<OverviewStatisticModel> Handle(GetDashboardOverviewStatisticQuery request, CancellationToken cancellationToken)
             {
                 Log.Information($"Checking role for GetOverviewStatisticQuery. Current user role: {_contextAccessor.Role}"); // Thêm dòng log này
 

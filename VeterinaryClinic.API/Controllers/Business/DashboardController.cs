@@ -18,13 +18,32 @@ namespace VeterinaryClinic.API.Controllers
             _mediator = mediator;
         }
 
+        /// <summary>
+        /// Thong ke tong quan
+        /// </summary>
+        /// <returns></returns>
         [HttpGet, Route("overview")]
         [ProducesResponseType(typeof(ResponseObject<Unit>), StatusCodes.Status200OK)]
         public async Task<IActionResult> Overview()
         {
             return await ExecuteFunction(async () =>
             {
-                return await _mediator.Send(new GetOverviewStatisticQuery());
+                return await _mediator.Send(new GetDashboardOverviewStatisticQuery());
+            });
+        }
+        
+        /// <summary>
+        /// Thong ke doanh thu
+        /// </summary>
+        /// <param name="Month"></param>
+        /// <returns></returns>
+        [HttpPost, Route("revenue-overview")]
+        [ProducesResponseType(typeof(ResponseObject<Unit>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> RevenueOverview([FromBody]int Month)
+        {
+            return await ExecuteFunction(async () =>
+            {
+                return await _mediator.Send(new GetDoashboardRevenueOverviewQuery(Month));
             });
         }
     }   

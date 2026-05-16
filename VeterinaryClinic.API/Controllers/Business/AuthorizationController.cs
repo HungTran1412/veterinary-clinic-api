@@ -14,12 +14,10 @@ namespace VeterinaryClinic.API.Controllers
     public class AuthorizationController : ApiControllerBase
     {
         private readonly IMediator _mediator;
-        private readonly MailSettings _mailSettings;
 
-        public AuthorizationController(IMediator mediator, IOptions<MailSettings> mailSettings)
+        public AuthorizationController(IMediator mediator)
         {
             _mediator = mediator;
-            _mailSettings = mailSettings.Value;
         }
 
         /// <summary>

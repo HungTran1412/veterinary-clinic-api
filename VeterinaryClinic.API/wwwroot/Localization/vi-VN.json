@@ -126,5 +126,7 @@
   "payment.not_found": "Không tìm thấy thanh toán.",
   "payment.vnpay.input_required": "Dữ liệu phản hồi VNPay là bắt buộc.",
   "payment.vnpay.invalid_signature": "Chữ ký VNPay không hợp lệ.",
-  "payment.vnpay.invalid_amount": "Số tiền thanh toán VNPay không hợp lệ."
+  "payment.vnpay.invalid_amount": "Số tiền thanh toán VNPay không hợp lệ.",
+  
+  "dashboard.no-permission": "Bạn không có quyền truy cập trang này."
 }

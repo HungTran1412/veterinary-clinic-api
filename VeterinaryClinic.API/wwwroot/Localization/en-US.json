@@ -126,5 +126,7 @@
   "payment.not_found": "Payment not found.",
   "payment.vnpay.input_required": "VNPay response data is required.",
   "payment.vnpay.invalid_signature": "VNPay signature is invalid.",
-  "payment.vnpay.invalid_amount": "VNPay payment amount is invalid."
+  "payment.vnpay.invalid_amount": "VNPay payment amount is invalid.",
+  
+  "dashboard.no-permission": "You do not have permission to access this page."
 }

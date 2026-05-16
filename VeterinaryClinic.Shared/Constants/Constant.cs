@@ -22,6 +22,7 @@
         public const string MEDICAL_RECORD = "medical-records";
         public const string PAYMENT = "payments";
         public const string INVOICE = "invoices";
+        public const string DASHBOARD = "dashboards";
 
         #endregion
     }   

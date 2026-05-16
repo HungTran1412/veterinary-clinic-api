@@ -2,6 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using VeterinaryClinic.Business;
 using VeterinaryClinic.Shared;
+using Microsoft.Extensions.Options; // Required for IOptions
+using System.Collections.Specialized; // Required for NameValueCollection
+using System.Web; // Required for HttpUtility.ParseQueryString
 
 namespace VeterinaryClinic.API.Controllers
 {
@@ -12,10 +15,12 @@ namespace VeterinaryClinic.API.Controllers
     public class PaymentController : ApiControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly VnPaySettings _vnpaySettings; // Inject VnPaySettings
 
-        public PaymentController(IMediator mediator)
+        public PaymentController(IMediator mediator, IOptions<VnPaySettings> vnpayOptions) : base(null, mediator, null, null) // Pass nulls for base constructor as they are not used here
         {
             _mediator = mediator;
+            _vnpaySettings = vnpayOptions.Value;
         }
 
         #region CRUD
@@ -89,14 +94,25 @@ namespace VeterinaryClinic.API.Controllers
         /// Callback/return URL từ VNPay.
         /// </summary>
         [HttpGet("vnpay/return")]
-        [ProducesResponseType(typeof(ResponseObject<VnPayReturnModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)] // Thay đổi kiểu trả về để không dùng ApiResponse
         public async Task<IActionResult> VnPayReturn()
         {
-            return await ExecuteFunction(async () =>
-            {
-                var queryData = Request.Query.ToDictionary(x => x.Key, x => x.Value.ToString());
-                return await _mediator.Send(new ProcessVnPayReturnCommand(queryData));
-            });
+            // Chuyển đổi Request.Query sang Dictionary<string, string>
+            var queryData = Request.Query.ToDictionary(x => x.Key, x => x.Value.ToString());
+
+            // Gửi command để xử lý kết quả VNPay
+            var result = await _mediator.Send(new ProcessVnPayReturnCommand(queryData));
+
+            // Xây dựng URL chuyển hướng về Frontend
+            var redirectUrl = $"{_vnpaySettings.FrontendReturnUrl}" +
+                              $"?isSuccess={result.IsSuccess}" +
+                              $"&responseCode={result.ResponseCode}" +
+                              $"&message={Uri.EscapeDataString(result.Message)}" +
+                              $"&invoiceId={result.InvoiceId}" +
+                              $"&paymentId={result.PaymentId}" +
+                              $"&appointmentId={result.AppointmentId}";
+
+            return Redirect(redirectUrl); // Thực hiện redirect HTTP 302
         }
     }
 }

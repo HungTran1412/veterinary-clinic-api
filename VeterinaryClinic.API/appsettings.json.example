@@ -51,6 +51,7 @@
     "Version": "2.1.0",
     "Locale": "vn",
     "ReturnUrl": "https://localhost:44360/veterinary-clinic/v1/payments/vnpay/return",
+    "FrontendReturnUrl": "http://localhost:4200/payment/return",
     "ExpireMinutes": 15
   },
   "SignalR": {

@@ -86,6 +86,7 @@ namespace VeterinaryClinic.Business
                         IsFinalState = a.IsFinalState,
                         ProcessId = a.ProcessId,
                         AuthorId = a.AuthorId,
+                        CreatedDate = a.CreatedDate, 
                         
                         CustomerName = customer.FullName,
                         DoctorName = doctor.FullName,
@@ -145,7 +146,7 @@ namespace VeterinaryClinic.Business
 
                 #endregion
 
-                // data = data.OrderByField(filter.PropertyName, filter.Ascending);
+                data = data.OrderByDescending(x => x.AppointmentDate).ThenByDescending(x=>x.Id);
 
                 if (filter.PageSize <= 0)
                 {
@@ -162,17 +163,6 @@ namespace VeterinaryClinic.Business
                     .Take(filter.PageSize)
                     .ToListAsync(cancellationToken);
                 
-                var prop = typeof(AppointmentModel).GetProperty(filter.PropertyName);
-
-                if (prop != null)
-                {
-                    var isAscending = filter.Ascending?.ToLower() == "true";
-
-                    listData = isAscending
-                        ? listData.OrderBy(x => prop.GetValue(x, null)).ToList()
-                        : listData.OrderByDescending(x => prop.GetValue(x, null)).ToList();
-                }
-
                 var currentRole = role;
                 listData = listData.Select(item =>
                 {

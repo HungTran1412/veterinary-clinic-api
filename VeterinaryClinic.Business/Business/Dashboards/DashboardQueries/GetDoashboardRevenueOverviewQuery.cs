@@ -8,15 +8,15 @@ namespace VeterinaryClinic.Business
 {
     public class GetDoashboardRevenueOverviewQuery : IRequest<RevenueOverviewModel>
     {
-        public int Month { get; }
+        public RevenueOverviewRequestModel Model { get; }
 
         /// <summary>
         /// Thong ke doanh thu 
         /// </summary>
         /// <param name="month"></param>
-        public GetDoashboardRevenueOverviewQuery(int month)
+        public GetDoashboardRevenueOverviewQuery(RevenueOverviewRequestModel model)
         {
-            Month = month;
+            Model = model;
         }
 
         public class Handler : IRequestHandler<GetDoashboardRevenueOverviewQuery, RevenueOverviewModel>
@@ -34,6 +34,7 @@ namespace VeterinaryClinic.Business
 
             public async Task<RevenueOverviewModel> Handle(GetDoashboardRevenueOverviewQuery request, CancellationToken cancellationToken)
             {
+                var model = request.Model;
                 Log.Information($"Checking role for GetDoashboardRevenueOverviewQuery. Current user role: {_contextAccessor.Role}"); // Thêm dòng log này
 
                 if (_contextAccessor.Role != Role.ADMIN.ToString())
@@ -41,7 +42,7 @@ namespace VeterinaryClinic.Business
                     throw new ArgumentException(_localizer["dashboard.no-permission"]);
                 }
                 
-                var dataTable = _callStoreHelper.CallStoreDashboardRevenueOverviewAsync(request.Month);
+                var dataTable = _callStoreHelper.CallStoreDashboardRevenueOverviewAsync(model.Month, model.Year);
                 if (dataTable == null || dataTable.Rows.Count == 0)
                 {
                     throw new KeyNotFoundException(_localizer["data.not_found"]);

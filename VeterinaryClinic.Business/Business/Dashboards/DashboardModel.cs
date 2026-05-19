@@ -30,6 +30,12 @@ namespace VeterinaryClinic.Business
         public long TotalPet { get; init; }
     }
 
+    public record RevenueOverviewRequestModel
+    {
+        public int Month { get; init; }
+        public int Year { get; init; }
+    }
+    
     public record RevenueOverviewModel
     {
         #region Today

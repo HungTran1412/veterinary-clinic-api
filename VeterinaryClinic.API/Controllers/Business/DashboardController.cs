@@ -39,11 +39,11 @@ namespace VeterinaryClinic.API.Controllers
         /// <returns></returns>
         [HttpPost, Route("revenue-overview")]
         [ProducesResponseType(typeof(ResponseObject<Unit>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> RevenueOverview([FromBody]int Month)
+        public async Task<IActionResult> RevenueOverview([FromBody]RevenueOverviewRequestModel model)
         {
             return await ExecuteFunction(async () =>
             {
-                return await _mediator.Send(new GetDoashboardRevenueOverviewQuery(Month));
+                return await _mediator.Send(new GetDoashboardRevenueOverviewQuery(model));
             });
         }
     }   

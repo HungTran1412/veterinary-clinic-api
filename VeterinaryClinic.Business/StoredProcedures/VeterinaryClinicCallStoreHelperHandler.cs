@@ -76,13 +76,14 @@ public class VeterinaryClinicCallStoreHelperHandler : IVeterinaryClinicCallStore
         return dt;
     }
 
-    public DataTable CallStoreDashboardRevenueOverviewAsync(int Month)
+    public DataTable CallStoreDashboardRevenueOverviewAsync(int Month, int Year)
     {
         using var conn = new SqlConnection(DatabaseConnectionString());
         using var cmd = new SqlCommand("sp_DashboardRevenueOverview", conn);
 
         cmd.CommandType = CommandType.StoredProcedure;
         cmd.Parameters.AddWithValue("@Month", Month);
+        cmd.Parameters.AddWithValue("@Year", Year);
 
         var dt = new DataTable();
 

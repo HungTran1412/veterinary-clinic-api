@@ -28,5 +28,5 @@ public interface IVeterinaryClinicCallStoreHelper
     /// </summary>
     /// <param name="Month">Thang</param>
     /// <returns></returns>
-    DataTable CallStoreDashboardRevenueOverviewAsync(int Month);
+    DataTable CallStoreDashboardRevenueOverviewAsync(int Month, int Year);
 }

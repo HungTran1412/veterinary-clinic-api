@@ -63,16 +63,33 @@
         VERIFY
     }
 
+    /// <summary>
+    /// Phương thức thanh toán
+    /// </summary>
     public enum PaymentMethod
     {
         CASH,
         VNPAY
     }
 
+    /// <summary>
+    /// Trạng thái thanh toán
+    /// </summary>
     public enum PaymentStatus
     {
         PENDING,
         SUCCESS,
         FAILED
+    }
+
+    /// <summary>
+    /// Trạng thái đăng ký lịch làm việc
+    /// </summary>
+    public enum WorkScheduleRegisterStatus
+    {
+        PENDING, 
+        APPROVED,
+        REJECTED,
+        CANCELED
     }
 }

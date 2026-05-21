@@ -36,7 +36,7 @@ namespace VeterinaryClinic.Business
                 if (!string.IsNullOrEmpty(filter.TextSearch))
                 {
                     string ts = filter.TextSearch.Trim().ToLower();
-                    data = data.Where(x => x.ShiftName.ToLower().Contains(ts));
+                    data = data.Where(x => x.ShiftName.ToLower().Contains(ts) || x.Code.ToLower().Contains(ts));
                 }
 
                 if (filter.IsActive.HasValue)

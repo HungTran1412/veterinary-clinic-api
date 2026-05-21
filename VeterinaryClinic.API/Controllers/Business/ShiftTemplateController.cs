@@ -88,7 +88,7 @@ namespace VeterinaryClinic.API.Controllers
         /// <param name="filter"></param>
         /// <returns></returns>
         [HttpPost, Route("filter")]
-        [ProducesResponseType(typeof(ResponseObject<List<ShiftTemplateSelectItemModel>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseObject<List<ShiftTemplateModel>>), StatusCodes.Status200OK)]
         public async Task<IActionResult> Filter([FromBody] ShiftTemplateFilterModel filter)
         {
             return await ExecuteFunction(async () =>

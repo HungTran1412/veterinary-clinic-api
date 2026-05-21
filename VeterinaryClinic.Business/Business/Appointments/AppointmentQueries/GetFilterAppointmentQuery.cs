@@ -89,6 +89,7 @@ namespace VeterinaryClinic.Business
                         CreatedDate = a.CreatedDate, 
                         
                         CustomerName = customer.FullName,
+                        CustomerPhone = customer.PhoneNumber,
                         DoctorName = doctor.FullName,
                         PetName = pet.Name,
                         ServiceName = service.Name,

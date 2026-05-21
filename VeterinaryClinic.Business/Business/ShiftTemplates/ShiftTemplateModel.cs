@@ -14,10 +14,10 @@ namespace VeterinaryClinic.Business
         public string ShiftName { get; init; }
     
         [Required(ErrorMessage = "shift_template.start_time.required")]    
-        public DateTime StartTime { get; init; }
+        public TimeOnly StartTime { get; init; }
     
         [Required(ErrorMessage = "shift_template.end_time.required")]    
-        public DateTime EndTime { get; init; }
+        public TimeOnly EndTime { get; init; }
 
         public int MaxEmployee { get; init; }
     }

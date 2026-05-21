@@ -31,13 +31,13 @@ namespace VeterinaryClinic.Data
         /// gio bat dau
         /// </summary>
         [Column("start_time")]
-        public DateTime StartTime { get; set; }
+        public TimeOnly StartTime { get; set; }
         
         /// <summary>
         /// gio ket thuc
         /// </summary>
         [Column("end_time")]
-        public DateTime EndTime { get; set; }
+        public TimeOnly EndTime { get; set; }
 
         /// <summary>
         /// so luong nhan vien

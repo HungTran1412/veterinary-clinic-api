@@ -56,6 +56,7 @@ namespace VeterinaryClinic.Business
         public string? CancelReason { get; init; }
 
         public string? CustomerName { get; init; }
+        public string? CustomerPhone { get; init; }
         public string? PetName { get; init; }
         public string? ServiceName { get; init; }
         public string? DoctorName { get; init; }

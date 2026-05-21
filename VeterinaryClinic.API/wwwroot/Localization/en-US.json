@@ -1,11 +1,19 @@
 {
   "Hello": "Hello",
   "data.not-found": "Data not found",
+  "forbidden": "You do not have permission to perform this function",
 
   "specialization.code.required": "Specialization code is required",
   "specialization.name.required": "Specialization name is required",
   "Specialization.existed.code;": "Specialization code already exists",
   "specialization.not_found_or_inactive": "One or more specializations not found or are inactive.",
+
+  "shift_template.code.required": "Shift template code is required",
+  "shift_template.shift_name.required": "Shift name is required",
+  "shift_template.start_time.required": "Start time is required",
+  "shift_template.end_time.required": "End time is required",
+  "ShiftTemplate.existed.code": "Shift template code already exists",
+  "shifttemplate.in_use": "Cannot delete shift template because it is in use.",
 
   "service.code.required": "Service code is required",
   "service.name.required": "Service name is required",

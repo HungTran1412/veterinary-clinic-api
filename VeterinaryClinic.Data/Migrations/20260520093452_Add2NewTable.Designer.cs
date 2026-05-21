@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VeterinaryClinic.Data;
 
@@ -11,9 +12,11 @@ using VeterinaryClinic.Data;
 namespace VeterinaryClinic.Data.Migrations
 {
     [DbContext(typeof(VeterinaryClinicDataContext))]
-    partial class VeterinaryClinicDataContextModelSnapshot : ModelSnapshot
+    [Migration("20260520093452_Add2NewTable")]
+    partial class Add2NewTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -870,9 +873,8 @@ namespace VeterinaryClinic.Data.Migrations
                         .HasColumnName("created_user_name")
                         .HasColumnOrder(105);
 
-                    b.Property<TimeOnly>("EndTime")
-                        .HasColumnType("time")
-                        .HasColumnName("end_time");
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit")
@@ -880,8 +882,7 @@ namespace VeterinaryClinic.Data.Migrations
                         .HasColumnOrder(101);
 
                     b.Property<int>("MaxEmployee")
-                        .HasColumnType("int")
-                        .HasColumnName("max_employee");
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime2")
@@ -906,12 +907,10 @@ namespace VeterinaryClinic.Data.Migrations
 
                     b.Property<string>("ShiftName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("shift_name");
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<TimeOnly>("StartTime")
-                        .HasColumnType("time")
-                        .HasColumnName("start_time");
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 

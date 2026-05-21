@@ -89,6 +89,7 @@ namespace VeterinaryClinic.Business
                         CreatedDate = a.CreatedDate, 
                         
                         CustomerName = customer.FullName,
+                        CustomerPhone = customer.PhoneNumber,
                         DoctorName = doctor.FullName,
                         PetName = pet.Name,
                         ServiceName = service.Name,
@@ -109,6 +110,7 @@ namespace VeterinaryClinic.Business
                     data = data.Where(x => x.Code != null && x.Code.ToLower().Contains(ts) 
                                            || x.CustomerName != null && x.CustomerName.ToLower().Contains(ts) 
                                            || x.PetName != null && x.PetName.ToLower().Contains(ts) 
+                                           || x.CustomerPhone != null && x.CustomerPhone.ToLower().Contains(ts)
                                            || x.ServiceName != null && x.ServiceName.ToLower().Contains(ts));
                 }
 

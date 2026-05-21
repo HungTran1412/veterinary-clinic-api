@@ -24,21 +24,25 @@ namespace VeterinaryClinic.Data
         /// <summary>
         /// Ten ca lam viec
         /// </summary>
+        [Column("shift_name")]
         public string ShiftName { get; set; }
         
         /// <summary>
         /// gio bat dau
         /// </summary>
+        [Column("start_time")]
         public DateTime StartTime { get; set; }
         
         /// <summary>
         /// gio ket thuc
         /// </summary>
+        [Column("end_time")]
         public DateTime EndTime { get; set; }
 
         /// <summary>
         /// so luong nhan vien
         /// </summary>
+        [Column("max_employee")]
         public int MaxEmployee { get; set; } = 15;
     }   
 }

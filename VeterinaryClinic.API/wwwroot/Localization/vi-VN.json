@@ -1,11 +1,19 @@
 {
   "Hello": "Xin chào",
   "data.not-found": "Dữ liệu không tồn tại",
+  "forbidden": "Bạn không có quyền thực hiện chức năng này",
 
   "specialization.code.required": "Mã chuyên ngành không được để trống",
   "specialization.name.required": "Tên chuyên ngành không được để trống",
   "Specialization.existed.code;": "Mã chuyên ngành đã tồn tại",
   "specialization.not_found_or_inactive": "Một hoặc nhiều chuyên ngành không tồn tại hoặc đã bị vô hiệu hóa.",
+
+  "shift_template.code.required": "Mã ca làm việc không được để trống",
+  "shift_template.shift_name.required": "Tên ca làm việc không được để trống",
+  "shift_template.start_time.required": "Thời gian bắt đầu không được để trống",
+  "shift_template.end_time.required": "Thời gian kết thúc không được để trống",
+  "ShiftTemplate.existed.code": "Mã ca làm việc đã tồn tại",
+  "shifttemplate.in_use": "Không thể xóa ca làm việc vì đang có lịch làm việc sử dụng.",
 
   "service.code.required": "Mã dịch vụ không được để trống",
   "service.name.required": "Tên dịch vụ không được để trống",

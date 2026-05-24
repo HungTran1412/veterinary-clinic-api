@@ -8,7 +8,7 @@ namespace VeterinaryClinic.API.Controllers
 {
     [ApiController]
     [Route("veterinary-clinic/v1/work-schedule-registrations")]
-    [ApiExplorerSettings(GroupName = "16. Dang ky lich lam viec")]
+    [ApiExplorerSettings(GroupName = "16. Đăng ký lịch làm việc (Quản lý đăng ký lịch làm việc)")]
     [Authorize]
     public class WorkScheduleRegistrationController : ApiControllerBase
     {

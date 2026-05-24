@@ -49,7 +49,7 @@ public class DeleteWorkScheduleRegistrationCommand : IRequest<Unit>
 
             if (entity.Status == WorkScheduleRegisterStatus.APPROVED.ToString())
             {
-                throw new ArgumentException("Approved registration cannot be deleted.");
+                throw new ArgumentException(_localizer["work-schedule-registration.approved_cannot_be_deleted"]);
             }
 
             entity.IsActive = false;

@@ -57,7 +57,7 @@ public class ProcessWorkScheduleRegistrationCommand : IRequest<Unit>
 
             if (!Enum.TryParse<WorkScheduleRegisterStatus>(entity.Status, true, out var currentStatus))
             {
-                throw new ArgumentException("Invalid work schedule registration status.");
+                throw new ArgumentException(_localizer["work-schedule-registration.invalid_status"]);
             }
 
             ValidatePermission(entity, nextStatus);
@@ -79,7 +79,7 @@ public class ProcessWorkScheduleRegistrationCommand : IRequest<Unit>
                     .FirstOrDefaultAsync(x => x.Id == entity.ShiftTemplateId && x.IsActive, cancellationToken);
                 if (shiftTemplate == null)
                 {
-                    throw new ArgumentException("Shift template not found.");
+                    throw new ArgumentException(_localizer["shift-template.not_found"]);
                 }
 
                 var workDate = entity.WorkDate.Date;
@@ -146,16 +146,16 @@ public class ProcessWorkScheduleRegistrationCommand : IRequest<Unit>
             throw new UnauthorizedAccessException(_localizer["user.unauthorized"]);
         }
 
-        private static void ValidateTransition(WorkScheduleRegisterStatus currentStatus, WorkScheduleRegisterStatus nextStatus)
+        private void ValidateTransition(WorkScheduleRegisterStatus currentStatus, WorkScheduleRegisterStatus nextStatus)
         {
             if (nextStatus == WorkScheduleRegisterStatus.PENDING)
             {
-                throw new InvalidOperationException("Cannot move registration back to pending.");
+                throw new InvalidOperationException(_localizer["work-schedule-registration.cannot_move_to_pending"]);
             }
 
             if (currentStatus != WorkScheduleRegisterStatus.PENDING)
             {
-                throw new InvalidOperationException("Only pending registration can be processed.");
+                throw new InvalidOperationException(_localizer["work-schedule-registration.only_pending_can_be_processed"]);
             }
         }
     }

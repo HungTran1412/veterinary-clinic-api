@@ -101,7 +101,7 @@ public class CreateWorkScheduleRegistrationCommand : IRequest<int>
 
             if (duplicateRegistration)
             {
-                throw new ArgumentException("Registration already exists for this shift and work date.");
+                throw new ArgumentException(_localizer["work-schedule-registration.already_exists"]);
             }
 
             var registration = new VcWorkScheduleRegistrations

@@ -14,6 +14,7 @@
   "shift_template.end_time.required": "Thời gian kết thúc không được để trống",
   "ShiftTemplate.existed.code": "Mã ca làm việc đã tồn tại",
   "shifttemplate.in_use": "Không thể xóa ca làm việc vì đang có lịch làm việc sử dụng.",
+  "shift-template.not_found": "Không tìm thấy mẫu ca làm việc.",
 
   "service.code.required": "Mã dịch vụ không được để trống",
   "service.name.required": "Tên dịch vụ không được để trống",
@@ -70,6 +71,18 @@
   "work_schedule.receptionist.limit_exceeded": "Ca làm việc đã đủ 2 lễ tân.",
   "work_schedule.doctor.limit_exceeded": "Ca làm việc đã đủ 15 bác sĩ.",
   "work_schedule.user.shift_limit_exceeded": "Người dùng đã đạt đến giới hạn 3 ca làm việc mỗi ngày.",
+
+  "work-schedule-registration.code.required": "Mã đăng ký không được để trống.",
+  "work-schedule-registration.user-id.required": "Người dùng không được để trống.",
+  "work-schedule-registration.shift-template-id.required": "Mẫu ca làm việc không được để trống.",
+  "work-schedule-registration.work-date.required": "Ngày làm việc không được để trống.",
+  "work-schedule-registration.status.required": "Trạng thái không được để trống.",
+  "work-schedule-registration.register-date.required": "Ngày đăng ký không được để trống.",
+  "work-schedule-registration.already_exists": "Đã tồn tại đơn đăng ký cho ca làm việc và ngày làm việc này.",
+  "work-schedule-registration.invalid_status": "Trạng thái đăng ký lịch làm việc không hợp lệ.",
+  "work-schedule-registration.cannot_move_to_pending": "Không thể chuyển trạng thái đăng ký về 'Chờ duyệt'.",
+  "work-schedule-registration.only_pending_can_be_processed": "Chỉ có thể xử lý các đơn đăng ký đang ở trạng thái 'Chờ duyệt'.",
+  "work-schedule-registration.approved_cannot_be_deleted": "Không thể xóa đơn đăng ký đã được chấp thuận.",
 
   "pet.name.required": "Tên thú cưng không được để trống.",
   "pet.species.required": "Loài không được để trống.",

@@ -26,6 +26,13 @@ namespace VeterinaryClinic.API.Controllers
             return await ExecuteFunction(async () => await _mediator.Send(new CreateWorkScheduleRegistrationCommand(model)));
         }
 
+        [HttpPost("many")]
+        [ProducesResponseType(typeof(ResponseObject<Unit>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> CreateMany([FromBody] List<CreateWorkScheduleRegistrationModel> models)
+        {
+            return await ExecuteFunction(async () => await _mediator.Send(new CreateManyWorkScheduleRegistrationCommand(models)));
+        }
+
         [HttpPost("{id}/process")]
         [ProducesResponseType(typeof(ResponseObject<Unit>), StatusCodes.Status200OK)]
         public async Task<IActionResult> Process([FromRoute] int id, [FromBody] ProcessWorkScheduleRegistrationModel model)

@@ -24,7 +24,7 @@ namespace VeterinaryClinic.API.Controllers
         /// </summary>
         /// <param name="model">Thông tin lịch làm việc</param>
         /// <returns>ID của lịch làm việc mới</returns>
-        [HttpPost, Route("create-many")]
+        [HttpPost, Route("many")]
         [ProducesResponseType(typeof(ResponseObject<int>), StatusCodes.Status200OK)]
         public async Task<IActionResult> CreateMany([FromBody] List<CreateWorkScheduleModel> model)
         {

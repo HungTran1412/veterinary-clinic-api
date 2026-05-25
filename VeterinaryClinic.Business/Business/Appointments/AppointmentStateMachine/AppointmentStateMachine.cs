@@ -33,13 +33,8 @@ namespace VeterinaryClinic.Business
             [AppointmentStatus.CONFIRMED] = new[]
             {
                 AppointmentAction.START_CONSULTATION,
-                AppointmentAction.REQUEST_CANCELLATION,
+                AppointmentAction.CUSTOMER_CANCEL,
                 AppointmentAction.MARK_NO_SHOW
-            },
-            [AppointmentStatus.CANCELLATION_REQUESTED] = new[]
-            {
-                AppointmentAction.APPROVE_CANCELLATION,
-                AppointmentAction.REJECT_CANCELLATION_REQUEST
             },
             [AppointmentStatus.IN_PROGRESS] = new[]
             {
@@ -72,7 +67,6 @@ namespace VeterinaryClinic.Business
                 AppointmentStatus.CONFIRMED => "Đã xác nhận",
                 AppointmentStatus.REJECTED => "Từ chối",
                 AppointmentStatus.CANCELLED => "Đã hủy",
-                AppointmentStatus.CANCELLATION_REQUESTED => "Chờ duyệt hủy",
                 AppointmentStatus.IN_PROGRESS => "Đang thực hiện",
                 AppointmentStatus.PAYMENT_PENDING => "Chờ thanh toán",
                 AppointmentStatus.COMPLETED => "Hoàn thành",
@@ -96,7 +90,7 @@ namespace VeterinaryClinic.Business
             return role switch
             {
                 Role.CUSTOMER => actions.Where(x =>
-                    x == AppointmentAction.REQUEST_CANCELLATION ||
+                    x == AppointmentAction.CUSTOMER_CANCEL ||
                     x == AppointmentAction.BANK_TRANSFER
                 ).ToList(),
 
@@ -107,8 +101,6 @@ namespace VeterinaryClinic.Business
                 ).ToList(),
 
                 Role.RECEPTIONIST => actions.Where(x =>
-                    x == AppointmentAction.APPROVE_CANCELLATION ||
-                    x == AppointmentAction.REJECT_CANCELLATION_REQUEST ||
                     x == AppointmentAction.CASH_PAYMENT ||
                     x == AppointmentAction.BANK_TRANSFER
                 ).ToList(),
@@ -128,7 +120,7 @@ namespace VeterinaryClinic.Business
                 throw new UnauthorizedAccessException(_localizer["user.unauthorized"]);
             }
 
-            if (action == AppointmentAction.REQUEST_CANCELLATION)
+            if (action == AppointmentAction.CUSTOMER_CANCEL)
             {
                 var now = DateTime.UtcNow;
 
@@ -192,10 +184,8 @@ namespace VeterinaryClinic.Business
             return (currentStatus, action) switch
             {
                 (AppointmentStatus.CONFIRMED, AppointmentAction.START_CONSULTATION) => AppointmentStatus.IN_PROGRESS,
-                (AppointmentStatus.CONFIRMED, AppointmentAction.REQUEST_CANCELLATION) => AppointmentStatus.CANCELLATION_REQUESTED,
+                (AppointmentStatus.CONFIRMED, AppointmentAction.CUSTOMER_CANCEL) => AppointmentStatus.CANCELLED,
                 (AppointmentStatus.CONFIRMED, AppointmentAction.MARK_NO_SHOW) => AppointmentStatus.NO_SHOW,
-                (AppointmentStatus.CANCELLATION_REQUESTED, AppointmentAction.APPROVE_CANCELLATION) => AppointmentStatus.CANCELLED,
-                (AppointmentStatus.CANCELLATION_REQUESTED, AppointmentAction.REJECT_CANCELLATION_REQUEST) => AppointmentStatus.CONFIRMED,
                 (AppointmentStatus.IN_PROGRESS, AppointmentAction.COMPLETE_CONSULTATION) => AppointmentStatus.PAYMENT_PENDING,
                 (AppointmentStatus.PAYMENT_PENDING, AppointmentAction.COMPLETE_PAYMENT) => AppointmentStatus.COMPLETED,
                 (AppointmentStatus.PAYMENT_PENDING, AppointmentAction.CASH_PAYMENT) => AppointmentStatus.COMPLETED,
@@ -212,10 +202,7 @@ namespace VeterinaryClinic.Business
                 AppointmentAction.REJECT => "Từ chối",
                 AppointmentAction.CUSTOMER_CANCEL => "Hủy lịch",
                 AppointmentAction.START_CONSULTATION => "Bắt đầu khám",
-                AppointmentAction.REQUEST_CANCELLATION => "Yêu cầu hủy",
                 AppointmentAction.MARK_NO_SHOW => "Không đến",
-                AppointmentAction.APPROVE_CANCELLATION => "Xác nhận hủy",
-                AppointmentAction.REJECT_CANCELLATION_REQUEST => "Từ chối từ chỗi hủy",
                 AppointmentAction.COMPLETE_CONSULTATION => "Hoàn thành khám",
                 AppointmentAction.COMPLETE_PAYMENT => "Thanh toán",
                 AppointmentAction.CASH_PAYMENT => "Thanh toán tiền mặt",

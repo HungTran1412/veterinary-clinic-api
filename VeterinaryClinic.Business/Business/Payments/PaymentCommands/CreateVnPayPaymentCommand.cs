@@ -61,63 +61,81 @@ namespace VeterinaryClinic.Business
                     throw new ArgumentException(_localizer["appointment.payment.not_pending"]);
                 }
 
-                var invoice = await _dataContext.VcInvoices
-                    .FirstOrDefaultAsync(x => x.AppointmentId == appointment.Id && x.IsActive, cancellationToken);
-                if (invoice == null)
+                var pendingInvoices = await (
+                    from invoice in _dataContext.VcInvoices
+                    join appt in _dataContext.VcAppointments on invoice.AppointmentId equals appt.Id
+                    where invoice.IsActive &&
+                          appt.IsActive &&
+                          appt.CustomerId == appointment.CustomerId &&
+                          invoice.Status != PaymentStatus.SUCCESS.ToString() &&
+                          appt.State == AppointmentStatus.PAYMENT_PENDING.ToString()
+                    select new { Invoice = invoice, Appointment = appt })
+                    .ToListAsync(cancellationToken);
+
+                if (!pendingInvoices.Any())
                 {
                     throw new ArgumentException(_localizer["invoice.not_found"]);
                 }
 
-                if (invoice.TotalAmount <= 0)
+                if (pendingInvoices.Any(x => x.Invoice.TotalAmount <= 0))
                 {
                     throw new ArgumentException(_localizer["invoice.amount.invalid"]);
                 }
 
-                if (invoice.Status == PaymentStatus.SUCCESS.ToString())
+                var paymentBatchCode = GenerateCodeUtils.GenerateUserCode("PAY");
+                var payments = new List<VcPayments>();
+
+                foreach (var item in pendingInvoices)
                 {
-                    throw new ArgumentException(_localizer["invoice.already_paid"]);
+                    item.Invoice.Status = PaymentStatus.PENDING.ToString();
+
+                    payments.Add(new VcPayments
+                    {
+                        InvoiceId = item.Invoice.Id,
+                        Code = paymentBatchCode,
+                        PaymentMethod = PaymentMethod.VNPAY.ToString(),
+                        PaymentStatus = PaymentStatus.PENDING.ToString(),
+                        Amount = item.Invoice.TotalAmount,
+                        GatewayTransactionId = null,
+                        ResponseCode = null,
+                        GatewayResponse = null,
+                        PaymentDate = null,
+                        IsActive = true,
+                        Order = 0,
+                        CreatedDate = DateTime.UtcNow,
+                        CreatedUserId = _contextAccessor.UserId,
+                        CreatedUserName = _contextAccessor.UserName
+                    });
                 }
 
-                var payment = new VcPayments
-                {
-                    InvoiceId = invoice.Id,
-                    Code = GenerateCodeUtils.GenerateUserCode("PAY"),
-                    PaymentMethod = PaymentMethod.VNPAY.ToString(),
-                    PaymentStatus = PaymentStatus.PENDING.ToString(),
-                    Amount = invoice.TotalAmount,
-                    GatewayTransactionId = null,
-                    ResponseCode = null,
-                    GatewayResponse = null,
-                    PaymentDate = null,
-                    IsActive = true,
-                    Order = 0,
-                    CreatedDate = DateTime.UtcNow,
-                    CreatedUserId = _contextAccessor.UserId,
-                    CreatedUserName = _contextAccessor.UserName
-                };
-
-                await _dataContext.VcPayments.AddAsync(payment, cancellationToken);
-                invoice.Status = PaymentStatus.PENDING.ToString();
+                await _dataContext.VcPayments.AddRangeAsync(payments, cancellationToken);
                 await _dataContext.SaveChangesAsync(cancellationToken);
 
-                var paymentUrl = CreatePaymentUrl(invoice, payment, model.ClientIpAddress);
-                Log.Information("Created VNPay payment url for Invoice {InvoiceId}, Payment {PaymentId}", invoice.Id, payment.Id);
+                var anchorPayment = payments.First();
+                var totalAmount = payments.Sum(x => x.Amount);
+                var paymentUrl = CreatePaymentUrl(totalAmount, anchorPayment, pendingInvoices.Count, model.ClientIpAddress);
+                Log.Information(
+                    "Created VNPay payment url for Customer {CustomerId}, Payment {PaymentId}, InvoiceCount {InvoiceCount}",
+                    appointment.CustomerId,
+                    anchorPayment.Id,
+                    pendingInvoices.Count);
 
                 return new VnPayPaymentUrlModel
                 {
                     PaymentUrl = paymentUrl,
-                    InvoiceId = invoice.Id,
-                    PaymentId = payment.Id,
-                    Amount = invoice.TotalAmount
+                    InvoiceId = anchorPayment.InvoiceId,
+                    PaymentId = anchorPayment.Id,
+                    Amount = totalAmount,
+                    InvoiceCount = pendingInvoices.Count
                 };
             }
 
-            private string CreatePaymentUrl(VcInvoices invoice, VcPayments payment, string? clientIpAddress)
+            private string CreatePaymentUrl(decimal totalAmount, VcPayments payment, int invoiceCount, string? clientIpAddress)
             {
                 var vnpay = new VnPayLibrary();
                 var now = DateTime.UtcNow.Add(VietnamUtcOffset);
                 var expireDate = now.AddMinutes(_vnpaySettings.ExpireMinutes > 0 ? _vnpaySettings.ExpireMinutes : DefaultExpireMinutes);
-                var amount = decimal.ToInt64(decimal.Round(invoice.TotalAmount * 100, 0, MidpointRounding.AwayFromZero));
+                var amount = decimal.ToInt64(decimal.Round(totalAmount * 100, 0, MidpointRounding.AwayFromZero));
 
                 vnpay.AddRequestData("vnp_Version", _vnpaySettings.Version);
                 vnpay.AddRequestData("vnp_Command", _vnpaySettings.Command);
@@ -127,7 +145,7 @@ namespace VeterinaryClinic.Business
                 vnpay.AddRequestData("vnp_CurrCode", _vnpaySettings.CurrCode);
                 vnpay.AddRequestData("vnp_IpAddr", NormalizeClientIpAddress(clientIpAddress));
                 vnpay.AddRequestData("vnp_Locale", _vnpaySettings.Locale);
-                vnpay.AddRequestData("vnp_OrderInfo", $"Thanh toan hoa don {invoice.Code}");
+                vnpay.AddRequestData("vnp_OrderInfo", $"Thanh toan {invoiceCount} hoa don");
                 vnpay.AddRequestData("vnp_OrderType", "other");
                 vnpay.AddRequestData("vnp_ReturnUrl", _vnpaySettings.ReturnUrl);
                 vnpay.AddRequestData("vnp_TxnRef", payment.Id.ToString(CultureInfo.InvariantCulture));

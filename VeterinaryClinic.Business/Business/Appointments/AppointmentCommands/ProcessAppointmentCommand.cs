@@ -117,9 +117,6 @@ namespace VeterinaryClinic.Business
                     AppointmentAction.REJECT => isAdmin,
                     AppointmentAction.CUSTOMER_CANCEL => isCustomer && appointment.CustomerId == userId,
                     AppointmentAction.START_CONSULTATION => isDoctor && appointment.DoctorId == userId,
-                    AppointmentAction.REQUEST_CANCELLATION => isCustomer && appointment.CustomerId == userId,
-                    AppointmentAction.APPROVE_CANCELLATION => isAdmin || isReceptionist,
-                    AppointmentAction.REJECT_CANCELLATION_REQUEST => isAdmin || isReceptionist,
                     AppointmentAction.MARK_NO_SHOW => isAdmin || (isDoctor && appointment.DoctorId == userId),
                     AppointmentAction.COMPLETE_CONSULTATION => isDoctor && appointment.DoctorId == userId,
                     AppointmentAction.COMPLETE_PAYMENT => isAdmin || isReceptionist,
@@ -136,45 +133,63 @@ namespace VeterinaryClinic.Business
 
             private async Task ApplyCashPayment(VcAppointments appointment, CancellationToken cancellationToken)
             {
-                var invoice = await _dataContext.VcInvoices
-                    .FirstOrDefaultAsync(x => x.AppointmentId == appointment.Id && x.IsActive, cancellationToken);
-                if (invoice == null)
+                var pendingBillingItems = await (
+                    from invoice in _dataContext.VcInvoices
+                    join appt in _dataContext.VcAppointments on invoice.AppointmentId equals appt.Id
+                    where invoice.IsActive &&
+                          appt.IsActive &&
+                          appt.CustomerId == appointment.CustomerId &&
+                          invoice.Status != PaymentStatus.SUCCESS.ToString() &&
+                          appt.State == AppointmentStatus.PAYMENT_PENDING.ToString()
+                    select new { Invoice = invoice, Appointment = appt })
+                    .ToListAsync(cancellationToken);
+
+                if (!pendingBillingItems.Any())
                 {
                     throw new ArgumentException(_localizer["invoice.not_found"]);
                 }
 
-                if (invoice.TotalAmount <= 0)
+                if (pendingBillingItems.Any(x => x.Invoice.TotalAmount <= 0))
                 {
                     throw new ArgumentException(_localizer["invoice.amount.invalid"]);
                 }
 
-                if (invoice.Status == PaymentStatus.SUCCESS.ToString())
+                var paymentCode = GenerateCodeUtils.GenerateUserCode("PAY");
+                var paidDate = DateTime.UtcNow;
+                var payments = new List<VcPayments>();
+
+                foreach (var item in pendingBillingItems)
                 {
-                    throw new ArgumentException(_localizer["invoice.already_paid"]);
+                    item.Invoice.Status = PaymentStatus.SUCCESS.ToString();
+                    item.Invoice.PaidDate = paidDate;
+
+                    item.Appointment.State = AppointmentStatus.COMPLETED.ToString();
+                    item.Appointment.StateName = _appointmentStateMachine.GetStateDisplayName(AppointmentStatus.COMPLETED);
+                    item.Appointment.IsFinalState = true;
+                    item.Appointment.ModifiedDate = paidDate;
+                    item.Appointment.ModifiedUserId = _contextAccessor.UserId;
+                    item.Appointment.ModifiedUserName = _contextAccessor.UserName;
+
+                    payments.Add(new VcPayments
+                    {
+                        InvoiceId = item.Invoice.Id,
+                        Code = paymentCode,
+                        PaymentMethod = PaymentMethod.CASH.ToString(),
+                        PaymentStatus = PaymentStatus.SUCCESS.ToString(),
+                        Amount = item.Invoice.TotalAmount,
+                        GatewayTransactionId = null,
+                        ResponseCode = null,
+                        GatewayResponse = null,
+                        PaymentDate = paidDate,
+                        IsActive = true,
+                        Order = 0,
+                        CreatedDate = paidDate,
+                        CreatedUserId = _contextAccessor.UserId,
+                        CreatedUserName = _contextAccessor.UserName
+                    });
                 }
 
-                var payment = new VcPayments
-                {
-                    InvoiceId = invoice.Id,
-                    Code = GenerateCodeUtils.GenerateUserCode("PAY"),
-                    PaymentMethod = PaymentMethod.CASH.ToString(),
-                    PaymentStatus = PaymentStatus.SUCCESS.ToString(),
-                    Amount = invoice.TotalAmount,
-                    GatewayTransactionId = null,
-                    ResponseCode = null,
-                    GatewayResponse = null,
-                    PaymentDate = DateTime.UtcNow,
-                    IsActive = true,
-                    Order = 0,
-                    CreatedDate = DateTime.UtcNow,
-                    CreatedUserId = _contextAccessor.UserId,
-                    CreatedUserName = _contextAccessor.UserName
-                };
-
-                invoice.Status = PaymentStatus.SUCCESS.ToString();
-                invoice.PaidDate = DateTime.UtcNow;
-
-                await _dataContext.VcPayments.AddAsync(payment, cancellationToken);
+                await _dataContext.VcPayments.AddRangeAsync(payments, cancellationToken);
             }
         }
     }

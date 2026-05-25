@@ -58,6 +58,7 @@ namespace VeterinaryClinic.Business
         public int InvoiceId { get; init; }
         public int PaymentId { get; init; }
         public decimal Amount { get; init; }
+        public int InvoiceCount { get; init; }
     }
 
     public record VnPayReturnModel
@@ -68,5 +69,7 @@ namespace VeterinaryClinic.Business
         public int? InvoiceId { get; init; }
         public int? PaymentId { get; init; }
         public int? AppointmentId { get; init; }
+        public decimal Amount { get; init; }
+        public int InvoiceCount { get; init; }
     }
 }

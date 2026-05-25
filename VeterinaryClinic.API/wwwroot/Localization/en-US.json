@@ -14,6 +14,7 @@
   "shift_template.end_time.required": "End time is required",
   "ShiftTemplate.existed.code": "Shift template code already exists",
   "shifttemplate.in_use": "Cannot delete shift template because it is in use.",
+  "shift-template.not_found": "Shift template not found.",
 
   "service.code.required": "Service code is required",
   "service.name.required": "Service name is required",
@@ -70,6 +71,18 @@
   "work_schedule.receptionist.limit_exceeded": "The shift is already full with 2 receptionists.",
   "work_schedule.doctor.limit_exceeded": "The shift is already full with 15 doctors.",
   "work_schedule.user.shift_limit_exceeded": "The user has reached the limit of 3 shifts per day.",
+
+  "work-schedule-registration.code.required": "Registration code is required.",
+  "work-schedule-registration.user-id.required": "User is required.",
+  "work-schedule-registration.shift-template-id.required": "Shift template is required.",
+  "work-schedule-registration.work-date.required": "Work date is required.",
+  "work-schedule-registration.status.required": "Status is required.",
+  "work-schedule-registration.register-date.required": "Registration date is required.",
+  "work-schedule-registration.already_exists": "A registration for this shift and work date already exists.",
+  "work-schedule-registration.invalid_status": "Invalid work schedule registration status.",
+  "work-schedule-registration.cannot_move_to_pending": "Cannot move registration back to pending.",
+  "work-schedule-registration.only_pending_can_be_processed": "Only pending registrations can be processed.",
+  "work-schedule-registration.approved_cannot_be_deleted": "Approved registration cannot be deleted.",
 
   "pet.name.required": "Pet name is required.",
   "pet.species.required": "Species is required.",

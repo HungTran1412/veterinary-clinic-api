@@ -67,29 +67,46 @@ namespace VeterinaryClinic.Business
                     throw new ArgumentException(_localizer["payment.not_found"]);
                 }
 
-                var invoice = await _dataContext.VcInvoices
-                    .FirstOrDefaultAsync(x => x.Id == payment.InvoiceId && x.IsActive, cancellationToken);
-                if (invoice == null)
+                var batchPayments = await _dataContext.VcPayments
+                    .Where(x => x.IsActive && x.Code == payment.Code)
+                    .ToListAsync(cancellationToken);
+                if (!batchPayments.Any())
+                {
+                    throw new ArgumentException(_localizer["payment.not_found"]);
+                }
+
+                var invoiceIds = batchPayments.Select(x => x.InvoiceId).Distinct().ToList();
+                var invoices = await _dataContext.VcInvoices
+                    .Where(x => x.IsActive && invoiceIds.Contains(x.Id))
+                    .ToListAsync(cancellationToken);
+                if (!invoices.Any())
                 {
                     throw new ArgumentException(_localizer["invoice.not_found"]);
                 }
 
-                var appointment = await _dataContext.VcAppointments
-                    .FirstOrDefaultAsync(x => x.Id == invoice.AppointmentId && x.IsActive, cancellationToken);
+                var appointmentIds = invoices.Select(x => x.AppointmentId).Distinct().ToList();
+                var appointments = await _dataContext.VcAppointments
+                    .Where(x => x.IsActive && appointmentIds.Contains(x.Id))
+                    .ToListAsync(cancellationToken);
 
                 var responseCode = vnpay.GetResponseData("vnp_ResponseCode");
                 var transactionStatus = vnpay.GetResponseData("vnp_TransactionStatus");
                 var gatewayTransactionId = vnpay.GetResponseData("vnp_TransactionNo");
-                var invoiceAlreadyPaid = invoice.Status == PaymentStatus.SUCCESS.ToString();
+                var totalAmount = invoices.Sum(x => x.TotalAmount);
+                var hasPaidInvoice = invoices.Any(x => x.Status == PaymentStatus.SUCCESS.ToString());
 
                 if (!long.TryParse(vnpay.GetResponseData("vnp_Amount"), out var vnpAmountValue) ||
-                    vnpAmountValue / 100m != invoice.TotalAmount)
+                    vnpAmountValue / 100m != totalAmount)
                 {
-                    payment.PaymentStatus = PaymentStatus.FAILED.ToString();
-                    payment.ResponseCode = responseCode;
-                    payment.GatewayTransactionId = gatewayTransactionId;
-                    payment.GatewayResponse = JsonSerializer.Serialize(request.QueryData);
-                    if (!invoiceAlreadyPaid)
+                    foreach (var batchPayment in batchPayments)
+                    {
+                        batchPayment.PaymentStatus = PaymentStatus.FAILED.ToString();
+                        batchPayment.ResponseCode = responseCode;
+                        batchPayment.GatewayTransactionId = gatewayTransactionId;
+                        batchPayment.GatewayResponse = JsonSerializer.Serialize(request.QueryData);
+                    }
+
+                    foreach (var invoice in invoices.Where(x => x.Status != PaymentStatus.SUCCESS.ToString()))
                     {
                         invoice.Status = PaymentStatus.FAILED.ToString();
                     }
@@ -100,28 +117,42 @@ namespace VeterinaryClinic.Business
                 }
 
                 var isSuccess = responseCode == "00" && transactionStatus == "00";
-                payment.PaymentStatus = isSuccess ? PaymentStatus.SUCCESS.ToString() : PaymentStatus.FAILED.ToString();
-                payment.PaymentMethod = PaymentMethod.VNPAY.ToString();
-                payment.Amount = invoice.TotalAmount;
-                payment.ResponseCode = responseCode;
-                payment.GatewayTransactionId = gatewayTransactionId;
-                payment.GatewayResponse = JsonSerializer.Serialize(request.QueryData);
-                payment.PaymentDate = DateTime.UtcNow;
+                var paymentStatus = isSuccess ? PaymentStatus.SUCCESS.ToString() : PaymentStatus.FAILED.ToString();
+                var now = DateTime.UtcNow;
 
-                if (isSuccess || !invoiceAlreadyPaid)
+                foreach (var batchPayment in batchPayments)
                 {
-                    invoice.Status = payment.PaymentStatus;
+                    var matchedInvoice = invoices.First(x => x.Id == batchPayment.InvoiceId);
+                    batchPayment.PaymentStatus = paymentStatus;
+                    batchPayment.PaymentMethod = PaymentMethod.VNPAY.ToString();
+                    batchPayment.Amount = matchedInvoice.TotalAmount;
+                    batchPayment.ResponseCode = responseCode;
+                    batchPayment.GatewayTransactionId = gatewayTransactionId;
+                    batchPayment.GatewayResponse = JsonSerializer.Serialize(request.QueryData);
+                    batchPayment.PaymentDate = now;
+                }
+
+                foreach (var invoice in invoices)
+                {
+                    if (isSuccess || invoice.Status != PaymentStatus.SUCCESS.ToString())
+                    {
+                        invoice.Status = paymentStatus;
+                    }
+
+                    if (isSuccess)
+                    {
+                        invoice.PaidDate = now;
+                    }
                 }
 
                 if (isSuccess)
                 {
-                    invoice.PaidDate = DateTime.UtcNow;
-
-                    if (appointment != null)
+                    foreach (var appointment in appointments.Where(x => x.State == AppointmentStatus.PAYMENT_PENDING.ToString()))
                     {
                         appointment.State = AppointmentStatus.COMPLETED.ToString();
                         appointment.StateName = "Hoan thanh";
                         appointment.IsFinalState = true;
+                        appointment.ModifiedDate = now;
                     }
                 }
 
@@ -132,9 +163,11 @@ namespace VeterinaryClinic.Business
                     IsSuccess = isSuccess,
                     ResponseCode = responseCode,
                     Message = isSuccess ? "Payment success" : "Payment failed",
-                    InvoiceId = invoice.Id,
+                    InvoiceId = invoices.FirstOrDefault()?.Id,
                     PaymentId = payment.Id,
-                    AppointmentId = appointment?.Id
+                    AppointmentId = appointments.FirstOrDefault()?.Id,
+                    Amount = totalAmount,
+                    InvoiceCount = invoices.Count
                 };
             }
         }

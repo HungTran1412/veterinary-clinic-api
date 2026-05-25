@@ -4,7 +4,7 @@ using VeterinaryClinic.Shared;
 
 namespace VeterinaryClinic.Business
 {
-    public record ShiftTemplateBaseModel
+    public abstract record ShiftTemplateBaseModel
     {
         public int Id { get; init; }
         [Required(ErrorMessage = "shift_template.code.required")]
@@ -20,6 +20,11 @@ namespace VeterinaryClinic.Business
         public TimeOnly EndTime { get; init; }
 
         public int MaxEmployee { get; init; }
+        
+        public bool IsActive { get; init; } = true;
+
+        public int Order { get; init; }
+        public DateTime? CreatedDate { get; init; }
     }
 
     public record ShiftTemplateModel : ShiftTemplateBaseModel

@@ -24,6 +24,21 @@ namespace VeterinaryClinic.API.Controllers
         /// </summary>
         /// <param name="model">Thông tin lịch làm việc</param>
         /// <returns>ID của lịch làm việc mới</returns>
+        [HttpPost, Route("many")]
+        [ProducesResponseType(typeof(ResponseObject<int>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> CreateMany([FromBody] List<CreateWorkScheduleModel> model)
+        {
+            return await ExecuteFunction(async () =>
+            {
+                return await _mediator.Send(new CreateManyWorkScheduleCommand(model));
+            });
+        }
+        
+        /// <summary>
+        /// Tạo mới lịch làm việc
+        /// </summary>
+        /// <param name="model">Thông tin lịch làm việc</param>
+        /// <returns>ID của lịch làm việc mới</returns>
         [HttpPost]
         [ProducesResponseType(typeof(ResponseObject<int>), StatusCodes.Status200OK)]
         public async Task<IActionResult> Create([FromBody] CreateWorkScheduleModel model)

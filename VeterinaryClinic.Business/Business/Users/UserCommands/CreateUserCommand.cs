@@ -72,16 +72,25 @@ namespace VeterinaryClinic.Business
                     throw new ArgumentException($"{_localizer["user.invalid.password_complexity"]}");
                 }
 
-                //validate role - Chỉ cho phép ADMIN tạo tài khoản cho DOCTOR hoặc RECEPTIONIST
-                if (string.IsNullOrEmpty(model.Role))
-                {
-                    throw new ArgumentException("Role is required.");
-                }
-
+                var currentUserRole = _contextAccessor.Role;
                 var upperRole = model.Role.Trim().ToUpper();
-                if (upperRole != Role.DOCTOR.ToString() && upperRole != Role.RECEPTIONIST.ToString())
+
+                if (currentUserRole == Role.RECEPTIONIST.ToString())
                 {
-                    throw new ArgumentException($"Admin can only create users with roles: {Role.DOCTOR}, {Role.RECEPTIONIST}");
+                    // Receptionist can only create customers
+                    upperRole = Role.CUSTOMER.ToString();
+                }
+                else if (currentUserRole == Role.ADMIN.ToString())
+                {
+                    // Admin can create DOCTOR or RECEPTIONIST
+                    if (upperRole != Role.DOCTOR.ToString() && upperRole != Role.RECEPTIONIST.ToString())
+                    {
+                        throw new ArgumentException($"Admin can only create users with roles: {Role.DOCTOR}, {Role.RECEPTIONIST}");
+                    }
+                }
+                else
+                {
+                    throw new UnauthorizedAccessException(_localizer["user.unauthorized"]);
                 }
                 
                 // Validate that specializations are only provided for doctors

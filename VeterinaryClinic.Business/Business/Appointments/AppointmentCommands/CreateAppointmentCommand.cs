@@ -70,12 +70,16 @@ namespace VeterinaryClinic.Business
                     throw new ArgumentException(_localizer["appointment.date.in_past"]);
                 }
 
-                if (currentRole == Role.DOCTOR.ToString())
+                var isCustomer = currentRole == Role.CUSTOMER.ToString();
+                var isReceptionist = currentRole == Role.RECEPTIONIST.ToString();
+                var isAdmin = currentRole == Role.ADMIN.ToString();
+
+                if (!isCustomer && !isReceptionist && !isAdmin)
                 {
                     throw new UnauthorizedAccessException(_localizer["appointment.create.unauthorized"]);
                 }
 
-                if (currentRole == Role.CUSTOMER.ToString() && currentUserId != model.CustomerId)
+                if (isCustomer && currentUserId != model.CustomerId)
                 {
                     throw new UnauthorizedAccessException(_localizer["appointment.create.customer_only_self"]);
                 }

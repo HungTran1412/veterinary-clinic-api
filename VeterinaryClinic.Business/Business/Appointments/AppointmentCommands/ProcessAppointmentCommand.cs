@@ -5,8 +5,6 @@ using Serilog;
 using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared;
 using VeterinaryClinic.Shared.ContextAccessor;
-using VeterinaryClinic.Business.Services;
-using VeterinaryClinic.Business.Models;
 
 namespace VeterinaryClinic.Business
 {

@@ -63,7 +63,7 @@ namespace VeterinaryClinic.API.Controllers
         }
 
         /// <summary>
-        /// lay danh sach chuyen nganh theo id
+        /// lay chuyen nganh theo id
         /// </summary>
         /// <param name="id">id chuyen nganh</param>
         /// <returns></returns>

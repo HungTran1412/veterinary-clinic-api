@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
-using VeterinaryClinic.Business.Models;
 
-namespace VeterinaryClinic.Business.Services
+
+namespace VeterinaryClinic.Business
 {
     public interface INotificationService
     {

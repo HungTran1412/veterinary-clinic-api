@@ -47,7 +47,8 @@
     /// </summary>
     public enum NotificationType
     {
-        MESSAGE
+        MESSAGE,
+        SYSTEM
     }
 
     /// <summary>

@@ -10,8 +10,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared;
-using VeterinaryClinic.Business.Services;
-using VeterinaryClinic.Business.Models;
 
 namespace VeterinaryClinic.Business
 {

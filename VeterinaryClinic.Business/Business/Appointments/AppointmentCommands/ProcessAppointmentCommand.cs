@@ -82,6 +82,11 @@ namespace VeterinaryClinic.Business
 
                 appointment.StateName = _appointmentStateMachine.GetStateDisplayName(Enum.Parse<AppointmentStatus>(appointment.State));
 
+                if (action == AppointmentAction.COMPLETE_CONSULTATION)
+                {
+                    appointment.EndTime = DateTime.UtcNow;
+                }
+
                 if (action == AppointmentAction.CASH_PAYMENT)
                 {
                     await ApplyCashPayment(appointment, cancellationToken);

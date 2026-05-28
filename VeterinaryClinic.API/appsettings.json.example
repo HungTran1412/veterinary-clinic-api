@@ -59,7 +59,7 @@
   },
   "SignalR": {
     "Hubs": {
-      "NotificationUrl": "/hubs/notifications"
+      "NotificationUrl": "/veterinary-clinic/v1/notifications/hub"
     }
   }
 }

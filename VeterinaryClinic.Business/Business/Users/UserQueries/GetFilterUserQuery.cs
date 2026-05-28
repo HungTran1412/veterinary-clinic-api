@@ -21,21 +21,37 @@ namespace VeterinaryClinic.Business
         public class Handler : IRequestHandler<GetFilterUserQuery, PaginationList<UserModel>>
         {
             private readonly VeterinaryClinicReadDataContext _dataContext;
+            private readonly IContextAccessor _contextAccessor;
 
-            public Handler(VeterinaryClinicReadDataContext dataContext)
+            public Handler(VeterinaryClinicReadDataContext dataContext, Func<IContextAccessor> contextAccessorFactory)
             {
                 _dataContext = dataContext;
+                _contextAccessor = contextAccessorFactory();
             }
 
             public async Task<PaginationList<UserModel>> Handle(GetFilterUserQuery request,
                 CancellationToken cancellationToken)
             {
                 var filter = request.Filter;
+                var currentUserRole = _contextAccessor.Role;
 
                 var query = _dataContext.VcUsers.AsNoTracking();
 
-                // Base filter for DOCTOR and RECEPTIONIST roles
-                query = query.Where(x => x.Role == Role.DOCTOR.ToString() || x.Role == Role.RECEPTIONIST.ToString());
+                if (currentUserRole == Role.RECEPTIONIST.ToString())
+                {
+                    // Receptionists can only see customers
+                    query = query.Where(x => x.Role == Role.CUSTOMER.ToString());
+                }
+                else if (currentUserRole == Role.ADMIN.ToString())
+                {
+                    // Admins can see doctors and receptionists
+                    query = query.Where(x => x.Role == Role.DOCTOR.ToString() || x.Role == Role.RECEPTIONIST.ToString());
+                }
+                else
+                {
+                    // Other roles cannot see anyone
+                    return new PaginationList<UserModel>();
+                }
 
                 // Lọc theo từ khóa chung (TextSearch)
                 if (!string.IsNullOrEmpty(filter.TextSearch))
@@ -59,8 +75,8 @@ namespace VeterinaryClinic.Business
                     query = query.Where(x => x.IsActive);
                 }
 
-                // Lọc theo Role nếu được cung cấp
-                if (!string.IsNullOrEmpty(filter.Role))
+                // Lọc theo Role nếu được cung cấp (chỉ áp dụng cho Admin)
+                if (currentUserRole == Role.ADMIN.ToString() && !string.IsNullOrEmpty(filter.Role))
                 {
                     string roleInput = filter.Role.Trim().ToUpper();
                     if (roleInput == Role.DOCTOR.ToString() || roleInput == Role.RECEPTIONIST.ToString())

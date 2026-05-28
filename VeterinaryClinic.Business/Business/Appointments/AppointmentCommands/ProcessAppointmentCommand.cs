@@ -5,6 +5,8 @@ using Serilog;
 using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared;
 using VeterinaryClinic.Shared.ContextAccessor;
+using VeterinaryClinic.Business.Services;
+using VeterinaryClinic.Business.Models;
 
 namespace VeterinaryClinic.Business
 {
@@ -27,6 +29,7 @@ namespace VeterinaryClinic.Business
             private readonly ICacheService _cacheService;
             private readonly IAppointmentStateMachine _appointmentStateMachine;
             private readonly IMediator _mediator;
+            private readonly INotificationService _notificationService;
 
             public Handler(
                 VeterinaryClinicDataContext dataContext,
@@ -34,7 +37,8 @@ namespace VeterinaryClinic.Business
                 IStringLocalizer<ProcessAppointmentCommand> localizer,
                 ICacheService cacheService,
                 IAppointmentStateMachine appointmentStateMachine,
-                IMediator mediator)
+                IMediator mediator,
+                INotificationService notificationService)
             {
                 _dataContext = dataContext;
                 _contextAccessor = contextAccessorFactory();
@@ -42,6 +46,7 @@ namespace VeterinaryClinic.Business
                 _cacheService = cacheService;
                 _appointmentStateMachine = appointmentStateMachine;
                 _mediator = mediator;
+                _notificationService = notificationService;
             }
 
             public async Task<object> Handle(ProcessAppointmentCommand request, CancellationToken cancellationToken)
@@ -77,7 +82,6 @@ namespace VeterinaryClinic.Business
 
                 _appointmentStateMachine.Apply(appointment, action, request.Model.CancelReason);
 
-                // Đảm bảo StateName luôn được cập nhật đúng chính tả từ StateMachine
                 appointment.StateName = _appointmentStateMachine.GetStateDisplayName(Enum.Parse<AppointmentStatus>(appointment.State));
 
                 if (action == AppointmentAction.CASH_PAYMENT)
@@ -90,6 +94,9 @@ namespace VeterinaryClinic.Business
                 appointment.ModifiedUserName = _contextAccessor.UserName;
 
                 await _dataContext.SaveChangesAsync(cancellationToken);
+                
+                await SendNotifications(appointment, action);
+
                 _cacheService.Remove(AppointmentConstant.BuildCacheKey());
 
                 Log.Information(
@@ -99,6 +106,73 @@ namespace VeterinaryClinic.Business
                     _contextAccessor.UserId);
 
                 return Unit.Value;
+            }
+
+            private async Task SendNotifications(VcAppointments appointment, AppointmentAction action)
+            {
+                NotificationModel? customerNotification = null;
+                NotificationModel? doctorNotification = null;
+
+                switch (action)
+                {
+                    case AppointmentAction.CUSTOMER_CANCEL:
+                        doctorNotification = new NotificationModel
+                        {
+                            UserId = appointment.DoctorId,
+                            Title = "Lịch hẹn đã bị hủy",
+                            Message = $"Lịch hẹn mã {appointment.Code} đã bị khách hàng hủy.",
+                            Type = NotificationType.MESSAGE.ToString(),
+                            RelatedEntityId = appointment.Id,
+                            RelatedEntityType = RelatedEntityType.Appointment.ToString()
+                        };
+                        break;
+
+                    case AppointmentAction.COMPLETE_CONSULTATION:
+                        customerNotification = new NotificationModel
+                        {
+                            UserId = appointment.CustomerId,
+                            Title = "Buổi khám đã hoàn tất",
+                            Message = $"Buổi khám cho lịch hẹn {appointment.Code} đã hoàn tất. Vui lòng tiến hành thanh toán.",
+                            Type = NotificationType.MESSAGE.ToString(),
+                            RelatedEntityId = appointment.Id,
+                            RelatedEntityType = RelatedEntityType.Appointment.ToString()
+                        };
+                        break;
+
+                    case AppointmentAction.CASH_PAYMENT:
+                    case AppointmentAction.BANK_TRANSFER:
+                         customerNotification = new NotificationModel
+                        {
+                            UserId = appointment.CustomerId,
+                            Title = "Thanh toán thành công",
+                            Message = $"Thanh toán cho lịch hẹn {appointment.Code} đã được ghi nhận thành công.",
+                            Type = NotificationType.MESSAGE.ToString(),
+                            RelatedEntityId = appointment.Id,
+                            RelatedEntityType = RelatedEntityType.Appointment.ToString()
+                        };
+                        break;
+                    
+                    case AppointmentAction.MARK_NO_SHOW:
+                        customerNotification = new NotificationModel
+                        {
+                            UserId = appointment.CustomerId,
+                            Title = "Lịch hẹn bị đánh dấu không đến",
+                            Message = $"Bạn đã không đến lịch hẹn {appointment.Code} và đã bị ghi nhận trong hệ thống.",
+                            Type = NotificationType.MESSAGE.ToString(),
+                            RelatedEntityId = appointment.Id,
+                            RelatedEntityType = RelatedEntityType.Appointment.ToString()
+                        };
+                        break;
+                }
+
+                if (customerNotification != null)
+                {
+                    await _notificationService.SendAndSaveNotificationAsync(customerNotification);
+                }
+                if (doctorNotification != null)
+                {
+                    await _notificationService.SendAndSaveNotificationAsync(doctorNotification);
+                }
             }
 
             private void ValidatePermission(VcAppointments appointment, AppointmentAction action)
@@ -133,63 +207,45 @@ namespace VeterinaryClinic.Business
 
             private async Task ApplyCashPayment(VcAppointments appointment, CancellationToken cancellationToken)
             {
-                var pendingBillingItems = await (
-                    from invoice in _dataContext.VcInvoices
-                    join appt in _dataContext.VcAppointments on invoice.AppointmentId equals appt.Id
-                    where invoice.IsActive &&
-                          appt.IsActive &&
-                          appt.CustomerId == appointment.CustomerId &&
-                          invoice.Status != PaymentStatus.SUCCESS.ToString() &&
-                          appt.State == AppointmentStatus.PAYMENT_PENDING.ToString()
-                    select new { Invoice = invoice, Appointment = appt })
-                    .ToListAsync(cancellationToken);
-
-                if (!pendingBillingItems.Any())
+                var invoice = await _dataContext.VcInvoices
+                    .FirstOrDefaultAsync(x => x.AppointmentId == appointment.Id && x.IsActive, cancellationToken);
+                if (invoice == null)
                 {
                     throw new ArgumentException(_localizer["invoice.not_found"]);
                 }
 
-                if (pendingBillingItems.Any(x => x.Invoice.TotalAmount <= 0))
+                if (invoice.TotalAmount <= 0)
                 {
                     throw new ArgumentException(_localizer["invoice.amount.invalid"]);
                 }
 
-                var paymentCode = GenerateCodeUtils.GenerateUserCode("PAY");
-                var paidDate = DateTime.UtcNow;
-                var payments = new List<VcPayments>();
-
-                foreach (var item in pendingBillingItems)
+                if (invoice.Status == PaymentStatus.SUCCESS.ToString())
                 {
-                    item.Invoice.Status = PaymentStatus.SUCCESS.ToString();
-                    item.Invoice.PaidDate = paidDate;
-
-                    item.Appointment.State = AppointmentStatus.COMPLETED.ToString();
-                    item.Appointment.StateName = _appointmentStateMachine.GetStateDisplayName(AppointmentStatus.COMPLETED);
-                    item.Appointment.IsFinalState = true;
-                    item.Appointment.ModifiedDate = paidDate;
-                    item.Appointment.ModifiedUserId = _contextAccessor.UserId;
-                    item.Appointment.ModifiedUserName = _contextAccessor.UserName;
-
-                    payments.Add(new VcPayments
-                    {
-                        InvoiceId = item.Invoice.Id,
-                        Code = paymentCode,
-                        PaymentMethod = PaymentMethod.CASH.ToString(),
-                        PaymentStatus = PaymentStatus.SUCCESS.ToString(),
-                        Amount = item.Invoice.TotalAmount,
-                        GatewayTransactionId = null,
-                        ResponseCode = null,
-                        GatewayResponse = null,
-                        PaymentDate = paidDate,
-                        IsActive = true,
-                        Order = 0,
-                        CreatedDate = paidDate,
-                        CreatedUserId = _contextAccessor.UserId,
-                        CreatedUserName = _contextAccessor.UserName
-                    });
+                    throw new ArgumentException(_localizer["invoice.already_paid"]);
                 }
 
-                await _dataContext.VcPayments.AddRangeAsync(payments, cancellationToken);
+                var payment = new VcPayments
+                {
+                    InvoiceId = invoice.Id,
+                    Code = GenerateCodeUtils.GenerateUserCode("PAY"),
+                    PaymentMethod = PaymentMethod.CASH.ToString(),
+                    PaymentStatus = PaymentStatus.SUCCESS.ToString(),
+                    Amount = invoice.TotalAmount,
+                    GatewayTransactionId = null,
+                    ResponseCode = null,
+                    GatewayResponse = null,
+                    PaymentDate = DateTime.UtcNow,
+                    IsActive = true,
+                    Order = 0,
+                    CreatedDate = DateTime.UtcNow,
+                    CreatedUserId = _contextAccessor.UserId,
+                    CreatedUserName = _contextAccessor.UserName
+                };
+
+                invoice.Status = PaymentStatus.SUCCESS.ToString();
+                invoice.PaidDate = DateTime.UtcNow;
+
+                await _dataContext.VcPayments.AddAsync(payment, cancellationToken);
             }
         }
     }

@@ -38,11 +38,16 @@ namespace VeterinaryClinic.Business
 
             public async Task<Unit> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
             {
+                if (_contextAccessor.Role != Role.ADMIN.ToString())
+                {
+                    throw new UnauthorizedAccessException(_localizer["user.unauthorized"]);
+                }
+
                 var id = request.Id;
                 Log.Information($"Delete {UserConstant.CachePrefix}: {id}");
                 
                 //kiem tra data co ton tai khong
-                var dt = await _dataContext.VcUsers.FirstOrDefaultAsync(x => x.Id == id);
+                var dt = await _dataContext.VcUsers.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
                 if (dt == null)
                 {
                     throw new ArgumentException($"{_localizer["data.not-found"]}");

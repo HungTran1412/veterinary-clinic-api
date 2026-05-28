@@ -10,6 +10,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared;
+using VeterinaryClinic.Business.Services;
+using VeterinaryClinic.Business.Models;
 
 namespace VeterinaryClinic.Business
 {
@@ -30,6 +32,7 @@ namespace VeterinaryClinic.Business
             private readonly IContextAccessor _contextAccessor;
             private readonly IBcryptPasswordHasher _passwordHasher;
             private readonly IMediator _mediator;
+            private readonly INotificationService _notificationService;
 
             public Handler(
                 VeterinaryClinicDataContext dataContext,
@@ -37,7 +40,8 @@ namespace VeterinaryClinic.Business
                 IStringLocalizer<CreateUserCommand> localizer,
                 Func<IContextAccessor> contextAccessorFactory,
                 IBcryptPasswordHasher passwordHasher,
-                IMediator mediator)
+                IMediator mediator,
+                INotificationService notificationService)
             {
                 _dataContext = dataContext;
                 _cacheService = cacheService;
@@ -45,6 +49,7 @@ namespace VeterinaryClinic.Business
                 _contextAccessor = contextAccessorFactory();
                 _passwordHasher = passwordHasher;
                 _mediator = mediator;
+                _notificationService = notificationService;
             }
 
             public async Task<Unit> Handle(CreateUserCommand request, CancellationToken cancellationToken)
@@ -72,16 +77,25 @@ namespace VeterinaryClinic.Business
                     throw new ArgumentException($"{_localizer["user.invalid.password_complexity"]}");
                 }
 
-                //validate role - Chỉ cho phép ADMIN tạo tài khoản cho DOCTOR hoặc RECEPTIONIST
-                if (string.IsNullOrEmpty(model.Role))
-                {
-                    throw new ArgumentException("Role is required.");
-                }
-
+                var currentUserRole = _contextAccessor.Role;
                 var upperRole = model.Role.Trim().ToUpper();
-                if (upperRole != Role.DOCTOR.ToString() && upperRole != Role.RECEPTIONIST.ToString())
+
+                if (currentUserRole == Role.RECEPTIONIST.ToString())
                 {
-                    throw new ArgumentException($"Admin can only create users with roles: {Role.DOCTOR}, {Role.RECEPTIONIST}");
+                    // Receptionist can only create customers
+                    upperRole = Role.CUSTOMER.ToString();
+                }
+                else if (currentUserRole == Role.ADMIN.ToString())
+                {
+                    // Admin can create DOCTOR or RECEPTIONIST
+                    if (upperRole != Role.DOCTOR.ToString() && upperRole != Role.RECEPTIONIST.ToString())
+                    {
+                        throw new ArgumentException($"Admin can only create users with roles: {Role.DOCTOR}, {Role.RECEPTIONIST}");
+                    }
+                }
+                else
+                {
+                    throw new UnauthorizedAccessException(_localizer["user.unauthorized"]);
                 }
                 
                 // Validate that specializations are only provided for doctors
@@ -158,6 +172,18 @@ namespace VeterinaryClinic.Business
                 );
 
                 BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendEmailAsync(entity.Email, subject, body));
+
+                // Gửi thông báo real-time
+                var notification = new NotificationModel
+                {
+                    UserId = entity.Id,
+                    Title = subject,
+                    Message = $"Chào mừng {entity.FullName}! Tài khoản của bạn đã được tạo thành công.",
+                    Type = NotificationType.MESSAGE.ToString(),
+                    RelatedEntityId = entity.Id,
+                    RelatedEntityType = RelatedEntityType.User.ToString()
+                };
+                await _notificationService.SendAndSaveNotificationAsync(notification);
 
                 Log.Information($"Account created email job enqueued for {entity.Email}");
 

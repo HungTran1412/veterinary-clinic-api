@@ -8,10 +8,13 @@
   "AllowedHosts": "*",
   "ConnectionStrings": {
     "DefaultConnection": "Server=.;Database=VeterinaryClinicDb;User Id=sa;Password=your_password;MultipleActiveResultSets=true;TrustServerCertificate=True",
-    "Redis": "localhost:6379"
+    "Redis": "localhost:6379,abortConnect=false"
   },
   "AppSettings": {
     "EnableCache": true
+  },
+  "CorsSettings": {
+    "AllowedOrigins": "http://localhost:3000"
   },
   "AdminSettings": {
     "Username": "admin",

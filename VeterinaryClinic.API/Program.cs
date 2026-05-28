@@ -21,6 +21,9 @@ using System.Text;
 using VeterinaryClinic.Business.Core;
 using VeterinaryClinic.Infrastructure.Redis;
 using Hangfire; // Added for Hangfire
+using VeterinaryClinic.API;
+using VeterinaryClinic.Business.Services;
+using VeterinaryClinic.API.Services;
 
 // Cấu hình Serilog tối thiểu để ghi ra Console
 Log.Logger = new LoggerConfiguration()
@@ -38,13 +41,29 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpContextAccessor();
 
-// Cấu hình CORS: Cho phép mọi nguồn (Dùng cho Dev)
+// Cấu hình CORS
+var webAppPolicy = "WebAppPolicy";
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll",
-        builder =>
+    // Chính sách cho môi trường Production, chặt chẽ hơn
+    var allowedOrigins = builder.Configuration.GetSection("CorsSettings:AllowedOrigins").Get<string[]>() ?? new string[0];
+    options.AddPolicy(webAppPolicy,
+        policy =>
         {
-            builder.AllowAnyOrigin()
+            if (allowedOrigins.Any())
+            {
+                policy.WithOrigins(allowedOrigins)
+                       .AllowAnyMethod()
+                       .AllowAnyHeader()
+                       .AllowCredentials();
+            }
+        });
+
+    // Chính sách riêng cho môi trường Development, linh hoạt hơn
+    options.AddPolicy("AllowAll_Dev",
+        policy =>
+        {
+            policy.AllowAnyOrigin()
                    .AllowAnyMethod()
                    .AllowAnyHeader();
         });
@@ -122,6 +141,21 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = builder.Configuration["JwtSettings:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]))
     };
+    
+    // Cấu hình để SignalR có thể nhận token từ query string
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
+    };
 });
 
 
@@ -157,6 +191,9 @@ builder.Services.AddScoped<IBcryptPasswordHasher, PasswordHasher>();
 // Đăng ký JWT Service
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IAppointmentStateMachine, AppointmentStateMachine>();
+
+// Đăng ký Notification Service
+builder.Services.AddScoped<INotificationService, SignalRNotificationService>();
 
 // Đăng ký các service từ tầng Infrastructure (bao gồm Cloudinary)
 builder.Services.AddApplicationServices(builder.Configuration);
@@ -196,6 +233,12 @@ builder.Services.AddHangfire(configuration => configuration
 // Add the processing server as IHostedService
 builder.Services.AddHangfireServer();
 
+// 9. Cấu hình SignalR
+builder.Services.AddSignalR()
+    .AddStackExchangeRedis(builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379", options => {
+        options.Configuration.ChannelPrefix = "VeterinaryClinicSignalR";
+    });
+
 var app = builder.Build();
 
 // Seed data
@@ -215,7 +258,15 @@ if (app.Environment.IsDevelopment())
         // Inject file JS để thêm nút Copy
         c.InjectJavascript("/js/custom-swagger.js");
     });
+    // Sử dụng chính sách CORS linh hoạt cho môi trường Development
+    app.UseCors("AllowAll_Dev");
 }
+else
+{
+    // Sử dụng chính sách CORS chặt chẽ cho môi trường Production
+    app.UseCors(webAppPolicy);
+}
+
 
 app.UseHttpsRedirection();
 
@@ -223,8 +274,6 @@ app.UseStaticFiles();
 
 // The correct order for middleware
 app.UseRouting();
-
-app.UseCors("AllowAll");
 
 app.UseRequestLocalization();
 
@@ -239,5 +288,8 @@ app.UseHangfireDashboard("/hangfire", new DashboardOptions
 });
 
 app.MapControllers();
+
+// Map SignalR Hubs
+app.MapHub<SignalRHub>(builder.Configuration["SignalR:Hubs:NotificationUrl"]);
 
 app.Run();

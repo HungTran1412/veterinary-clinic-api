@@ -51,6 +51,15 @@
     }
 
     /// <summary>
+    /// Loại dữ liệu liên quan đến thông báo
+    /// </summary>
+    public enum RelatedEntityType
+    {
+        Appointment,
+        User
+    }
+
+    /// <summary>
     /// Token xác thực
     /// </summary>
     public enum TokenType

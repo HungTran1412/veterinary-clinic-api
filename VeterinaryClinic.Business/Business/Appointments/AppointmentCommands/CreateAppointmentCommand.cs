@@ -7,6 +7,8 @@ using Serilog;
 using System.Text.Json;
 using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared;
+using VeterinaryClinic.Business.Services;
+using VeterinaryClinic.Business.Models;
 
 namespace VeterinaryClinic.Business
 {
@@ -36,6 +38,7 @@ namespace VeterinaryClinic.Business
             private readonly MailSettings _mailSettings;
             private readonly IMediator _mediator;
             private readonly IVeterinaryClinicCallStoreHelper _callStoreHelper;
+            private readonly INotificationService _notificationService;
 
             public Handler(
                 VeterinaryClinicDataContext dataContext,
@@ -45,7 +48,8 @@ namespace VeterinaryClinic.Business
                 IAppointmentStateMachine appointmentStateMachine,
                 IOptions<MailSettings> mailSettings,
                 IMediator mediator,
-                IVeterinaryClinicCallStoreHelper callStoreHelper
+                IVeterinaryClinicCallStoreHelper callStoreHelper,
+                INotificationService notificationService
                 ) 
             {
                 _dataContext = dataContext;
@@ -56,6 +60,7 @@ namespace VeterinaryClinic.Business
                 _mailSettings = mailSettings.Value;
                 _mediator = mediator;
                 _callStoreHelper = callStoreHelper;
+                _notificationService = notificationService;
             }
 
             public async Task<Unit> Handle(CreateAppointmentCommand request, CancellationToken cancellationToken)
@@ -264,6 +269,19 @@ namespace VeterinaryClinic.Business
                 );
                 BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendEmailAsync(customer.Email, customerSubject, customerBody));
 
+                // Notification to Customer
+                var customerNotification = new NotificationModel
+                {
+                    UserId = customer.Id,
+                    Title = customerSubject,
+                    Message = $"Lịch hẹn cho thú cưng {pet.Name} đã được tạo thành công.",
+                    Type = NotificationType.MESSAGE.ToString(),
+                    RelatedEntityId = entity.Id,
+                    RelatedEntityType = RelatedEntityType.Appointment.ToString()
+                };
+                await _notificationService.SendAndSaveNotificationAsync(customerNotification);
+
+
                 // Email to Doctor
                 string doctorSubject = "Lịch hẹn mới được tạo - Phòng khám thú y";
                 string doctorBody = EmailTemplates.GetAppointmentConfirmationEmailForDoctor(
@@ -277,6 +295,18 @@ namespace VeterinaryClinic.Business
                     entity.Code
                 );
                 BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendEmailAsync(selectedDoctor.DoctorEmail, doctorSubject, doctorBody)); 
+
+                // Notification to Doctor
+                var doctorNotification = new NotificationModel
+                {
+                    UserId = selectedDoctor.DoctorId,
+                    Title = doctorSubject,
+                    Message = $"Bạn có lịch hẹn mới với khách hàng {customer.FullName} cho thú cưng {pet.Name}.",
+                    Type = NotificationType.MESSAGE.ToString(),
+                    RelatedEntityId = entity.Id,
+                    RelatedEntityType = RelatedEntityType.Appointment.ToString()
+                };
+                await _notificationService.SendAndSaveNotificationAsync(doctorNotification);
 
                 Log.Information($"Appointment confirmation email jobs enqueued for customer {customer.Email} and doctor {selectedDoctor.DoctorEmail}.");
                 

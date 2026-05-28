@@ -56,7 +56,7 @@ namespace VeterinaryClinic.Business
 
     public record MedicalInfoModel
     {
-        #region MyRegion
+        #region Medical Record
 
         [DataColumn("medical_record_id")] 
         public int MedicalRecordId { get; set; }
@@ -154,6 +154,13 @@ namespace VeterinaryClinic.Business
 
         [DataColumn("doctor_email")] 
         public string? DoctorEmail { get; set; }
+
+        #endregion
+
+        #region Service
+
+        [DataColumn("service_name")] 
+        public string? ServiceName { get; set; }
 
         #endregion
     }

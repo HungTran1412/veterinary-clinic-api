@@ -10,6 +10,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared;
+using VeterinaryClinic.Business.Services;
+using VeterinaryClinic.Business.Models;
 
 namespace VeterinaryClinic.Business
 {
@@ -30,6 +32,7 @@ namespace VeterinaryClinic.Business
             private readonly IContextAccessor _contextAccessor;
             private readonly IBcryptPasswordHasher _passwordHasher;
             private readonly IMediator _mediator;
+            private readonly INotificationService _notificationService;
 
             public Handler(
                 VeterinaryClinicDataContext dataContext,
@@ -37,7 +40,8 @@ namespace VeterinaryClinic.Business
                 IStringLocalizer<CreateUserCommand> localizer,
                 Func<IContextAccessor> contextAccessorFactory,
                 IBcryptPasswordHasher passwordHasher,
-                IMediator mediator)
+                IMediator mediator,
+                INotificationService notificationService)
             {
                 _dataContext = dataContext;
                 _cacheService = cacheService;
@@ -45,6 +49,7 @@ namespace VeterinaryClinic.Business
                 _contextAccessor = contextAccessorFactory();
                 _passwordHasher = passwordHasher;
                 _mediator = mediator;
+                _notificationService = notificationService;
             }
 
             public async Task<Unit> Handle(CreateUserCommand request, CancellationToken cancellationToken)
@@ -167,6 +172,18 @@ namespace VeterinaryClinic.Business
                 );
 
                 BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendEmailAsync(entity.Email, subject, body));
+
+                // Gửi thông báo real-time
+                var notification = new NotificationModel
+                {
+                    UserId = entity.Id,
+                    Title = subject,
+                    Message = $"Chào mừng {entity.FullName}! Tài khoản của bạn đã được tạo thành công.",
+                    Type = NotificationType.MESSAGE.ToString(),
+                    RelatedEntityId = entity.Id,
+                    RelatedEntityType = RelatedEntityType.User.ToString()
+                };
+                await _notificationService.SendAndSaveNotificationAsync(notification);
 
                 Log.Information($"Account created email job enqueued for {entity.Email}");
 

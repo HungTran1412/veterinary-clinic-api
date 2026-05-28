@@ -20,11 +20,13 @@ namespace VeterinaryClinic.Business
         {
             private readonly VeterinaryClinicReadDataContext _dataContext;
             private readonly ICacheService _cacheService;
+            private readonly IContextAccessor _contextAccessor;
 
-            public Handler(VeterinaryClinicReadDataContext dataContext, ICacheService cacheService)
+            public Handler(VeterinaryClinicReadDataContext dataContext, ICacheService cacheService, Func<IContextAccessor> contextAccessorFactory)
             {
                 _dataContext = dataContext;
                 _cacheService = cacheService;
+                _contextAccessor = contextAccessorFactory();
             }
 
             public async Task<List<UserSelectItemModel>> Handle(GetComboboxUserQuery request,

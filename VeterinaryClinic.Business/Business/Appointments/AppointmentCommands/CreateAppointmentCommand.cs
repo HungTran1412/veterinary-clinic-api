@@ -7,8 +7,6 @@ using Serilog;
 using System.Text.Json;
 using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared;
-using VeterinaryClinic.Business.Services;
-using VeterinaryClinic.Business.Models;
 
 namespace VeterinaryClinic.Business
 {

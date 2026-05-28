@@ -25,7 +25,8 @@
         public const string DASHBOARD = "dashboards";
         public const string SHIFT_TEMPLATE = "shift_templates";
         public const string WORK_SCHEDULE_REGISTRATION = "work_schedule_registrations";
-        
+        public const string NOTIFICATION = "notifications";
+
         #endregion
     }   
 

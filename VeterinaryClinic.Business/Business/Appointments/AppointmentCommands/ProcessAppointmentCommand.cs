@@ -5,8 +5,6 @@ using Serilog;
 using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared;
 using VeterinaryClinic.Shared.ContextAccessor;
-using VeterinaryClinic.Business.Services;
-using VeterinaryClinic.Business.Models;
 
 namespace VeterinaryClinic.Business
 {
@@ -83,6 +81,11 @@ namespace VeterinaryClinic.Business
                 _appointmentStateMachine.Apply(appointment, action, request.Model.CancelReason);
 
                 appointment.StateName = _appointmentStateMachine.GetStateDisplayName(Enum.Parse<AppointmentStatus>(appointment.State));
+
+                if (action == AppointmentAction.COMPLETE_CONSULTATION)
+                {
+                    appointment.EndTime = DateTime.UtcNow;
+                }
 
                 if (action == AppointmentAction.CASH_PAYMENT)
                 {

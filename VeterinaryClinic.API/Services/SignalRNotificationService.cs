@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using System.Threading.Tasks;
-using VeterinaryClinic.Business.Services;
-using VeterinaryClinic.Business.Models;
+using VeterinaryClinic.Business;
 using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared;
 

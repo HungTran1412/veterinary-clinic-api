@@ -80,6 +80,8 @@ namespace VeterinaryClinic.Business
         public string? PetSpecies { get; init; }
         public string? PetBreed { get; init; }
         public DateTime? PetBirthDate { get; init; }
+        public bool? PetGender { get; set; }
+        public double? PetWeight { get; init; }
     }
 
     /// <summary>

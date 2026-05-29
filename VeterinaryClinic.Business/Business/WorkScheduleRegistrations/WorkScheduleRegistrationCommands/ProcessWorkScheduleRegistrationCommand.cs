@@ -26,19 +26,22 @@ public class ProcessWorkScheduleRegistrationCommand : IRequest<Unit>
         private readonly IContextAccessor _contextAccessor;
         private readonly IStringLocalizer<ProcessWorkScheduleRegistrationCommand> _localizer;
         private readonly IMediator _mediator;
+        private readonly INotificationService _notificationService;
 
         public Handler(
             VeterinaryClinicDataContext dataContext,
             ICacheService cacheService,
             Func<IContextAccessor> contextAccessorFactory,
             IStringLocalizer<ProcessWorkScheduleRegistrationCommand> localizer,
-            IMediator mediator)
+            IMediator mediator,
+            INotificationService notificationService)
         {
             _dataContext = dataContext;
             _cacheService = cacheService;
             _contextAccessor = contextAccessorFactory();
             _localizer = localizer;
             _mediator = mediator;
+            _notificationService = notificationService;
         }
 
         public async Task<Unit> Handle(ProcessWorkScheduleRegistrationCommand request, CancellationToken cancellationToken)
@@ -103,6 +106,39 @@ public class ProcessWorkScheduleRegistrationCommand : IRequest<Unit>
             }
 
             await transaction.CommitAsync(cancellationToken);
+
+            #region Send Notification
+
+            string title = "Kết quả đăng ký lịch làm việc";
+            string message;
+            switch (nextStatus)
+            {
+                case WorkScheduleRegisterStatus.APPROVED:
+                    message = $"Đăng ký lịch làm việc của bạn cho ngày {entity.WorkDate:dd/MM/yyyy} đã được chấp thuận.";
+                    break;
+                case WorkScheduleRegisterStatus.REJECTED:
+                    message = $"Đăng ký lịch làm việc của bạn cho ngày {entity.WorkDate:dd/MM/yyyy} đã bị từ chối.";
+                    break;
+                case WorkScheduleRegisterStatus.CANCELED:
+                    message = $"Đăng ký lịch làm việc của bạn cho ngày {entity.WorkDate:dd/MM/yyyy} đã được hủy.";
+                    break;
+                default:
+                    message = $"Trạng thái đăng ký lịch làm việc của bạn cho ngày {entity.WorkDate:dd/MM/yyyy} đã được cập nhật.";
+                    break;
+            }
+
+            var notification = new NotificationModel
+            {
+                UserId = entity.UserId,
+                Title = title,
+                Message = message,
+                Type = NotificationType.MESSAGE.ToString(),
+                RelatedEntityId = entity.Id,
+                RelatedEntityType = RelatedEntityType.WorkScheduleRegistration.ToString()
+            };
+            await _notificationService.SendAndSaveNotificationAsync(notification);
+
+            #endregion
 
             _cacheService.Remove(WorkScheduleRegistrationConstant.BuildCacheKey());
             _cacheService.Remove(WorkScheduleRegistrationConstant.BuildCacheKey(entity.Id.ToString()));

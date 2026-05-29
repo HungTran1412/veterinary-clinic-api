@@ -117,7 +117,9 @@ namespace VeterinaryClinic.Business
                             Name = model.PetName,
                             Species = model.PetSpecies,
                             Breed = model.PetBreed,
-                            BirthDate = model.PetBirthDate
+                            BirthDate = model.PetBirthDate,
+                            Gender = model.PetGender,
+                            Weight = model.PetWeight,
                         };
                         var newPetId = await _mediator.Send(new CreatePetCommand(createPetModel), cancellationToken);
                         pet = await _dataContext.VcPets.FindAsync(newPetId);
@@ -357,6 +359,27 @@ namespace VeterinaryClinic.Business
                     RelatedEntityType = RelatedEntityType.Appointment.ToString()
                 };
                 await _notificationService.SendAndSaveNotificationAsync(doctorNotification);
+
+                // --- Notification to Admins ---
+                var adminIds = await _dataContext.VcUsers
+                    .Where(u => u.IsActive && u.Role == Role.ADMIN.ToString())
+                    .Select(u => u.Id)
+                    .ToListAsync(cancellationToken);
+
+                foreach (var adminId in adminIds)
+                {
+                    var adminNotification = new NotificationModel
+                    {
+                        UserId = adminId,
+                        Title = "Lịch hẹn mới được tạo",
+                        Message = $"Một lịch hẹn mới (Mã: {entity.Code}) đã được tạo cho khách hàng {customer.FullName} với bác sĩ {selectedDoctor.DoctorName}.",
+                        Type = NotificationType.INFORMATION.ToString(),
+                        RelatedEntityId = entity.Id,
+                        RelatedEntityType = RelatedEntityType.Appointment.ToString()
+                    };
+                    await _notificationService.SendAndSaveNotificationAsync(adminNotification);
+                }
+                // --- End Notification to Admins ---
 
                 Log.Information($"Appointment confirmation email jobs enqueued for customer {customer.Email} and doctor {selectedDoctor.DoctorEmail}.");
                 

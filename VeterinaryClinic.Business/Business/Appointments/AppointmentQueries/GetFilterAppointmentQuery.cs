@@ -96,11 +96,12 @@ namespace VeterinaryClinic.Business
                         ServicePrice = service.Price + " VNĐ"
                     };
                 
-                if (role == Role.DOCTOR)
-                {
-                    data = data.Where(x => x.DoctorId == userId);
-                }
-                else if (role == Role.CUSTOMER)
+                // if (role == Role.DOCTOR)
+                // {
+                //     data = data.Where(x => x.DoctorId == userId);
+                // }
+                // else 
+                if (role == Role.CUSTOMER)
                 {
                     data = data.Where(x => x.CustomerId == userId);
                 }

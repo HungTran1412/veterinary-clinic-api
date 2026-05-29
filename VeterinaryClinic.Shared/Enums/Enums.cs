@@ -47,7 +47,8 @@
     public enum NotificationType
     {
         MESSAGE,
-        SYSTEM
+        SYSTEM,
+        INFORMATION
     }
 
     /// <summary>
@@ -56,7 +57,9 @@
     public enum RelatedEntityType
     {
         Appointment,
-        User
+        User,
+        WorkScheduleRegistration,
+        INFORMATION
     }
 
     /// <summary>

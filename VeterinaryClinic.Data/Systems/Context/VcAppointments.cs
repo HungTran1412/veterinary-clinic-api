@@ -36,7 +36,7 @@ namespace VeterinaryClinic.Data
         /// id dich vu
         /// </summary>
         [Column("service_id")]
-        public int SerivceId { get; set; }
+        public int ServiceId { get; set; }
         
         /// <summary>
         /// id bac si

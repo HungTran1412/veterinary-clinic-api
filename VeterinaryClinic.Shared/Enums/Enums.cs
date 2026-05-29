@@ -16,7 +16,6 @@
     /// </summary>
     public enum AppointmentStatus
     {
-        PENDING_CONFIRMATION,
         CONFIRMED,
         REJECTED,
         CANCELLED,

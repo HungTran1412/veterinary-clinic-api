@@ -220,6 +220,13 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     options.DefaultRequestCulture = new RequestCulture("vi-VN");
     options.SupportedCultures = supportedCultures;
     options.SupportedUICultures = supportedCultures;
+
+    // Xóa các nhà cung cấp văn hóa mặc định và chỉ giữ lại những cái cần thiết.
+    // Việc này loại bỏ 'AcceptLanguageHeaderRequestCultureProvider', 
+    // ngăn hệ thống tự động chọn ngôn ngữ theo cài đặt của trình duyệt.
+    options.RequestCultureProviders.Clear();
+    options.RequestCultureProviders.Add(new QueryStringRequestCultureProvider()); // ?culture=vi-VN
+    options.RequestCultureProviders.Add(new CookieRequestCultureProvider());
 });
 
 // 8. Cấu hình Hangfire

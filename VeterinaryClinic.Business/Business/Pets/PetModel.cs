@@ -14,12 +14,14 @@ namespace VeterinaryClinic.Business
         [Required(ErrorMessage = "pet.species.required")]
         public string Species { get; init; }
         [Required(ErrorMessage = "pet.breed.required")]
-        public string Breed { get; init; }
+        public string? Breed { get; init; }
         [Required(ErrorMessage = "pet.gender.required")]
-        public bool Gender { get; init; }
+        public bool? Gender { get; init; }
         public bool IsNeutered { get; init; } = false;
         [Required(ErrorMessage = "pet.birth_date.required")]
-        public DateTime BirthDate { get; init; }
+        public DateTime? BirthDate { get; init; }
+        [Required(ErrorMessage = "pet.owner_id.required")]
+        public int OwnerId { get; init; }
         public double? Weight { get; init; }
         public string? Color { get; init; }
         public string? ImageUrl { get; init; }
@@ -31,29 +33,11 @@ namespace VeterinaryClinic.Business
 
     public record PetModel : PetBaseModel
     {
-        [Required(ErrorMessage = "pet.owner_id.required")]
-        public int OwnerId { get; init; }
         public string OwnerName { get; init; }
     }
 
-    public record CreatePetModel
+    public record CreatePetModel : PetBaseModel
     {
-        [Required(ErrorMessage = "pet.name.required")]
-        public string Name { get; init; }
-        [Required(ErrorMessage = "pet.species.required")]
-        public string Species { get; init; }
-        [Required(ErrorMessage = "pet.breed.required")]
-        public string Breed { get; init; }
-        [Required(ErrorMessage = "pet.gender.required")]
-        public bool Gender { get; init; }
-        public bool IsNeutered { get; init; } = false;
-        [Required(ErrorMessage = "pet.birth_date.required")]
-        public DateTime BirthDate { get; init; }
-        public double? Weight { get; init; }
-        public string? Color { get; init; }
-        public string? ImageUrl { get; init; }
-        public int? OwnerId { get; init; } // Nullable, not required
-        public string? Note { get; init; }
     }
 
     public record UpdatePetModel : PetBaseModel

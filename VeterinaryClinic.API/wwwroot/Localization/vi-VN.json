@@ -109,7 +109,7 @@
   "appointment.action.invalid": "Hành động xử lý lịch hẹn không hợp lệ.",
   "appointment.time.invalid": "Thời gian kết thúc phải sau thời gian bắt đầu.",
   "appointment.date.in_past": "Không thể tạo lịch hẹn trong quá khứ.",
-  "appointment.create.unauthorized": "Chỉ khách hàng, lễ tân hoặc quản trị viên mới được tạo lịch hẹn.",
+  "appointment.create.unauthorized": "Chỉ khách hàng, lễ tân mới được tạo lịch hẹn.",
   "appointment.create.customer_only_self": "Khách hàng chỉ có thể tạo lịch cho chính mình.",
   "appointment.customer.invalid": "Khách hàng không tồn tại hoặc không hợp lệ.",
   "appointment.pet.not_belong_to_customer": "Thú cưng không thuộc về khách hàng đã chọn.",

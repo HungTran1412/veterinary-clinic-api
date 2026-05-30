@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using VeterinaryClinic.Data;
 
@@ -50,6 +51,18 @@ namespace VeterinaryClinic.Business
 
     public record ProcessWorkScheduleRegistrationModel
     {
+        [Required(ErrorMessage = "work-schedule-registration.status.required")]
+        public string Status { get; init; } = string.Empty;
+
+        public string? Note { get; init; }
+    }
+    
+    public record ProcessManyWorkScheduleRegistrationModel
+    {
+        [Required(ErrorMessage = "work-schedule-registration.ids.required")]
+        [MinLength(1, ErrorMessage = "work-schedule-registration.ids.min_length")]
+        public List<int> RegistrationIds { get; init; } = new List<int>();
+
         [Required(ErrorMessage = "work-schedule-registration.status.required")]
         public string Status { get; init; } = string.Empty;
 

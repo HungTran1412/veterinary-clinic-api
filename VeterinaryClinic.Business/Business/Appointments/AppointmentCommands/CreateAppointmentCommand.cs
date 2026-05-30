@@ -75,43 +75,97 @@ namespace VeterinaryClinic.Business
 
                 var isCustomer = currentRole == Role.CUSTOMER.ToString();
                 var isReceptionist = currentRole == Role.RECEPTIONIST.ToString();
-                var isAdmin = currentRole == Role.ADMIN.ToString();
 
-                if (!isCustomer && !isReceptionist && !isAdmin)
+                if (!isCustomer && !isReceptionist)
                 {
                     throw new UnauthorizedAccessException(_localizer["appointment.create.unauthorized"]);
                 }
 
-                if (isCustomer && currentUserId != model.CustomerId)
+                VcUsers customer = null;
+                VcPets pet = null;
+
+                // SCENARIO 1: Receptionist creates for a walk-in customer (new or existing)
+                if (isReceptionist && !string.IsNullOrEmpty(model.CustomerPhone))
                 {
-                    throw new UnauthorizedAccessException(_localizer["appointment.create.customer_only_self"]);
+                    customer = await _dataContext.VcUsers
+                        .FirstOrDefaultAsync(u => u.PhoneNumber == model.CustomerPhone && u.Role == Role.CUSTOMER.ToString(), cancellationToken);
+
+                    if (customer == null)
+                    {
+                        var createUserModel = new CreateUserModel
+                        {
+                            Code = GenerateCodeUtils.GenerateUserCode("CUS"),
+                            UserName = model.CustomerPhone,
+                            FullName = model.CustomerName,
+                            PhoneNumber = model.CustomerPhone,
+                            Email = model.CustomerEmail,
+                            Role = Role.CUSTOMER.ToString(),
+                            Password = "Abc@1234" // IMPORTANT: Should be replaced with a secure random password generator
+                        };
+                        var newCustomerId = await _mediator.Send(new CreateUserCommand(createUserModel), cancellationToken);
+                        customer = await _dataContext.VcUsers.FindAsync(newCustomerId);
+                    }
+
+                    pet = await _dataContext.VcPets
+                        .FirstOrDefaultAsync(p => p.OwnerId == customer.Id && p.Name == model.PetName, cancellationToken);
+
+                    if (pet == null)
+                    {
+                        var createPetModel = new CreatePetModel
+                        {
+                            OwnerId = customer.Id,
+                            Name = model.PetName,
+                            Species = model.PetSpecies,
+                            Breed = model.PetBreed,
+                            BirthDate = model.PetBirthDate,
+                            Gender = model.PetGender,
+                            Weight = model.PetWeight,
+                        };
+                        var newPetId = await _mediator.Send(new CreatePetCommand(createPetModel), cancellationToken);
+                        pet = await _dataContext.VcPets.FindAsync(newPetId);
+                    }
+                }
+                // SCENARIO 2: Logged-in customer creates for themselves, or Receptionist creates for an existing customer via ID
+                else
+                {
+                    var customerId = isCustomer ? currentUserId : model.CustomerId;
+                    if (customerId == null || customerId <= 0)
+                    {
+                        throw new ArgumentException(_localizer["appointment.customer.invalid"]);
+                    }
+
+                    if (isCustomer && currentUserId != customerId)
+                    {
+                        throw new UnauthorizedAccessException(_localizer["appointment.create.customer_only_self"]);
+                    }
+
+                    customer = await _dataContext.VcUsers
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(x => x.Id == customerId && x.Role == Role.CUSTOMER.ToString() && x.IsActive, cancellationToken);
+                    if (customer == null)
+                    {
+                        throw new ArgumentException(_localizer["appointment.customer.invalid"]);
+                    }
+
+                    pet = await _dataContext.VcPets
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(x => x.Id == model.PetId && x.IsActive, cancellationToken);
+                    if (pet == null)
+                    {
+                        throw new ArgumentException(_localizer["pet.not_found"]);
+                    }
+
+                    if (pet.OwnerId != customerId)
+                    {
+                        throw new ArgumentException(_localizer["appointment.pet.not_belong_to_customer"]);
+                    }
                 }
 
-                var customer = await _dataContext.VcUsers
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(x => x.Id == model.CustomerId && x.Role == Role.CUSTOMER.ToString() && x.IsActive, cancellationToken);
-                if (customer == null)
-                {
-                    throw new ArgumentException(_localizer["appointment.customer.invalid"]);
-                }
-
-                var pet = await _dataContext.VcPets
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(x => x.Id == model.PetId && x.IsActive, cancellationToken);
-                if (pet == null)
-                {
-                    throw new ArgumentException(_localizer["pet.not_found"]);
-                }
-
-                if (pet.OwnerId != model.CustomerId)
-                {
-                    throw new ArgumentException(_localizer["appointment.pet.not_belong_to_customer"]);
-                }
 
                 var service = await (from svc in _dataContext.VcServices.AsNoTracking()
                                      join sp in _dataContext.VcSpecializations.AsNoTracking()
                                          on svc.SpecializationId equals sp.Id
-                                     where svc.Id == model.SerivceId &&
+                                     where svc.Id == model.ServiceId &&
                                            svc.IsActive &&
                                            svc.IsAvailable &&
                                            sp.IsActive
@@ -196,9 +250,9 @@ namespace VeterinaryClinic.Business
                 var entity = new VcAppointments
                 {
                     Code = GenerateCodeUtils.GenerateUserCode("APT"),
-                    CustomerId = model.CustomerId,
-                    PetId = model.PetId,
-                    SerivceId = model.SerivceId,
+                    CustomerId = customer.Id,
+                    PetId = pet.Id,
+                    ServiceId = model.ServiceId,
                     DoctorId = selectedDoctor.DoctorId, 
                     AppointmentDate = appointmentDate,
                     StartTime = startTime,
@@ -305,6 +359,27 @@ namespace VeterinaryClinic.Business
                     RelatedEntityType = RelatedEntityType.Appointment.ToString()
                 };
                 await _notificationService.SendAndSaveNotificationAsync(doctorNotification);
+
+                // --- Notification to Admins ---
+                var adminIds = await _dataContext.VcUsers
+                    .Where(u => u.IsActive && u.Role == Role.ADMIN.ToString())
+                    .Select(u => u.Id)
+                    .ToListAsync(cancellationToken);
+
+                foreach (var adminId in adminIds)
+                {
+                    var adminNotification = new NotificationModel
+                    {
+                        UserId = adminId,
+                        Title = "Lịch hẹn mới được tạo",
+                        Message = $"Một lịch hẹn mới (Mã: {entity.Code}) đã được tạo cho khách hàng {customer.FullName} với bác sĩ {selectedDoctor.DoctorName}.",
+                        Type = NotificationType.INFORMATION.ToString(),
+                        RelatedEntityId = entity.Id,
+                        RelatedEntityType = RelatedEntityType.Appointment.ToString()
+                    };
+                    await _notificationService.SendAndSaveNotificationAsync(adminNotification);
+                }
+                // --- End Notification to Admins ---
 
                 Log.Information($"Appointment confirmation email jobs enqueued for customer {customer.Email} and doctor {selectedDoctor.DoctorEmail}.");
                 

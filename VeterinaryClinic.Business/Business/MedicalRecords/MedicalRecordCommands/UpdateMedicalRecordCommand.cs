@@ -40,6 +40,12 @@ namespace VeterinaryClinic.Business
                 var model = request.Model;
                 Log.Information($"Update Medical Record: {JsonSerializer.Serialize(model)}");
 
+                //check phải đúng người khám mới được sửa
+                if(_contextAccessor.UserId != model.DoctorId)
+                {
+                    throw new ArgumentException(_localizer["medical_record.no-permission"]);
+                }
+                    
                 //check role người dùng
                 if (_contextAccessor.Role != Role.DOCTOR.ToString())
                 {

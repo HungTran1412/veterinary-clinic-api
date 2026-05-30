@@ -52,7 +52,7 @@ namespace VeterinaryClinic.Business
                                     Code = a.Code,
                                     CustomerId = a.CustomerId,
                                     PetId = a.PetId,
-                                    SerivceId = a.SerivceId,
+                                    ServiceId = a.ServiceId,
                                     DoctorId = a.DoctorId,
                                     AppointmentDate = a.AppointmentDate,
                                     StartTime = a.StartTime,

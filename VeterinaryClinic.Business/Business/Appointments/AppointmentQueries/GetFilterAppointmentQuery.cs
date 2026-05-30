@@ -57,7 +57,7 @@ namespace VeterinaryClinic.Business
                     join doctor in _dataContext.VcUsers on a.DoctorId equals doctor.Id into doc from doctor in doc.DefaultIfEmpty()
                     
                     //join bang service lay ten dich vu
-                    join service in _dataContext.VcServices on a.SerivceId equals service.Id into ser from service in ser.DefaultIfEmpty()
+                    join service in _dataContext.VcServices on a.ServiceId equals service.Id into ser from service in ser.DefaultIfEmpty()
                     
                     //join bang pet lay ten pet
                     join pet in _dataContext.VcPets on a.PetId equals pet.Id into 
@@ -73,7 +73,7 @@ namespace VeterinaryClinic.Business
                         Code = a.Code,
                         CustomerId = a.CustomerId,
                         PetId = a.PetId,
-                        SerivceId = a.SerivceId,
+                        ServiceId = a.ServiceId,
                         DoctorId = a.DoctorId,
                         MedicalRecordId = mr.Id,
                         AppointmentDate = a.AppointmentDate,
@@ -93,13 +93,15 @@ namespace VeterinaryClinic.Business
                         DoctorName = doctor.FullName,
                         PetName = pet.Name,
                         ServiceName = service.Name,
+                        ServicePrice = service.Price + " VNĐ"
                     };
                 
-                if (role == Role.DOCTOR)
-                {
-                    data = data.Where(x => x.DoctorId == userId);
-                }
-                else if (role == Role.CUSTOMER)
+                // if (role == Role.DOCTOR)
+                // {
+                //     data = data.Where(x => x.DoctorId == userId);
+                // }
+                // else 
+                if (role == Role.CUSTOMER)
                 {
                     data = data.Where(x => x.CustomerId == userId);
                 }
@@ -123,7 +125,7 @@ namespace VeterinaryClinic.Business
 
                 if (filter.ServiceId.HasValue && filter.ServiceId > 0)
                 {
-                    data = data.Where(x => x.SerivceId == filter.ServiceId.Value);
+                    data = data.Where(x => x.ServiceId == filter.ServiceId.Value);
                 }
 
                 if (filter.DoctorId.HasValue && filter.DoctorId > 0)

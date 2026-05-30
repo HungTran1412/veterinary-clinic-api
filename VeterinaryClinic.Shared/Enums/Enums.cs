@@ -16,7 +16,6 @@
     /// </summary>
     public enum AppointmentStatus
     {
-        PENDING_CONFIRMATION,
         CONFIRMED,
         REJECTED,
         CANCELLED,
@@ -48,7 +47,8 @@
     public enum NotificationType
     {
         MESSAGE,
-        SYSTEM
+        SYSTEM,
+        INFORMATION
     }
 
     /// <summary>
@@ -57,7 +57,9 @@
     public enum RelatedEntityType
     {
         Appointment,
-        User
+        User,
+        WorkScheduleRegistration,
+        INFORMATION
     }
 
     /// <summary>

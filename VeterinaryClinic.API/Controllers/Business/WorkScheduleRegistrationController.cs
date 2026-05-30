@@ -39,6 +39,14 @@ namespace VeterinaryClinic.API.Controllers
         {
             return await ExecuteFunction(async () => await _mediator.Send(new ProcessWorkScheduleRegistrationCommand(id, model)));
         }
+        
+        [HttpPost("process-many")]
+        // [Authorize(Roles = Role.ADMIN.ToString())]
+        [ProducesResponseType(typeof(ResponseObject<Unit>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> ProcessMany([FromBody] ProcessManyWorkScheduleRegistrationModel model)
+        {
+            return await ExecuteFunction(async () => await _mediator.Send(new ProcessManyWorkScheduleRegistrationCommand(model)));
+        }
 
         [HttpDelete("{id}")]
         [ProducesResponseType(typeof(ResponseObject<Unit>), StatusCodes.Status200OK)]

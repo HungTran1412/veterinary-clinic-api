@@ -38,13 +38,13 @@ namespace VeterinaryClinic.Data
         /// Giong: anh long ngan...
         /// </summary>
         [Column("breed")]
-        public string Breed { get; set; }
+        public string? Breed { get; set; }
         
         /// <summary>
         /// gioi tinh
         /// </summary>
         [Column("gender")]
-        public bool Gender { get; set; }
+        public bool? Gender { get; set; }
 
         /// <summary>
         /// trang thai triet san
@@ -56,7 +56,7 @@ namespace VeterinaryClinic.Data
         /// ngay sinh
         /// </summary>
         [Column("birth_date")]
-        public DateTime BirthDate { get; set; }
+        public DateTime? BirthDate { get; set; }
         
         /// <summary>
         /// Can nang thu cung

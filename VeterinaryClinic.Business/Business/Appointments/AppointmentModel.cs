@@ -16,7 +16,7 @@ namespace VeterinaryClinic.Business
         public int PetId { get; init; }
 
         [Required(ErrorMessage = "appointment.service_id.required")]
-        public int SerivceId { get; init; }
+        public int ServiceId { get; init; }
 
         [Required(ErrorMessage = "appointment.appointment_date.required")]
         public DateTime AppointmentDate { get; init; }
@@ -59,6 +59,7 @@ namespace VeterinaryClinic.Business
         public string? CustomerPhone { get; init; }
         public string? PetName { get; init; }
         public string? ServiceName { get; init; }
+        public string? ServicePrice { get; init; }
         public string? DoctorName { get; init; }
 
         public int MedicalRecordId { get; init; }
@@ -71,6 +72,16 @@ namespace VeterinaryClinic.Business
     /// </summary>
     public record CreateAppointmentModel : AppointmentBaseModel
     {
+        public int? CreatedUserId { get; init; }
+        public string? CustomerName { get; init; }
+        public string? CustomerPhone { get; init; }
+        public string? CustomerEmail { get; init; }
+        public string? PetName { get; init; }
+        public string? PetSpecies { get; init; }
+        public string? PetBreed { get; init; }
+        public DateTime? PetBirthDate { get; init; }
+        public bool? PetGender { get; set; }
+        public double? PetWeight { get; init; }
     }
 
     /// <summary>
@@ -102,7 +113,7 @@ namespace VeterinaryClinic.Business
         {
             entity.CustomerId = this.CustomerId;
             entity.PetId = this.PetId;
-            entity.SerivceId = this.SerivceId;
+            entity.ServiceId = this.ServiceId;
             entity.DoctorId = this.DoctorId;
             entity.AppointmentDate = this.AppointmentDate;
             entity.StartTime = this.StartTime;

@@ -24,17 +24,20 @@ public class CreateWorkScheduleRegistrationCommand : IRequest<int>
         private readonly ICacheService _cacheService;
         private readonly IContextAccessor _contextAccessor;
         private readonly IStringLocalizer<CreateWorkScheduleRegistrationCommand> _localizer;
+        private readonly INotificationService _notificationService;
 
         public Handler(
             VeterinaryClinicDataContext dataContext,
             ICacheService cacheService,
             Func<IContextAccessor> contextAccessorFactory,
-            IStringLocalizer<CreateWorkScheduleRegistrationCommand> localizer)
+            IStringLocalizer<CreateWorkScheduleRegistrationCommand> localizer,
+            INotificationService notificationService)
         {
             _dataContext = dataContext;
             _cacheService = cacheService;
             _contextAccessor = contextAccessorFactory();
             _localizer = localizer;
+            _notificationService = notificationService;
         }
 
         public async Task<int> Handle(CreateWorkScheduleRegistrationCommand request, CancellationToken cancellationToken)
@@ -122,6 +125,32 @@ public class CreateWorkScheduleRegistrationCommand : IRequest<int>
 
             await _dataContext.VcWorkScheduleRegistrations.AddAsync(registration, cancellationToken);
             await _dataContext.SaveChangesAsync(cancellationToken);
+
+            #region Send Notification
+
+            var title = "Đăng ký lịch làm việc mới";
+            var message = $"{user.FullName} đã đăng ký một lịch làm việc mới vào ngày {registration.WorkDate:dd/MM/yyyy}.";
+            
+            var adminAndReceptionistIds = await _dataContext.VcUsers
+                .Where(u => u.IsActive && (u.Role == Role.ADMIN.ToString() || u.Role == Role.RECEPTIONIST.ToString()))
+                .Select(u => u.Id)
+                .ToListAsync(cancellationToken);
+
+            foreach (var userId in adminAndReceptionistIds)
+            {
+                var notification = new NotificationModel
+                {
+                    UserId = userId,
+                    Title = title,
+                    Message = message,
+                    Type = NotificationType.MESSAGE.ToString(),
+                    RelatedEntityId = registration.Id,
+                    RelatedEntityType = RelatedEntityType.WorkScheduleRegistration.ToString()
+                };
+                await _notificationService.SendAndSaveNotificationAsync(notification);
+            }
+
+            #endregion
 
             _cacheService.Remove(WorkScheduleRegistrationConstant.BuildCacheKey());
 

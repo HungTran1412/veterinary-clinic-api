@@ -49,9 +49,10 @@ namespace VeterinaryClinic.Business
                     throw new ArgumentException(_localizer["pet.birthdate.future"]);
                 }
 
-                // Determine the owner ID. If not provided, use the current user's ID.
-                var ownerId = model.OwnerId ?? currentUserId;
-                if (ownerId == null)
+                // Determine the owner ID. If not provided (i.e., is 0), use the current user's ID.
+                int? ownerId = model.OwnerId > 0 ? model.OwnerId : currentUserId;
+
+                if (ownerId == null || ownerId.Value <= 0)
                 {
                     throw new ArgumentException(_localizer["pet.owner.required"]);
                 }

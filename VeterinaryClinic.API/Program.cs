@@ -2,9 +2,8 @@ using VeterinaryClinic.Business;
 using System.Globalization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
-using VeterinaryClinic.Business; // Using Interface
 using VeterinaryClinic.Data;
-using VeterinaryClinic.Infrastructure; // Using Implementation
+using VeterinaryClinic.Infrastructure;
 using System.Reflection;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -12,17 +11,16 @@ using VeterinaryClinic.Shared.ContextAccessor;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using Microsoft.Extensions.Localization;
 using VeterinaryClinic.API.Localization;
-using VeterinaryClinic.Infrastructure; // Using custom localizer
 using VeterinaryClinic.API.Extensions;
 using VeterinaryClinic.Shared;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using VeterinaryClinic.Business.Core;
-using VeterinaryClinic.Infrastructure.Redis;
-using Hangfire; // Added for Hangfire
+using Hangfire;
 using VeterinaryClinic.API;
 using VeterinaryClinic.API.Services;
+using QuestPDF.Infrastructure;
 
 // Cấu hình Serilog tối thiểu để ghi ra Console
 Log.Logger = new LoggerConfiguration()
@@ -31,6 +29,7 @@ Log.Logger = new LoggerConfiguration()
     .CreateBootstrapLogger();
 
 var builder = WebApplication.CreateBuilder(args);
+QuestPDF.Settings.License = LicenseType.Community;
 
 // Thêm Serilog vào pipeline của host
 builder.Host.UseSerilog();
@@ -39,6 +38,9 @@ builder.Host.UseSerilog();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpContextAccessor();
+
+// Bind settings from appsettings.json
+builder.Services.Configure<ClinicInfoSettings>(builder.Configuration.GetSection(ClinicInfoSettings.SECTION_NAME));
 
 // Cấu hình CORS
 var webAppPolicy = "WebAppPolicy";
@@ -180,7 +182,10 @@ builder.Services.AddScoped<IVeterinaryClinicCallStoreHelper, VeterinaryClinicCal
 // 4. Đăng ký Email Service (Infrastructure)
 builder.Services.AddScoped<IEmailService, EmailService>();
 
-// 5. Đăng ký Context Accessor
+// 5. Đăng ký PDF Service
+builder.Services.AddScoped<IPdfService, QuestPdfService>();
+
+// 6. Đăng ký Context Accessor
 builder.Services.AddScoped<IContextAccessor, HttpContextAccessorWrapper>();
 builder.Services.AddScoped<Func<IContextAccessor>>(sp => () => sp.GetRequiredService<IContextAccessor>());
 
@@ -198,14 +203,14 @@ builder.Services.AddScoped<INotificationService, SignalRNotificationService>();
 builder.Services.AddApplicationServices(builder.Configuration);
 
 
-// 6. Cấu hình Redis Cache
+// 7. Cấu hình Redis Cache
 builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
     options.InstanceName = "VeterinaryClinic_";
 });
 
-// 7. Cấu hình Custom JSON Localization
+// 8. Cấu hình Custom JSON Localization
 builder.Services.AddSingleton<IStringLocalizerFactory, JsonStringLocalizerFactory>();
 builder.Services.AddTransient(typeof(IStringLocalizer<>), typeof(StringLocalizer<>));
 
@@ -229,7 +234,7 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     options.RequestCultureProviders.Add(new CookieRequestCultureProvider());
 });
 
-// 8. Cấu hình Hangfire
+// 9. Cấu hình Hangfire
 builder.Services.AddHangfire(configuration => configuration
     .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
     .UseSimpleAssemblyNameTypeSerializer()
@@ -239,7 +244,7 @@ builder.Services.AddHangfire(configuration => configuration
 // Add the processing server as IHostedService
 builder.Services.AddHangfireServer();
 
-// 9. Cấu hình SignalR
+// 10. Cấu hình SignalR
 builder.Services.AddSignalR()
     .AddStackExchangeRedis(builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379", options => {
         options.Configuration.ChannelPrefix = "VeterinaryClinicSignalR";

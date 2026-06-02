@@ -33,7 +33,7 @@ namespace VeterinaryClinic.API.Services
             var dbNotification = new VcNotifications
             {
                 UserId = notification.UserId,
-                Code = GenerateCodeUtils.GenerateUserCode("NOTI"),
+                Code = GenerateCodeUtils.GenerateCode("NOTI"),
                 Title = notification.Title,
                 Type = notification.Type,
                 IsRead = false,

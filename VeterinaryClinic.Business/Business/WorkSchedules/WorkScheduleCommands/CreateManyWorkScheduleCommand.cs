@@ -109,7 +109,7 @@ namespace VeterinaryClinic.Business
                     
                     var entity = new VcWorkSchedules
                     {
-                        Code = GenerateCodeUtils.GenerateUserCode("WS"),
+                        Code = GenerateCodeUtils.GenerateCode("WS"),
                         UserId = model.UserId,
                         WorkDate = model.WorkDate,
                         StartTime = model.StartTime,

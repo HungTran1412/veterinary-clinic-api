@@ -35,6 +35,7 @@ namespace VeterinaryClinic.Business
     public record AppointmentModel : AppointmentBaseModel
     {
         public int DoctorId { get; init; }
+        public int? BillId { get; init; }
         public DateTime EndTime { get; init; }
 
         // from TrackedChangeEntity

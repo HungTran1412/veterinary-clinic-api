@@ -12,6 +12,7 @@ namespace VeterinaryClinic.Business
         bool IsFinalStatus(AppointmentStatus status);
         IReadOnlyCollection<AppointmentAction> GetAvailableActions(AppointmentStatus status, Role role);
         void Apply(VcAppointments appointment, AppointmentAction action, string? cancelReason = null);
+        void ApplySystem(VcAppointments appointment, AppointmentAction action, string? cancelReason = null);
         string GetActionDisplayName(AppointmentAction action);
     }
 
@@ -143,6 +144,18 @@ namespace VeterinaryClinic.Business
             }
 
             var nextStatus = GetNextStatus(currentStatus, action, role);
+            UpdateAppointmentState(appointment, nextStatus, cancelReason);
+        }
+
+        public void ApplySystem(VcAppointments appointment, AppointmentAction action, string? cancelReason = null)
+        {
+            var currentStatus = ParseStatus(appointment.State);
+            var nextStatus = GetNextStatusForSystem(currentStatus, action);
+            UpdateAppointmentState(appointment, nextStatus, cancelReason);
+        }
+
+        private void UpdateAppointmentState(VcAppointments appointment, AppointmentStatus nextStatus, string? cancelReason)
+        {
 
             if (nextStatus == AppointmentStatus.CANCELLED &&
                 string.IsNullOrWhiteSpace(cancelReason) &&
@@ -187,6 +200,17 @@ namespace VeterinaryClinic.Business
                 (AppointmentStatus.CONFIRMED, AppointmentAction.CUSTOMER_CANCEL) => AppointmentStatus.CANCELLED,
                 (AppointmentStatus.CONFIRMED, AppointmentAction.MARK_NO_SHOW) => AppointmentStatus.NO_SHOW,
                 (AppointmentStatus.IN_PROGRESS, AppointmentAction.COMPLETE_CONSULTATION) => AppointmentStatus.PAYMENT_PENDING,
+                (AppointmentStatus.PAYMENT_PENDING, AppointmentAction.COMPLETE_PAYMENT) => AppointmentStatus.COMPLETED,
+                (AppointmentStatus.PAYMENT_PENDING, AppointmentAction.CASH_PAYMENT) => AppointmentStatus.COMPLETED,
+                (AppointmentStatus.PAYMENT_PENDING, AppointmentAction.BANK_TRANSFER) => AppointmentStatus.COMPLETED,
+                _ => throw new InvalidOperationException(_localizer["appointment.transition.invalid"])
+            };
+        }
+
+        private AppointmentStatus GetNextStatusForSystem(AppointmentStatus currentStatus, AppointmentAction action)
+        {
+            return (currentStatus, action) switch
+            {
                 (AppointmentStatus.PAYMENT_PENDING, AppointmentAction.COMPLETE_PAYMENT) => AppointmentStatus.COMPLETED,
                 (AppointmentStatus.PAYMENT_PENDING, AppointmentAction.CASH_PAYMENT) => AppointmentStatus.COMPLETED,
                 (AppointmentStatus.PAYMENT_PENDING, AppointmentAction.BANK_TRANSFER) => AppointmentStatus.COMPLETED,

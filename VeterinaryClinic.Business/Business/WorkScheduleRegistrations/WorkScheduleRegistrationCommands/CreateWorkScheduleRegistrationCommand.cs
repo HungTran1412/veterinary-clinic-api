@@ -109,7 +109,7 @@ public class CreateWorkScheduleRegistrationCommand : IRequest<int>
 
             var registration = new VcWorkScheduleRegistrations
             {
-                Code = GenerateCodeUtils.GenerateUserCode("WSR"),
+                Code = GenerateCodeUtils.GenerateCode("WSR"),
                 UserId = targetUserId,
                 ShiftTemplateId = model.ShiftTemplateId,
                 WorkDate = model.WorkDate.Date,

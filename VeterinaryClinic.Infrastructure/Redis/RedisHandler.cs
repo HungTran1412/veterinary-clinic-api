@@ -4,7 +4,7 @@ using Serilog;
 using StackExchange.Redis;
 using VeterinaryClinic.Business.Core;
 
-namespace VeterinaryClinic.Infrastructure.Redis
+namespace VeterinaryClinic.Infrastructure
 {
     // https://github.com/redis/NRedisStack
 

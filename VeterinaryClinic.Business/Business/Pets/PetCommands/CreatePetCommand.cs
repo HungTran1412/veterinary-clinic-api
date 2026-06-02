@@ -78,7 +78,7 @@ namespace VeterinaryClinic.Business
 
                 var entity = new VcPets
                 {
-                    Code = GenerateCodeUtils.GenerateUserCode("PET"),
+                    Code = GenerateCodeUtils.GenerateCode("PET"),
                     Name = model.Name,
                     Species = model.Species,
                     Breed = model.Breed,

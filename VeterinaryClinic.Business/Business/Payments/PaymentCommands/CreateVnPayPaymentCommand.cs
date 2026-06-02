@@ -82,7 +82,7 @@ namespace VeterinaryClinic.Business
                     throw new ArgumentException(_localizer["invoice.amount.invalid"]);
                 }
 
-                var paymentBatchCode = GenerateCodeUtils.GenerateUserCode("PAY");
+                var paymentBatchCode = GenerateCodeUtils.GenerateCode("PAY");
                 var payments = new List<VcPayments>();
 
                 foreach (var item in pendingInvoices)
@@ -123,7 +123,7 @@ namespace VeterinaryClinic.Business
                 return new VnPayPaymentUrlModel
                 {
                     PaymentUrl = paymentUrl,
-                    InvoiceId = anchorPayment.InvoiceId,
+                    InvoiceId = anchorPayment.InvoiceId.Value,
                     PaymentId = anchorPayment.Id,
                     Amount = totalAmount,
                     InvoiceCount = pendingInvoices.Count

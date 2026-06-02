@@ -28,6 +28,7 @@ namespace VeterinaryClinic.Data
         public DbSet<VcPayments> VcPayments { get; set; }
         public DbSet<VcShiftTemplates> VcShiftTemplates { get; set; }
         public DbSet<VcWorkScheduleRegistrations> VcWorkScheduleRegistrations { get; set; }
+        public DbSet<VcBills> VcBills { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

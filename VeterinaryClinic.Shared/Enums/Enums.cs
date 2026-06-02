@@ -87,7 +87,8 @@
     {
         PENDING,
         SUCCESS,
-        FAILED
+        FAILED,
+        PAID
     }
 
     /// <summary>

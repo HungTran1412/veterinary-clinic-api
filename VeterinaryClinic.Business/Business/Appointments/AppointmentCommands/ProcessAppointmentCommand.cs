@@ -2,6 +2,8 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Serilog;
+using System.Linq;
+using System.Threading.Tasks;
 using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared;
 using VeterinaryClinic.Shared.ContextAccessor;
@@ -68,30 +70,72 @@ namespace VeterinaryClinic.Business
 
                 ValidatePermission(appointment, action);
 
-                if (action == AppointmentAction.BANK_TRANSFER)
+                // --- UNIFIED PAYMENT LOGIC ---
+                if (action == AppointmentAction.CASH_PAYMENT || action == AppointmentAction.BANK_TRANSFER)
                 {
-                    return await _mediator.Send(
-                        new CreateVnPayPaymentCommand(new CreateVnPayPaymentModel
+                    // Safety check: Ensure the primary invoice for this action hasn't been processed.
+                    var primaryInvoice = await _dataContext.VcInvoices
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(i => i.AppointmentId == appointment.Id, cancellationToken);
+
+                    if (primaryInvoice != null)
+                    {
+                        if (primaryInvoice.Status == PaymentStatus.PAID.ToString() ||
+                            primaryInvoice.Status == PaymentStatus.SUCCESS.ToString())
                         {
-                            AppointmentId = appointment.Id
-                        }),
-                        cancellationToken);
+                            throw new ArgumentException(_localizer["invoice.already_processed"]);
+                        }
+
+                        if (primaryInvoice.BillId.HasValue)
+                        {
+                            var existingBillStatus = await _dataContext.VcBills
+                                .AsNoTracking()
+                                .Where(b => b.Id == primaryInvoice.BillId.Value && b.IsActive)
+                                .Select(b => b.Status)
+                                .FirstOrDefaultAsync(cancellationToken);
+
+                            if (string.Equals(existingBillStatus, PaymentStatus.PAID.ToString(), StringComparison.OrdinalIgnoreCase) ||
+                                string.Equals(existingBillStatus, PaymentStatus.SUCCESS.ToString(), StringComparison.OrdinalIgnoreCase))
+                            {
+                                throw new ArgumentException(_localizer["invoice.already_processed"]);
+                            }
+                        }
+                    }
+                    
+                    // Find all pending appointments for this customer
+                    var pendingAppointmentIds = await _dataContext.VcAppointments
+                        .Where(a => a.CustomerId == appointment.CustomerId &&
+                                    a.State == AppointmentStatus.PAYMENT_PENDING.ToString() &&
+                                    a.IsActive)
+                        .Select(a => a.Id)
+                        .ToListAsync(cancellationToken);
+                    
+                    if (!pendingAppointmentIds.Contains(appointment.Id))
+                    {
+                        pendingAppointmentIds.Add(appointment.Id);
+                    }
+
+                    var createBillModel = new CreateBillModel
+                    {
+                        AppointmentIds = pendingAppointmentIds,
+                        PaymentMethod = action == AppointmentAction.CASH_PAYMENT ? PaymentMethod.CASH.ToString() : PaymentMethod.VNPAY.ToString(),
+                        Note = "Thanh toán gộp tự động",
+                        ClientIpAddress = null // Pass null as the model doesn't contain this info
+                    };
+
+                    return await _mediator.Send(new CreateBillCommand(createBillModel), cancellationToken);
                 }
+                // --- END OF UNIFIED PAYMENT LOGIC ---
 
+                // This part will only be executed for non-payment actions
                 _appointmentStateMachine.Apply(appointment, action, request.Model.CancelReason);
-
                 appointment.StateName = _appointmentStateMachine.GetStateDisplayName(Enum.Parse<AppointmentStatus>(appointment.State));
 
                 if (action == AppointmentAction.COMPLETE_CONSULTATION)
                 {
                     appointment.EndTime = DateTime.UtcNow;
                 }
-
-                if (action == AppointmentAction.CASH_PAYMENT)
-                {
-                    await ApplyCashPayment(appointment, cancellationToken);
-                }
-
+                
                 appointment.ModifiedDate = DateTime.UtcNow;
                 appointment.ModifiedUserId = _contextAccessor.UserId;
                 appointment.ModifiedUserName = _contextAccessor.UserName;
@@ -136,19 +180,6 @@ namespace VeterinaryClinic.Business
                             UserId = appointment.CustomerId,
                             Title = "Buổi khám đã hoàn tất",
                             Message = $"Buổi khám cho lịch hẹn {appointment.Code} đã hoàn tất. Vui lòng tiến hành thanh toán.",
-                            Type = NotificationType.MESSAGE.ToString(),
-                            RelatedEntityId = appointment.Id,
-                            RelatedEntityType = RelatedEntityType.Appointment.ToString()
-                        };
-                        break;
-
-                    case AppointmentAction.CASH_PAYMENT:
-                    case AppointmentAction.BANK_TRANSFER:
-                         customerNotification = new NotificationModel
-                        {
-                            UserId = appointment.CustomerId,
-                            Title = "Thanh toán thành công",
-                            Message = $"Thanh toán cho lịch hẹn {appointment.Code} đã được ghi nhận thành công.",
                             Type = NotificationType.MESSAGE.ToString(),
                             RelatedEntityId = appointment.Id,
                             RelatedEntityType = RelatedEntityType.Appointment.ToString()
@@ -206,49 +237,6 @@ namespace VeterinaryClinic.Business
                 {
                     throw new UnauthorizedAccessException(_localizer["user.unauthorized"]);
                 }
-            }
-
-            private async Task ApplyCashPayment(VcAppointments appointment, CancellationToken cancellationToken)
-            {
-                var invoice = await _dataContext.VcInvoices
-                    .FirstOrDefaultAsync(x => x.AppointmentId == appointment.Id && x.IsActive, cancellationToken);
-                if (invoice == null)
-                {
-                    throw new ArgumentException(_localizer["invoice.not_found"]);
-                }
-
-                if (invoice.TotalAmount <= 0)
-                {
-                    throw new ArgumentException(_localizer["invoice.amount.invalid"]);
-                }
-
-                if (invoice.Status == PaymentStatus.SUCCESS.ToString())
-                {
-                    throw new ArgumentException(_localizer["invoice.already_paid"]);
-                }
-
-                var payment = new VcPayments
-                {
-                    InvoiceId = invoice.Id,
-                    Code = GenerateCodeUtils.GenerateUserCode("PAY"),
-                    PaymentMethod = PaymentMethod.CASH.ToString(),
-                    PaymentStatus = PaymentStatus.SUCCESS.ToString(),
-                    Amount = invoice.TotalAmount,
-                    GatewayTransactionId = null,
-                    ResponseCode = null,
-                    GatewayResponse = null,
-                    PaymentDate = DateTime.UtcNow,
-                    IsActive = true,
-                    Order = 0,
-                    CreatedDate = DateTime.UtcNow,
-                    CreatedUserId = _contextAccessor.UserId,
-                    CreatedUserName = _contextAccessor.UserName
-                };
-
-                invoice.Status = PaymentStatus.SUCCESS.ToString();
-                invoice.PaidDate = DateTime.UtcNow;
-
-                await _dataContext.VcPayments.AddAsync(payment, cancellationToken);
             }
         }
     }

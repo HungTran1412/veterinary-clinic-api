@@ -1,5 +1,5 @@
 them migration
-dotnet ef migrations add UpdateVcUserTable --project VeterinaryClinic.Data --startup-project VeterinaryClinic.API --context VeterinaryClinicDataContext
+dotnet ef migrations add AddVcBillTable --project VeterinaryClinic.Data --startup-project VeterinaryClinic.API --context VeterinaryClinicDataContext
 
 cập nhật database:
 dotnet ef database update --project VeterinaryClinic.Data --startup-project VeterinaryClinic.API --context VeterinaryClinicDataContext

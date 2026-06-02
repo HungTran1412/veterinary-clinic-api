@@ -64,9 +64,9 @@ namespace VeterinaryClinic.Infrastructure
                     row.RelativeItem().Column(col =>
                     {
                         col.Item().Text("KHÁCH HÀNG");
-                        col.Item().Text(_model.CustomerName).SemiBold();
-                        col.Item().Text(_model.CustomerAddress);
-                        col.Item().Text(_model.CustomerPhone);
+                        col.Item().Text("Tên khách hàng: " + _model.CustomerName).SemiBold();
+                        col.Item().Text("Địa chỉ: " + _model.CustomerAddress);
+                        col.Item().Text("SĐT: " + _model.CustomerPhone);
                     });
 
                     row.RelativeItem().Column(col =>

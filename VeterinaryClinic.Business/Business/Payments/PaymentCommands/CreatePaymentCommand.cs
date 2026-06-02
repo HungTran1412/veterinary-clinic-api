@@ -55,7 +55,7 @@ public class CreatePaymentCommand : IRequest<Unit>
                 throw new ArgumentException(_localizer["data.not_found"]);
             }
 
-            entity.Code = GenerateCodeUtils.GenerateUserCode("PAY");
+            entity.Code = GenerateCodeUtils.GenerateCodeByDaily("PAY");
             var checkCode = await _dataContext.VcPayments.AnyAsync(x => x.Code == entity.Code, cancellationToken);
             if (checkCode)
             {

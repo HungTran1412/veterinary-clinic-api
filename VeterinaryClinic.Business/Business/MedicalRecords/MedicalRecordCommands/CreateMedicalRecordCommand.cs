@@ -61,7 +61,7 @@ namespace VeterinaryClinic.Business
 
                 var entity = new VcMedicalRecords
                 {
-                    Code = GenerateCodeUtils.GenerateUserCode("MR"),
+                    Code = GenerateCodeUtils.GenerateCode("MR"),
                     AppointmentId = model.AppointmentId,
                     DoctorId = model.DoctorId,
                     Symptoms = model.Symptoms,

@@ -2,9 +2,8 @@ using VeterinaryClinic.Business;
 using System.Globalization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
-using VeterinaryClinic.Business; // Using Interface
 using VeterinaryClinic.Data;
-using VeterinaryClinic.Infrastructure; // Using Implementation
+using VeterinaryClinic.Infrastructure;
 using System.Reflection;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -12,14 +11,13 @@ using VeterinaryClinic.Shared.ContextAccessor;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using Microsoft.Extensions.Localization;
 using VeterinaryClinic.API.Localization;
-using VeterinaryClinic.Infrastructure; // Using custom localizer
 using VeterinaryClinic.API.Extensions;
 using VeterinaryClinic.Shared;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using VeterinaryClinic.Business.Core;
-using Hangfire; // Added for Hangfire
+using Hangfire;
 using VeterinaryClinic.API;
 using VeterinaryClinic.API.Services;
 using QuestPDF.Infrastructure;
@@ -40,6 +38,9 @@ builder.Host.UseSerilog();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpContextAccessor();
+
+// Bind settings from appsettings.json
+builder.Services.Configure<ClinicInfoSettings>(builder.Configuration.GetSection(ClinicInfoSettings.SECTION_NAME));
 
 // Cấu hình CORS
 var webAppPolicy = "WebAppPolicy";

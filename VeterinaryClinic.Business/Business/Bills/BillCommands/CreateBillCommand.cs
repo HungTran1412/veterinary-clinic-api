@@ -164,7 +164,7 @@ namespace VeterinaryClinic.Business
                 var payment = new VcPayments
                 {
                     BillId = bill.Id,
-                    Code = GenerateCodeUtils.GenerateUserCode("PAY"),
+                    Code = GenerateCodeUtils.GenerateCodeByDaily("PAY"),
                     PaymentMethod = paymentMethod.ToString(),
                     PaymentStatus = PaymentStatus.PENDING.ToString(),
                     Amount = totalAmount,
@@ -226,7 +226,7 @@ namespace VeterinaryClinic.Business
             {
                 var bill = new VcBills
                 {
-                    Code = GenerateCodeUtils.GenerateUserCode("BILL"),
+                    Code = GenerateCodeUtils.GenerateCodeByDaily("BILL"),
                     CustomerId = customerId,
                     TotalAmount = totalAmount,
                     Status = PaymentStatus.PENDING.ToString(),

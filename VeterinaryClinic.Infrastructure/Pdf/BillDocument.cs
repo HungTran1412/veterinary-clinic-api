@@ -42,8 +42,10 @@ namespace VeterinaryClinic.Infrastructure
                     column.Item().Text($"Điện thoại: {_model.ClinicPhone}");
                 });
 
-                // Uncomment the line below to add a logo
-                // row.ConstantItem(100).Image(Placeholders.Image(100, 50));
+                if (_model.LogoImageBytes != null)
+                {
+                    row.ConstantItem(100).Image(_model.LogoImageBytes);
+                }
             });
         }
 

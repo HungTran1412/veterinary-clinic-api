@@ -97,7 +97,7 @@ namespace VeterinaryClinic.Busines
 
                 var entity = new VcUsers
                 {
-                    Code = GenerateCodeUtils.GenerateUserCode("CUS"),
+                    Code = GenerateCodeUtils.GenerateCode("CUS"),
                     Username = model.UserName,
                     Email = model.Email,
                     Password = _passwordHasher.HashPassword(model.Password),

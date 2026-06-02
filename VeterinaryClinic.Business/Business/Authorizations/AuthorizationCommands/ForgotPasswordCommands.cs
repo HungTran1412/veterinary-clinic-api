@@ -71,7 +71,7 @@ namespace VeterinaryClinic.Business
                     TokenType = TokenType.OTP.ToString(),
                     ExpirationAt = DateTime.UtcNow.AddMinutes(5),
                     IsUsed = false,
-                    Code = GenerateCodeUtils.GenerateUserCode("OTP")
+                    Code = GenerateCodeUtils.GenerateCode("OTP")
                 };
 
                 await _dataContext.VcUserVerificationTokens.AddAsync(verificationToken, cancellationToken);

@@ -94,7 +94,7 @@ namespace VeterinaryClinic.Business
                     {
                         var createUserModel = new CreateUserModel
                         {
-                            Code = GenerateCodeUtils.GenerateUserCode("CUS"),
+                            Code = GenerateCodeUtils.GenerateCode("CUS"),
                             UserName = model.CustomerPhone,
                             FullName = model.CustomerName,
                             PhoneNumber = model.CustomerPhone,
@@ -249,7 +249,7 @@ namespace VeterinaryClinic.Business
                 var initialStatus = _appointmentStateMachine.GetInitialStatus();
                 var entity = new VcAppointments
                 {
-                    Code = GenerateCodeUtils.GenerateUserCode("APT"),
+                    Code = GenerateCodeUtils.GenerateCodeByDaily("APT"),
                     CustomerId = customer.Id,
                     PetId = pet.Id,
                     ServiceId = model.ServiceId,
@@ -275,7 +275,7 @@ namespace VeterinaryClinic.Business
                 var invoice = new VcInvoices
                 {
                     AppointmentId = entity.Id,
-                    Code = GenerateCodeUtils.GenerateUserCode("INV"),
+                    Code = GenerateCodeUtils.GenerateCodeByDaily("INV"),
                     Status = PaymentStatus.PENDING.ToString(),
                     TotalAmount = service.Price,
                     PaidDate = default,

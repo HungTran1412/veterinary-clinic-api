@@ -55,7 +55,7 @@ public class CreateInvoiceCommand : IRequest<Unit>
                 throw new ArgumentException(_localizer["data.not_found"]);
             }
 
-            entity.Code = GenerateCodeUtils.GenerateUserCode("INV");
+            // entity.Code = GenerateCodeUtils.GenerateCodeByDaily("INV");
             var checkCode = await _dataContext.VcInvoices.AnyAsync(x => x.Code == entity.Code, cancellationToken);
             if (checkCode)
             {

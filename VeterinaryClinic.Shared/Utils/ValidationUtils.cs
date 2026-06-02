@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
 
 namespace VeterinaryClinic.Shared
 {
@@ -37,12 +38,25 @@ namespace VeterinaryClinic.Shared
     public static class GenerateCodeUtils
     {
         /// <summary>
-        /// Sinh mã người dùng ngẫu nhiên với một tiền tố.
+        /// Sinh mã ngẫu nhiên với một tiền tố.
         /// </summary>
-        public static string GenerateUserCode(string prefix)
+        public static string GenerateCode(string prefix)
         {
             int randomNumber = Random.Shared.Next(10000000, 100000000);
             return $"{prefix}{randomNumber}";
+        }
+
+        /// <summary>
+        /// Sinh mã theo ngày với một tiền tố và một phần số ngẫu nhiên.
+        /// Định dạng: Prefix-yyMMdd-xxxx
+        /// </summary>
+        /// <param name="prefix">Tiền tố cho mã (ví dụ: BILL, INV).</param>
+        /// <returns>Một mã duy nhất có chứa thông tin ngày tháng.</returns>
+        public static string GenerateCodeByDaily(string prefix)
+        {
+            string datePart = DateTime.UtcNow.ToString("yyMMdd");
+            int randomNumber = Random.Shared.Next(1000, 10000); // 4-digit random number
+            return $"{prefix}-{datePart}-{randomNumber}";
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace VeterinaryClinic.Business
@@ -34,10 +35,11 @@ namespace VeterinaryClinic.Business
 
         public decimal TotalAmount { get; init; }
         
-        // Thông tin phòng khám (có thể lấy từ appsettings)
-        public string ClinicName { get; init; } = "Phòng khám Thú y PetCare";
-        public string ClinicAddress { get; init; } = "123 Đường ABC, Quận 1, TP. Hồ Chí Minh";
-        public string ClinicPhone { get; init; } = "0123 456 789";
+        public string ClinicName { get; init; } = string.Empty;
+        public string ClinicAddress { get; init; } = string.Empty;
+        public string ClinicPhone { get; init; } = string.Empty;
+        
+        public byte[]? LogoImageBytes { get; init; }
     }
 
     /// <summary>

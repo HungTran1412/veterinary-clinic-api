@@ -82,7 +82,7 @@ namespace VeterinaryClinic.Business
                     throw new ArgumentException(_localizer["invoice.amount.invalid"]);
                 }
 
-                var paymentBatchCode = GenerateCodeUtils.GenerateUserCode("PAY");
+                var paymentBatchCode = GenerateCodeUtils.GenerateCode("PAY");
                 var payments = new List<VcPayments>();
 
                 foreach (var item in pendingInvoices)

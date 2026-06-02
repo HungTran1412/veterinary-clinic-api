@@ -98,7 +98,7 @@ namespace VeterinaryClinic.Business
                         DoctorName = doctor.FullName,
                         PetName = pet.Name,
                         ServiceName = service.Name,
-                        ServicePrice = service.Price + " VNĐ"
+                        ServicePrice = service != null ? service.Price.ToString("N0") + " VNĐ" : "0 VNĐ"
                     };
                 
                 // if (role == Role.DOCTOR)

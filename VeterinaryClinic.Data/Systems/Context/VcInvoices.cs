@@ -15,6 +15,13 @@ namespace VeterinaryClinic.Data
         }
         
         /// <summary>
+        /// ID của hóa đơn tổng (nếu có).
+        /// Dùng để gom nhiều hóa đơn dịch vụ vào một lần thanh toán.
+        /// </summary>
+        [Column("bill_id")]
+        public int? BillId { get; set; }
+        
+        /// <summary>
         /// Id lich kham
         /// </summary>
         [Column("appointment_id")]

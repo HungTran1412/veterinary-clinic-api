@@ -66,6 +66,10 @@ namespace VeterinaryClinic.Business
                     //join bang medical record lay id
                     join mr in _dataContext.VcMedicalRecords on a.Id equals mr.AppointmentId into m from mr in m.DefaultIfEmpty()
                     
+                    // LEFT JOIN to get BillId from Invoices
+                    join inv in _dataContext.VcInvoices on a.Id equals inv.AppointmentId into invGroup
+                    from invoice in invGroup.DefaultIfEmpty()
+                    
                     where a.IsActive
                     select new AppointmentModel
                     {
@@ -76,6 +80,7 @@ namespace VeterinaryClinic.Business
                         ServiceId = a.ServiceId,
                         DoctorId = a.DoctorId,
                         MedicalRecordId = mr.Id,
+                        BillId = invoice.BillId,
                         AppointmentDate = a.AppointmentDate,
                         StartTime = a.StartTime,
                         EndTime = a.EndTime,

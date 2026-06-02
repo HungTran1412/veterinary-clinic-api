@@ -123,7 +123,7 @@ namespace VeterinaryClinic.Business
                 return new VnPayPaymentUrlModel
                 {
                     PaymentUrl = paymentUrl,
-                    InvoiceId = anchorPayment.InvoiceId,
+                    InvoiceId = anchorPayment.InvoiceId.Value,
                     PaymentId = anchorPayment.Id,
                     Amount = totalAmount,
                     InvoiceCount = pendingInvoices.Count

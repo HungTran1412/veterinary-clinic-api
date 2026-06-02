@@ -10,6 +10,7 @@
     <PackageReference Include="MailKit" Version="4.3.0" />
     <PackageReference Include="CloudinaryDotNet" Version="1.26.2" />
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    <PackageReference Include="QuestPDF" Version="2023.12.6" />
   </ItemGroup>
 
   <ItemGroup>

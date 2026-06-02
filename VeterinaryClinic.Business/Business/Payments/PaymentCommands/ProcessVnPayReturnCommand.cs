@@ -22,30 +22,29 @@ namespace VeterinaryClinic.Business
             private readonly VeterinaryClinicDataContext _dataContext;
             private readonly IStringLocalizer<ProcessVnPayReturnCommand> _localizer;
             private readonly VnPaySettings _vnpaySettings;
+            private readonly IAppointmentStateMachine _appointmentStateMachine;
 
             public Handler(
                 VeterinaryClinicDataContext dataContext,
                 IStringLocalizer<ProcessVnPayReturnCommand> localizer,
-                IOptions<VnPaySettings> vnpayOptions)
+                IOptions<VnPaySettings> vnpayOptions,
+                IAppointmentStateMachine appointmentStateMachine)
             {
                 _dataContext = dataContext;
                 _localizer = localizer;
                 _vnpaySettings = vnpayOptions.Value;
+                _appointmentStateMachine = appointmentStateMachine;
             }
 
             public async Task<VnPayReturnModel> Handle(ProcessVnPayReturnCommand request, CancellationToken cancellationToken)
             {
-                if (request.QueryData.Count == 0)
-                {
-                    throw new ArgumentException(_localizer["payment.vnpay.input_required"]);
-                }
-
+                // 1. Validate signature from VNPay
                 var vnpay = new VnPayLibrary();
-                foreach (var item in request.QueryData)
+                foreach (var (key, value) in request.QueryData)
                 {
-                    if (item.Key.StartsWith("vnp_", StringComparison.OrdinalIgnoreCase))
+                    if (key.StartsWith("vnp_", StringComparison.OrdinalIgnoreCase))
                     {
-                        vnpay.AddResponseData(item.Key, item.Value);
+                        vnpay.AddResponseData(key, value);
                     }
                 }
 
@@ -55,6 +54,7 @@ namespace VeterinaryClinic.Business
                     throw new ArgumentException(_localizer["payment.vnpay.invalid_signature"]);
                 }
 
+                // 2. Find the payment record
                 if (!int.TryParse(vnpay.GetResponseData("vnp_TxnRef"), out var paymentId))
                 {
                     throw new ArgumentException(_localizer["payment.not_found"]);
@@ -67,95 +67,87 @@ namespace VeterinaryClinic.Business
                     throw new ArgumentException(_localizer["payment.not_found"]);
                 }
 
-                var batchPayments = await _dataContext.VcPayments
-                    .Where(x => x.IsActive && x.Code == payment.Code)
-                    .ToListAsync(cancellationToken);
-                if (!batchPayments.Any())
-                {
-                    throw new ArgumentException(_localizer["payment.not_found"]);
-                }
-
-                var invoiceIds = batchPayments.Select(x => x.InvoiceId).Distinct().ToList();
-                var invoices = await _dataContext.VcInvoices
-                    .Where(x => x.IsActive && invoiceIds.Contains(x.Id))
-                    .ToListAsync(cancellationToken);
-                if (!invoices.Any())
-                {
-                    throw new ArgumentException(_localizer["invoice.not_found"]);
-                }
-
-                var appointmentIds = invoices.Select(x => x.AppointmentId).Distinct().ToList();
-                var appointments = await _dataContext.VcAppointments
-                    .Where(x => x.IsActive && appointmentIds.Contains(x.Id))
-                    .ToListAsync(cancellationToken);
-
+                // 3. Process payment result
                 var responseCode = vnpay.GetResponseData("vnp_ResponseCode");
                 var transactionStatus = vnpay.GetResponseData("vnp_TransactionStatus");
                 var gatewayTransactionId = vnpay.GetResponseData("vnp_TransactionNo");
-                var totalAmount = invoices.Sum(x => x.TotalAmount);
-                var hasPaidInvoice = invoices.Any(x => x.Status == PaymentStatus.SUCCESS.ToString());
-
-                if (!long.TryParse(vnpay.GetResponseData("vnp_Amount"), out var vnpAmountValue) ||
-                    vnpAmountValue / 100m != totalAmount)
-                {
-                    foreach (var batchPayment in batchPayments)
-                    {
-                        batchPayment.PaymentStatus = PaymentStatus.FAILED.ToString();
-                        batchPayment.ResponseCode = responseCode;
-                        batchPayment.GatewayTransactionId = gatewayTransactionId;
-                        batchPayment.GatewayResponse = JsonSerializer.Serialize(request.QueryData);
-                    }
-
-                    foreach (var invoice in invoices.Where(x => x.Status != PaymentStatus.SUCCESS.ToString()))
-                    {
-                        invoice.Status = PaymentStatus.FAILED.ToString();
-                    }
-
-                    await _dataContext.SaveChangesAsync(cancellationToken);
-
-                    throw new ArgumentException(_localizer["payment.vnpay.invalid_amount"]);
-                }
-
                 var isSuccess = responseCode == "00" && transactionStatus == "00";
                 var paymentStatus = isSuccess ? PaymentStatus.SUCCESS.ToString() : PaymentStatus.FAILED.ToString();
+                var invoiceAndBillStatus = isSuccess ? PaymentStatus.PAID.ToString() : PaymentStatus.FAILED.ToString();
                 var now = DateTime.UtcNow;
 
-                foreach (var batchPayment in batchPayments)
-                {
-                    var matchedInvoice = invoices.First(x => x.Id == batchPayment.InvoiceId);
-                    batchPayment.PaymentStatus = paymentStatus;
-                    batchPayment.PaymentMethod = PaymentMethod.VNPAY.ToString();
-                    batchPayment.Amount = matchedInvoice.TotalAmount;
-                    batchPayment.ResponseCode = responseCode;
-                    batchPayment.GatewayTransactionId = gatewayTransactionId;
-                    batchPayment.GatewayResponse = JsonSerializer.Serialize(request.QueryData);
-                    batchPayment.PaymentDate = now;
-                }
+                // Update the primary payment record
+                payment.PaymentStatus = paymentStatus;
+                payment.ResponseCode = responseCode;
+                payment.GatewayTransactionId = gatewayTransactionId;
+                payment.GatewayResponse = JsonSerializer.Serialize(request.QueryData);
+                payment.PaymentDate = now;
 
-                foreach (var invoice in invoices)
+                if (payment.BillId.HasValue)
                 {
-                    if (isSuccess || invoice.Status != PaymentStatus.SUCCESS.ToString())
+                    // --- NEW LOGIC: Processing a master Bill ---
+                    var bill = await _dataContext.VcBills.FindAsync(payment.BillId.Value);
+                    if (bill == null) throw new KeyNotFoundException(_localizer["bill.not_found"]);
+
+                    // Validate amount
+                    if (!long.TryParse(vnpay.GetResponseData("vnp_Amount"), out var vnpAmountValue) || vnpAmountValue / 100m != bill.TotalAmount)
                     {
-                        invoice.Status = paymentStatus;
+                        bill.Status = PaymentStatus.FAILED.ToString();
+                        await _dataContext.SaveChangesAsync(cancellationToken);
+                        throw new ArgumentException(_localizer["payment.vnpay.invalid_amount"]);
+                    }
+                    
+                    // Update statuses
+                    bill.Status = invoiceAndBillStatus;
+                    
+                    var invoices = await _dataContext.VcInvoices.Where(i => i.BillId == bill.Id).ToListAsync(cancellationToken);
+                    var appointmentIds = invoices.Select(i => i.AppointmentId).ToList();
+                    var appointments = await _dataContext.VcAppointments.Where(a => appointmentIds.Contains(a.Id)).ToListAsync(cancellationToken);
+
+                    foreach (var invoice in invoices)
+                    {
+                        invoice.Status = invoiceAndBillStatus;
+                        if(isSuccess) invoice.PaidDate = now;
                     }
 
                     if (isSuccess)
                     {
-                        invoice.PaidDate = now;
+                        foreach (var appt in appointments)
+                        {
+                            _appointmentStateMachine.ApplySystem(appt, AppointmentAction.BANK_TRANSFER);
+                            appt.StateName = _appointmentStateMachine.GetStateDisplayName(Enum.Parse<AppointmentStatus>(appt.State));
+                        }
                     }
                 }
-
-                if (isSuccess)
+                else if (payment.InvoiceId.HasValue)
                 {
-                    foreach (var appointment in appointments.Where(x => x.State == AppointmentStatus.PAYMENT_PENDING.ToString()))
+                    // --- OLD LOGIC: Processing a single Invoice ---
+                    var invoice = await _dataContext.VcInvoices.FindAsync(payment.InvoiceId.Value);
+                    if (invoice == null) throw new KeyNotFoundException(_localizer["invoice.not_found"]);
+
+                    // Validate amount
+                    if (!long.TryParse(vnpay.GetResponseData("vnp_Amount"), out var vnpAmountValue) || vnpAmountValue / 100m != invoice.TotalAmount)
                     {
-                        appointment.State = AppointmentStatus.COMPLETED.ToString();
-                        appointment.StateName = "Hoan thanh";
-                        appointment.IsFinalState = true;
-                        appointment.ModifiedDate = now;
+                        invoice.Status = PaymentStatus.FAILED.ToString();
+                        await _dataContext.SaveChangesAsync(cancellationToken);
+                        throw new ArgumentException(_localizer["payment.vnpay.invalid_amount"]);
+                    }
+                    
+                    // Update statuses
+                    invoice.Status = invoiceAndBillStatus;
+                    if(isSuccess) invoice.PaidDate = now;
+
+                    if (isSuccess)
+                    {
+                        var appointment = await _dataContext.VcAppointments.FindAsync(invoice.AppointmentId);
+                        if (appointment != null)
+                        {
+                            _appointmentStateMachine.ApplySystem(appointment, AppointmentAction.BANK_TRANSFER);
+                            appointment.StateName = _appointmentStateMachine.GetStateDisplayName(Enum.Parse<AppointmentStatus>(appointment.State));
+                        }
                     }
                 }
-
+                
                 await _dataContext.SaveChangesAsync(cancellationToken);
 
                 return new VnPayReturnModel
@@ -163,11 +155,8 @@ namespace VeterinaryClinic.Business
                     IsSuccess = isSuccess,
                     ResponseCode = responseCode,
                     Message = isSuccess ? "Payment success" : "Payment failed",
-                    InvoiceId = invoices.FirstOrDefault()?.Id,
                     PaymentId = payment.Id,
-                    AppointmentId = appointments.FirstOrDefault()?.Id,
-                    Amount = totalAmount,
-                    InvoiceCount = invoices.Count
+                    Amount = payment.Amount
                 };
             }
         }

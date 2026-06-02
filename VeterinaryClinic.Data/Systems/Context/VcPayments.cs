@@ -11,10 +11,18 @@ namespace VeterinaryClinic.Data
     public class VcPayments : BaseEntity
     {
         /// <summary>
-        /// Id hóa đơn
+        /// ID của hóa đơn tổng (nếu có).
+        /// Dùng cho các khoản thanh toán gộp nhiều dịch vụ.
+        /// </summary>
+        [Column("bill_id")]
+        public int? BillId { get; set; }
+
+        /// <summary>
+        /// Id hóa đơn dịch vụ (dùng cho logic cũ, hoặc thanh toán riêng lẻ).
+        /// Có thể null nếu thanh toán theo hóa đơn tổng.
         /// </summary>
         [Column("invoice_id")]
-        public int InvoiceId { get; set; }
+        public int? InvoiceId { get; set; }
 
         /// <summary>
         /// Mã thanh toán nội bộ

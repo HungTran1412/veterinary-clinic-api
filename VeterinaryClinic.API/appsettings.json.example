@@ -63,8 +63,8 @@
     }
   },
   "ClinicInfo": {
-    "Name": "Phòng khám Thú y VetCare",
-    "Address": "236 Phố Ngô Xuân Quảng, Xã Gia Lâm, TP. Hà Nội",
-    "PhoneNumber": "0123 456 789"
-  }
+      "Name": "Phòng khám Thú y VetCare",
+      "Address": "236 phố Ngô Xuân Quảng, xã Gia Lâm, thành phó Hà Nội",
+      "PhoneNumber": "0123 456 789"
+    }
 }

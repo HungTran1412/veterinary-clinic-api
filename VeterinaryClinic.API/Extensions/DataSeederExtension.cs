@@ -42,7 +42,7 @@ namespace VeterinaryClinic.API.Extensions
                         // Tạo tài khoản admin
                         var newAdmin = new VcUsers
                         {
-                            Code = GenerateCode("ADM"),
+                            Code = GenerateCodeUtils.GenerateCode("ADM"),
                             Username = adminSettings.Username,
                             Email = adminSettings.Email,
                             Password = passwordHasher.HashPassword(adminSettings.Password),
@@ -86,12 +86,6 @@ namespace VeterinaryClinic.API.Extensions
                     Log.Error(ex, "An error occurred while seeding the admin user.");
                 }
             }
-        }
-
-        private static string GenerateCode(string prefix)
-        {
-            int randomNumber = Random.Shared.Next(10000000, 100000000);
-            return $"{prefix}{randomNumber}";
         }
     }
 }

@@ -84,4 +84,9 @@ namespace VeterinaryClinic.Business
         public int? SpecializationId { get; init; }
         public bool? IsAvailable { get; init; }
     }
+    
+    public record TopServiceModel : InfoServiceModel
+    {
+        public int UsageCount { get; init; }
+    }
 }

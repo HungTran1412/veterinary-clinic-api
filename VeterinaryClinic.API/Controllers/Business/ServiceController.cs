@@ -103,6 +103,21 @@ namespace VeterinaryClinic.API.Controllers
         }
         
         /// <summary>
+        /// Lọc danh sách dịch vụ được sử dụng nhiều nhất.
+        /// </summary>
+        /// <param name="filter">Điều kiện phân trang.</param>
+        /// <returns></returns>
+        [HttpPost, Route("filter-top")]
+        [ProducesResponseType(typeof(ResponseObject<PaginationList<TopServiceModel>>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FilterTop([FromBody] BaseQueryFilterModel filter)
+        {
+            return await ExecuteFunction(async () =>
+            {
+                return await _mediator.Send(new GetFilterTopServiceQuery(filter));
+            });
+        }
+        
+        /// <summary>
         /// Lấy danh sách dịch vụ cho combobox
         /// </summary>
         /// <param name="count">Số bản ghi tối đa</param>

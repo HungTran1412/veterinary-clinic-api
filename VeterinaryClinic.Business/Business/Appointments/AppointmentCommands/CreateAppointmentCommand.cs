@@ -306,7 +306,8 @@ namespace VeterinaryClinic.Business
                     throw;
                 }
                 
-                // Send email notifications using Hangfire
+                #region Send Email
+
                 // Email to Customer
                 string customerSubject = "Xác nhận lịch hẹn của bạn - Phòng khám thú y";
                 string customerBody = EmailTemplates.GetAppointmentConfirmationEmailForCustomer(
@@ -321,19 +322,6 @@ namespace VeterinaryClinic.Business
                 );
                 BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendEmailAsync(customer.Email, customerSubject, customerBody));
 
-                // Notification to Customer
-                var customerNotification = new NotificationModel
-                {
-                    UserId = customer.Id,
-                    Title = customerSubject,
-                    Message = $"Lịch hẹn cho thú cưng {pet.Name} đã được tạo thành công.",
-                    Type = NotificationType.MESSAGE.ToString(),
-                    RelatedEntityId = entity.Id,
-                    RelatedEntityType = RelatedEntityType.Appointment.ToString()
-                };
-                await _notificationService.SendAndSaveNotificationAsync(customerNotification);
-
-
                 // Email to Doctor
                 string doctorSubject = "Lịch hẹn mới được tạo - Phòng khám thú y";
                 string doctorBody = EmailTemplates.GetAppointmentConfirmationEmailForDoctor(
@@ -347,7 +335,11 @@ namespace VeterinaryClinic.Business
                     entity.Code
                 );
                 BackgroundJob.Enqueue<IEmailService>(emailService => emailService.SendEmailAsync(selectedDoctor.DoctorEmail, doctorSubject, doctorBody)); 
+                
 
+                #endregion
+                
+                #region Notification
                 // Notification to Doctor
                 var doctorNotification = new NotificationModel
                 {
@@ -358,9 +350,21 @@ namespace VeterinaryClinic.Business
                     RelatedEntityId = entity.Id,
                     RelatedEntityType = RelatedEntityType.Appointment.ToString()
                 };
+                
+                // Notification to Customer
+                var customerNotification = new NotificationModel
+                {
+                    UserId = customer.Id,
+                    Title = customerSubject,
+                    Message = $"Lịch hẹn cho thú cưng {pet.Name} đã được tạo thành công.",
+                    Type = NotificationType.MESSAGE.ToString(),
+                    RelatedEntityId = entity.Id,
+                    RelatedEntityType = RelatedEntityType.Appointment.ToString()
+                };
                 await _notificationService.SendAndSaveNotificationAsync(doctorNotification);
-
-                // --- Notification to Admins ---
+                await _notificationService.SendAndSaveNotificationAsync(customerNotification);
+                
+                // Notification to Admin
                 var adminIds = await _dataContext.VcUsers
                     .Where(u => u.IsActive && u.Role == Role.ADMIN.ToString())
                     .Select(u => u.Id)
@@ -379,7 +383,8 @@ namespace VeterinaryClinic.Business
                     };
                     await _notificationService.SendAndSaveNotificationAsync(adminNotification);
                 }
-                // --- End Notification to Admins ---
+
+                #endregion
 
                 Log.Information($"Appointment confirmation email jobs enqueued for customer {customer.Email} and doctor {selectedDoctor.DoctorEmail}.");
                 

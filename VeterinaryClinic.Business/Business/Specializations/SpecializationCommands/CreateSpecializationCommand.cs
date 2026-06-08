@@ -57,6 +57,12 @@ namespace VeterinaryClinic.Business
                     throw new ArgumentException($"{_localizer["Specialization.existed.code"]}");
                 }
 
+                var checkName = await _dataContext.VcSpecializations.AnyAsync(x => x.Name == entity.Name, cancellationToken);
+                if (checkName)
+                {
+                    throw new ArgumentException($"{_localizer["Specialization.existed.name"]}");
+                }
+                
                 //luu vao database
                 entity.CreatedUserId = _contextAccessor.UserId;
                 await _dataContext.VcSpecializations.AddAsync(entity, cancellationToken);

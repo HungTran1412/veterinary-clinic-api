@@ -6,6 +6,7 @@
   "specialization.code.required": "Mã chuyên ngành không được để trống",
   "specialization.name.required": "Tên chuyên ngành không được để trống",
   "Specialization.existed.code;": "Mã chuyên ngành đã tồn tại",
+  "Specialization.existed.name;": "Tên chuyên ngành đã tồn tại",
   "specialization.not_found_or_inactive": "Một hoặc nhiều chuyên ngành không tồn tại hoặc đã bị vô hiệu hóa.",
 
   "shift_template.code.required": "Mã ca làm việc không được để trống",

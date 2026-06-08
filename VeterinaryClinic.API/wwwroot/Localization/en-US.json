@@ -6,6 +6,7 @@
   "specialization.code.required": "Specialization code is required",
   "specialization.name.required": "Specialization name is required",
   "Specialization.existed.code;": "Specialization code already exists",
+  "Specialization.existed.name;": "Specialization name already exists",
   "specialization.not_found_or_inactive": "One or more specializations not found or are inactive.",
 
   "shift_template.code.required": "Shift template code is required",

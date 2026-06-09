@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using VeterinaryClinic.Data;
 using VeterinaryClinic.Shared;
 
@@ -47,10 +48,11 @@ namespace VeterinaryClinic.Business
 
                 if (filter.IsActive.HasValue)
                 {
-                    data = data.Where(x => x.IsActive == filter.IsActive.HasValue);
+                    data = data.Where(x => x.IsActive == filter.IsActive.Value);
                 }
 
-                data.OrderByField(filter.PropertyName, filter.Ascending);
+                // Sắp xếp theo ngày tạo mới nhất đến cũ nhất
+                data = data.OrderByDescending(x => x.CreatedDate);
                 
                 if (filter.PageSize <= 0)
                 {
@@ -62,7 +64,7 @@ namespace VeterinaryClinic.Business
                 
                 //tinh so dong bi bo qua trong kich thuoc trang
                 int excludedRows = (filter.PageNumber - 1) * filter.PageSize;
-                if (excludedRows <= 0)
+                if (excludedRows < 0)
                 {
                     excludedRows = 0;
                 }

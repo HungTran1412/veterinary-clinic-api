@@ -102,12 +102,18 @@ namespace VeterinaryClinic.Business
                         }
                     }
                     
-                    // Find all pending appointments for this customer
-                    var pendingAppointmentIds = await _dataContext.VcAppointments
-                        .Where(a => a.CustomerId == appointment.CustomerId &&
-                                    a.State == AppointmentStatus.PAYMENT_PENDING.ToString() &&
-                                    a.IsActive)
-                        .Select(a => a.Id)
+                    // Only include pending appointments that still have an active invoice.
+                    var pendingAppointmentIds = await (
+                        from appt in _dataContext.VcAppointments
+                        join invoice in _dataContext.VcInvoices on appt.Id equals invoice.AppointmentId
+                        where appt.CustomerId == appointment.CustomerId &&
+                              appt.State == AppointmentStatus.PAYMENT_PENDING.ToString() &&
+                              appt.IsActive &&
+                              invoice.IsActive &&
+                              invoice.Status != PaymentStatus.PAID.ToString() &&
+                              invoice.Status != PaymentStatus.SUCCESS.ToString()
+                        select appt.Id)
+                        .Distinct()
                         .ToListAsync(cancellationToken);
                     
                     if (!pendingAppointmentIds.Contains(appointment.Id))

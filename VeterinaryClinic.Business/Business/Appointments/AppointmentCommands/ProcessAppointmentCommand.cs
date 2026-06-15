@@ -70,10 +70,11 @@ namespace VeterinaryClinic.Business
 
                 ValidatePermission(appointment, action);
 
-                // --- UNIFIED PAYMENT LOGIC ---
+                #region PAYMENT LOGIC
+
                 if (action == AppointmentAction.CASH_PAYMENT || action == AppointmentAction.BANK_TRANSFER)
                 {
-                    // Safety check: Ensure the primary invoice for this action hasn't been processed.
+                    // check xem hóa đơn được xử lý chưa
                     var primaryInvoice = await _dataContext.VcInvoices
                         .AsNoTracking()
                         .FirstOrDefaultAsync(i => i.AppointmentId == appointment.Id, cancellationToken);
@@ -102,17 +103,17 @@ namespace VeterinaryClinic.Business
                         }
                     }
                     
-                    // Only include pending appointments that still have an active invoice.
+                    // Xử lí các lịch hẹn vẫn còn hóa đơn chưa thanh toán
                     var pendingAppointmentIds = await (
-                        from appt in _dataContext.VcAppointments
-                        join invoice in _dataContext.VcInvoices on appt.Id equals invoice.AppointmentId
-                        where appt.CustomerId == appointment.CustomerId &&
-                              appt.State == AppointmentStatus.PAYMENT_PENDING.ToString() &&
-                              appt.IsActive &&
-                              invoice.IsActive &&
-                              invoice.Status != PaymentStatus.PAID.ToString() &&
-                              invoice.Status != PaymentStatus.SUCCESS.ToString()
-                        select appt.Id)
+                            from appt in _dataContext.VcAppointments
+                            join invoice in _dataContext.VcInvoices on appt.Id equals invoice.AppointmentId
+                            where appt.CustomerId == appointment.CustomerId &&
+                                  appt.State == AppointmentStatus.PAYMENT_PENDING.ToString() &&
+                                  appt.IsActive &&
+                                  invoice.IsActive &&
+                                  invoice.Status != PaymentStatus.PAID.ToString() &&
+                                  invoice.Status != PaymentStatus.SUCCESS.ToString()
+                            select appt.Id)
                         .Distinct()
                         .ToListAsync(cancellationToken);
                     
@@ -126,12 +127,13 @@ namespace VeterinaryClinic.Business
                         AppointmentIds = pendingAppointmentIds,
                         PaymentMethod = action == AppointmentAction.CASH_PAYMENT ? PaymentMethod.CASH.ToString() : PaymentMethod.VNPAY.ToString(),
                         Note = "Thanh toán gộp tự động",
-                        ClientIpAddress = null // Pass null as the model doesn't contain this info
+                        ClientIpAddress = null 
                     };
 
                     return await _mediator.Send(new CreateBillCommand(createBillModel), cancellationToken);
                 }
-                // --- END OF UNIFIED PAYMENT LOGIC ---
+
+                #endregion
 
                 // This part will only be executed for non-payment actions
                 _appointmentStateMachine.Apply(appointment, action, request.Model.CancelReason);

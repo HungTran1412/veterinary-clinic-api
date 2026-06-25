@@ -8,7 +8,7 @@ using VeterinaryClinic.Shared;
 
 namespace VeterinaryClinic.Business
 {
-    public class CreateServiceCommand : IRequest<Unit>
+    public class CreateServiceCommand : IRequest<int>
     {
         public CreateServiceModel Model { get; }
 
@@ -21,7 +21,7 @@ namespace VeterinaryClinic.Business
             Model = model;
         }
 
-        public class Handler : IRequestHandler<CreateServiceCommand, Unit>
+        public class Handler : IRequestHandler<CreateServiceCommand, int>
         {
             private readonly VeterinaryClinicDataContext _dataContext;
             private readonly ICacheService _cacheService;
@@ -36,7 +36,7 @@ namespace VeterinaryClinic.Business
                 _contextAccessor = contextAccessorFactory();
             }
 
-            public async Task<Unit> Handle(CreateServiceCommand request, CancellationToken cancellationToken)
+            public async Task<int> Handle(CreateServiceCommand request, CancellationToken cancellationToken)
             {
                 var model = request.Model;
                 var currentUserId = _contextAccessor.UserId;
@@ -71,7 +71,7 @@ namespace VeterinaryClinic.Business
                 //xoa cache
                 _cacheService.Remove(ServiceConstant.BuildCacheKey());
                 
-                return Unit.Value;
+                return entity.Id;
             }
         }
     }   

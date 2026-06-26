@@ -29,7 +29,7 @@
                     <hr style='border: none; border-top: 1px solid #eee;' />
                     <p style='font-size: 0.9em; color: #777;'>
                         Trân trọng,<br/>
-                        <strong>Ban quản trị hệ thống Veterinary Clinic</strong>
+                        <strong>Ban quản trị hệ thống VetCare</strong>
                     </p>
                 </div>
             ";
@@ -47,7 +47,7 @@
                 <div style='font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px;'>
                     <h2 style='color: #0056b3; text-align: center;'>Xác thực tài khoản của bạn</h2>
                     <p>Xin chào {fullName},</p>
-                    <p>Cảm ơn bạn đã đăng ký tài khoản tại Veterinary Clinic. Vui lòng nhấp vào nút bên dưới để hoàn tất quá trình đăng ký và kích hoạt tài khoản của bạn.</p>
+                    <p>Cảm ơn bạn đã đăng ký tài khoản tại VetCare. Vui lòng nhấp vào nút bên dưới để hoàn tất quá trình đăng ký và kích hoạt tài khoản của bạn.</p>
                     <div style='text-align: center; margin: 30px 0;'>
                         <a href='{verificationLink}' style='background-color: #28a745; color: white; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-size: 1.1em;'>Kích hoạt tài khoản</a>
                     </div>
@@ -58,7 +58,7 @@
                     <hr style='border: none; border-top: 1px solid #eee;' />
                     <p style='font-size: 0.9em; color: #777;'>
                         Trân trọng,<br/>
-                        <strong>Ban quản trị hệ thống Veterinary Clinic</strong>
+                        <strong>Ban quản trị hệ thống VetCare</strong>
                     </p>
                 </div>
             ";
@@ -76,7 +76,7 @@
                 <div style='font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px;'>
                     <h2 style='color: #28a745; text-align: center;'>Đăng ký tài khoản thành công!</h2>
                     <p>Xin chào {fullName},</p>
-                    <p>Chúc mừng bạn đã kích hoạt thành công tài khoản tại Veterinary Clinic.</p>
+                    <p>Chúc mừng bạn đã kích hoạt thành công tài khoản tại VetCare.</p>
                     <p>Bây giờ bạn có thể đăng nhập vào hệ thống và bắt đầu sử dụng các dịch vụ của chúng tôi.</p>
                     <div style='text-align: center; margin: 30px 0;'>
                         <a href='{loginUrl}' style='background-color: #007bff; color: white; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-size: 1.1em;'>Đăng nhập ngay</a>
@@ -85,7 +85,7 @@
                     <hr style='border: none; border-top: 1px solid #eee;' />
                     <p style='font-size: 0.9em; color: #777;'>
                         Trân trọng,<br/>
-                        <strong>Ban quản trị hệ thống Veterinary Clinic</strong>
+                        <strong>Ban quản trị hệ thống VetCare</strong>
                     </p>
                 </div>
             ";
@@ -108,7 +108,7 @@
                 <div style='font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px;'>
                     <h2 style='color: #0056b3; text-align: center;'>Xác nhận lịch hẹn của bạn</h2>
                     <p>Xin chào {customerName},</p>
-                    <p>Lịch hẹn của bạn tại Veterinary Clinic đã được xác nhận thành công với các chi tiết sau:</p>
+                    <p>Lịch hẹn của bạn tại VetCare đã được xác nhận thành công với các chi tiết sau:</p>
                     <div style='background-color: #f9f9f9; padding: 15px; border-left: 4px solid #0056b3; margin: 20px 0;'>
                         <p style='margin: 0;'><strong>Mã lịch hẹn:</strong> {appointmentCode}</p>
                         <p style='margin: 0;'><strong>Thú cưng:</strong> {petName}</p>
@@ -122,7 +122,7 @@
                     <hr style='border: none; border-top: 1px solid #eee;' />
                     <p style='font-size: 0.9em; color: #777;'>
                         Trân trọng,<br/>
-                        <strong>Ban quản trị hệ thống Veterinary Clinic</strong>
+                        <strong>Ban quản trị hệ thống VetCare</strong>
                     </p>
                 </div>
             ";
@@ -159,7 +159,7 @@
                     <hr style='border: none; border-top: 1px solid #eee;' />
                     <p style='font-size: 0.9em; color: #777;'>
                         Trân trọng,<br/>
-                        <strong>Ban quản trị hệ thống Veterinary Clinic</strong>
+                        <strong>Ban quản trị hệ thống VetCare</strong>
                     </p>
                 </div>
             ";
@@ -186,7 +186,7 @@
                     <hr style='border: none; border-top: 1px solid #eee;' />
                     <p style='font-size: 0.9em; color: #777;'>
                         Trân trọng,<br/>
-                        <strong>Ban quản trị hệ thống Veterinary Clinic</strong>
+                        <strong>Ban quản trị hệ thống VetCare</strong>
                     </p>
                 </div>
             ";

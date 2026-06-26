@@ -84,7 +84,7 @@ namespace VeterinaryClinic.Business
                 VcUsers customer = null;
                 VcPets pet = null;
 
-                // SCENARIO 1: Receptionist creates for a walk-in customer (new or existing)
+                // Nhân viên lễ tân tạo cho khách hàng mới đến (mới hoặc hiện tại)
                 if (isReceptionist && !string.IsNullOrEmpty(model.CustomerPhone))
                 {
                     customer = await _dataContext.VcUsers
@@ -100,7 +100,7 @@ namespace VeterinaryClinic.Business
                             PhoneNumber = model.CustomerPhone,
                             Email = model.CustomerEmail,
                             Role = Role.CUSTOMER.ToString(),
-                            Password = "Abc@1234" // IMPORTANT: Should be replaced with a secure random password generator
+                            Password = "Abc@1234"
                         };
                         var newCustomerId = await _mediator.Send(new CreateUserCommand(createUserModel), cancellationToken);
                         customer = await _dataContext.VcUsers.FindAsync(newCustomerId);
@@ -125,7 +125,7 @@ namespace VeterinaryClinic.Business
                         pet = await _dataContext.VcPets.FindAsync(newPetId);
                     }
                 }
-                // SCENARIO 2: Logged-in customer creates for themselves, or Receptionist creates for an existing customer via ID
+                // Khách hàng đã đăng nhập tự tạo hoặc Nhân viên lễ tân tạo cho khách hàng hiện tại thông qua ID
                 else
                 {
                     var customerId = isCustomer ? currentUserId : model.CustomerId;

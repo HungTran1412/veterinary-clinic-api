@@ -2,6 +2,8 @@
 
 Backend API cho hệ thống quản lý phòng khám thú y, được xây dựng bằng .NET 8 theo hướng phân lớp, CQRS với MediatR, Entity Framework Core và SQL Server. Dự án tập trung vào các nghiệp vụ đặt lịch khám, quản lý thú cưng, bác sĩ, chuyên khoa, dịch vụ, lịch làm việc, hồ sơ bệnh án, hóa đơn, thanh toán và thông báo thời gian thực.
 
+ clone https://github.com/HungTran1412/veterinary-clinic-ui để lấy project ui của hệ thống hoặc bạn có thể tự phát triển giao diện riêng của mình
+
 ## Công Nghệ Đang Sử Dụng
 
 ### Nền Tảng Chính

@@ -15,6 +15,9 @@ namespace VeterinaryClinic.Business
         private int _timeLive = 300;
         private string? _redisConnectionString = "";
 
+        private bool CanUseReadCache => _config.GetValue<bool>("AppSettings:EnableCache")
+            && !_config.GetValue<bool>("ReadModelSynchronization:Enabled");
+
         public RedisCacheService(IDistributedCache distributedCache, IConfiguration config)
         {
             _config = config;
@@ -31,7 +34,7 @@ namespace VeterinaryClinic.Business
         public async Task<TItem?> GetOrCreate<TItem>(string key, Func<Task<TItem>> createItem,
             DistributedCacheEntryOptions? options = null)
         {
-            if (_config["AppSettings:EnableCache"] == "true")
+            if (CanUseReadCache)
             {
                 TItem? cacheEntry;
                 try
@@ -72,7 +75,7 @@ namespace VeterinaryClinic.Business
         public async Task<TItem?> GetOrCreate<TItem>(string key, Func<TItem> createItem,
             DistributedCacheEntryOptions? options = null)
         {
-            if (_config["AppSettings:EnableCache"] == "true")
+            if (CanUseReadCache)
             {
                 TItem? cacheEntry;
                 try
@@ -113,7 +116,7 @@ namespace VeterinaryClinic.Business
         public async Task Set<TItem>(string key, Func<Task<TItem>> createItem,
             DistributedCacheEntryOptions? options = null)
         {
-            if (_config["AppSettings:EnableCache"] == "true")
+            if (CanUseReadCache)
             {
                 try
                 {
@@ -137,7 +140,7 @@ namespace VeterinaryClinic.Business
 
         public async Task Set<TItem>(string key, Func<TItem> createItem, DistributedCacheEntryOptions? options = null)
         {
-            if (_config["AppSettings:EnableCache"] == "true")
+            if (CanUseReadCache)
             {
                 try
                 {
@@ -161,7 +164,7 @@ namespace VeterinaryClinic.Business
 
         public async Task Set<TItem>(string key, TItem createItem, DistributedCacheEntryOptions? options = null)
         {
-            if (_config["AppSettings:EnableCache"] == "true")
+            if (CanUseReadCache)
             {
                 try
                 {

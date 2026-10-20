@@ -1,17 +1,24 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using VeterinaryClinic.Shared;
+using Microsoft.Extensions.Options;
+using VeterinaryClinic.Data.Synchronization;
 using VeterinaryClinic.Shared.ContextAccessor;
 
 namespace VeterinaryClinic.Data
 {
     public partial class VeterinaryClinicDataContext : DbContext
     {
-        private readonly IContextAccessor _contextAccessor;
+        private readonly IContextAccessor? _contextAccessor;
+        private readonly bool _captureOutbox;
 
-        public VeterinaryClinicDataContext(DbContextOptions<VeterinaryClinicDataContext> options, Func<IContextAccessor> contextAccessorFactory) : base(options)
+        public VeterinaryClinicDataContext(DbContextOptions<VeterinaryClinicDataContext> options, Func<IContextAccessor> contextAccessorFactory,
+            IOptions<ReadModelSynchronizationOptions>? synchronizationOptions = null) : base(options)
         {
             _contextAccessor = contextAccessorFactory?.Invoke();
+            _captureOutbox = synchronizationOptions?.Value.Enabled ?? false;
         }
+
+        public DbSet<ReadModelOutboxMessage> ReadModelOutboxMessages { get; set; } = null!;
         
         public DbSet<VcPets> VcPets { get; set; }
         public DbSet<VcUsers> VcUsers { get; set; }
@@ -36,14 +43,59 @@ namespace VeterinaryClinic.Data
             
             modelBuilder.Entity<VcDoctorSpecializations>()
                 .HasKey(ds => new { ds.DoctorId, ds.SpecializationId });
+
+            modelBuilder.Entity<ReadModelOutboxMessage>(entity =>
+            {
+                entity.ToTable("vcReadModelOutbox");
+                entity.HasKey(message => message.Id);
+                entity.Property(message => message.Id).ValueGeneratedOnAdd();
+                entity.Property(message => message.EntityType).HasMaxLength(512).IsRequired();
+                entity.Property(message => message.KeyValuesJson).IsRequired();
+                entity.HasIndex(message => new { message.ProcessedAtUtc, message.Id });
+            });
         }
         
-        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        public override int SaveChanges() => SaveChanges(true);
+
+        public override int SaveChanges(bool acceptAllChangesOnSuccess)
+        {
+            if (_captureOutbox)
+            {
+                return ReadModelOutboxCapture.SaveChanges(this, acceptAllChangesOnSuccess, accept =>
+                {
+                    ApplyAudit();
+                    return base.SaveChanges(accept);
+                });
+            }
+
+            ApplyAudit();
+            return base.SaveChanges(acceptAllChangesOnSuccess);
+        }
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) =>
+            SaveChangesAsync(true, cancellationToken);
+
+        public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+        {
+            if (_captureOutbox)
+            {
+                return ReadModelOutboxCapture.SaveChangesAsync(this, acceptAllChangesOnSuccess, (accept, token) =>
+                {
+                    ApplyAudit();
+                    return base.SaveChangesAsync(accept, token);
+                }, cancellationToken);
+            }
+
+            ApplyAudit();
+            return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        }
+
+        private void ApplyAudit()
         {
             var entries = ChangeTracker.Entries();
             foreach (var entry in entries)
             {
-                if (entry.Entity is TrackedChangeEntity entity)
+                if (entry.Entity is TrackedChangeEntity entity && entry.State is EntityState.Added or EntityState.Modified)
                 {
                     var userId = _contextAccessor?.UserId ?? 0;
                     var userName = _contextAccessor?.UserName ?? "System";
@@ -68,7 +120,6 @@ namespace VeterinaryClinic.Data
                     }
                 }
             }
-            return base.SaveChangesAsync(cancellationToken);
         }
     }   
 }

@@ -1,8 +1,6 @@
 using VeterinaryClinic.Business;
 using System.Globalization;
 using Microsoft.AspNetCore.Localization;
-using Microsoft.EntityFrameworkCore;
-using VeterinaryClinic.Data;
 using VeterinaryClinic.Infrastructure;
 using System.Reflection;
 using Microsoft.OpenApi.Models;
@@ -161,11 +159,7 @@ builder.Services.AddAuthentication(options =>
 
 
 // 1. Đăng ký DbContext
-builder.Services.AddDbContext<VeterinaryClinicDataContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-builder.Services.AddDbContext<VeterinaryClinicReadDataContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddClinicDatabases(builder.Configuration);
 
 // 2. Đăng ký MediatR
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateSpecializationCommand).Assembly));
@@ -239,7 +233,7 @@ builder.Services.AddHangfire(configuration => configuration
     .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
     .UseSimpleAssemblyNameTypeSerializer()
     .UseRecommendedSerializerSettings()
-    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+    .UseSqlServerStorage(DatabaseConnectionSettings.GetWriteConnectionString(builder.Configuration)));
 
 // Add the processing server as IHostedService
 builder.Services.AddHangfireServer();

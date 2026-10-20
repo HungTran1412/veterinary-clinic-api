@@ -7,11 +7,17 @@
   },
   "AllowedHosts": "*",
   "ConnectionStrings": {
-    "DefaultConnection": "Server=.;Database=VeterinaryClinicDb;User Id=sa;Password=your_password;MultipleActiveResultSets=true;TrustServerCertificate=True",
+    "WriteConnection": "Server=.;Database=VeterinaryClinicWriteDb;User Id=your_write_user;Password=your_write_password;TrustServerCertificate=True",
+    "ReadConnection": "Server=.;Database=VeterinaryClinicReadDb;User Id=your_replica_user;Password=your_replica_password;TrustServerCertificate=True",
     "Redis": "localhost:6379,abortConnect=false"
   },
   "AppSettings": {
     "EnableCache": true
+  },
+  "ReadModelSynchronization": {
+    "Enabled": true,
+    "PollIntervalSeconds": 5,
+    "BatchSize": 100
   },
   "CorsSettings": {
     "AllowedOrigins": "http://localhost:3000"

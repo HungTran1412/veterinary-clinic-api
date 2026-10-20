@@ -2,6 +2,7 @@ using System.Data;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Serilog;
+using VeterinaryClinic.Shared;
 
 namespace VeterinaryClinic.Business;
 
@@ -14,9 +15,11 @@ public class VeterinaryClinicCallStoreHelperHandler : IVeterinaryClinicCallStore
         _config = config;
     }
 
-    private string DatabaseConnectionString()
+    private string DatabaseConnectionString(bool forWrite = false)
     {
-        return _config.GetConnectionString("DefaultConnection") ?? string.Empty;
+        return forWrite
+            ? DatabaseConnectionSettings.GetWriteConnectionString(_config)
+            : DatabaseConnectionSettings.GetReadConnectionString(_config);
     }
 
     public DataTable CallStoreGetMedicalRecordByIdAsync(int id)
@@ -50,7 +53,7 @@ public class VeterinaryClinicCallStoreHelperHandler : IVeterinaryClinicCallStore
         DateTime StartTime,
         DateTime EndTime)
     {
-        using var conn = new SqlConnection(DatabaseConnectionString());
+        using var conn = new SqlConnection(DatabaseConnectionString(forWrite: true));
         using var cmd = new SqlCommand("sp_GetCandidateDoctors", conn);
 
         cmd.CommandType = CommandType.StoredProcedure;

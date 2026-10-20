@@ -19,9 +19,9 @@ namespace VeterinaryClinic.Business
     public class CheckTokenQueryHandler : IRequestHandler<CheckTokenQuery, CheckTokenResponseModel>
     {
         private readonly IContextAccessor _contextAccessor;
-        private readonly VeterinaryClinicReadDataContext _dataContext;
+        private readonly VeterinaryClinicDataContext _dataContext;
 
-        public CheckTokenQueryHandler(Func<IContextAccessor> contextAccessorFactory, VeterinaryClinicReadDataContext dataContext)
+        public CheckTokenQueryHandler(Func<IContextAccessor> contextAccessorFactory, VeterinaryClinicDataContext dataContext)
         {
             _contextAccessor = contextAccessorFactory();
             _dataContext = dataContext;

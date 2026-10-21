@@ -147,9 +147,9 @@ File mẫu dùng `VeterinaryCliniceDB` và `VeterinaryClinicReadDB`, bật `Read
 Luồng xử lý:
 
 1. `VeterinaryClinicDataContext.SaveChanges` lưu thay đổi nghiệp vụ và khóa bản ghi trong `vcReadModelOutbox` cùng transaction trên Write DB. Outbox không lưu snapshot mật khẩu/token.
-2. `ReadModelSynchronizationWorker` lấy pending theo `Id`, tối đa `BatchSize` (mặc định 100), mỗi `PollIntervalSeconds` (mặc định 5 giây). SQL Server application lock trên Write DB đảm bảo chỉ một consumer xử lý, kể cả có nhiều API instance.
+2. Sau khi transaction có ghi Outbox commit thành công, write context gửi tín hiệu đánh thức `ReadModelSynchronizationWorker` trong cùng process. Transaction do caller mở chỉ gửi tín hiệu khi caller commit thực tế, không gửi ngay sau `SaveChanges` bên trong transaction. Worker lấy pending theo `Id`, tối đa `BatchSize` (mặc định 100), xử lý batch tiếp theo ngay khi lượt trước có dữ liệu; khi rỗng thì chờ tín hiệu hoặc hết `PollIntervalSeconds` (mặc định 5 giây). SQL Server application lock trên Write DB đảm bảo chỉ một consumer xử lý, kể cả có nhiều API instance.
 3. Consumer đọc lại dữ liệu hiện tại tại Write DB, upsert hoặc xóa ở Read DB trong transaction, giữ nguyên primary key, khóa ghép và thông tin audit. Sau khi Read DB commit mới đánh dấu Outbox hoàn tất.
-4. Nếu lỗi, Outbox còn pending và được thử lại. Nếu replica đã commit nhưng ack lỗi, lần sau áp dụng lại trạng thái hiện tại; không dùng checkpoint lớn nhất nên không bỏ mất message có `Id` thấp nhưng commit muộn.
+4. Nếu lỗi, Outbox còn pending và worker nghỉ theo `PollIntervalSeconds` trước khi thử lại; tín hiệu mới không bỏ qua khoảng nghỉ này. Nếu replica đã commit nhưng ack lỗi, lần sau áp dụng lại trạng thái hiện tại; không dùng checkpoint lớn nhất nên không bỏ mất message có `Id` thấp nhưng commit muộn. Việc ack Outbox không phát thêm tín hiệu.
 
 Command và `check-token` dùng Write DB authoritative. Query thông thường dùng Read DB và có thể trễ hơn lệnh ghi; không có bảo đảm đọc thấy ngay dữ liệu vừa ghi. Service lỗi không làm thất bại một command đã commit. Khi bật đồng bộ, `RedisCacheService.GetOrCreate/Set` bỏ qua cache để không giữ kết quả replica cũ sau khi đồng bộ đã hoàn tất; cấu hình một DB vẫn dùng cache như trước. Redis/SignalR vẫn được cấu hình và sử dụng cho các mục đích khác.
 
@@ -185,6 +185,8 @@ Index pending: `(ProcessedAtUtc, Id)`. Ví dụ khóa đơn `{"Id":12}`, khóa g
 ### Vận hành và giới hạn
 
 Theo dõi số message `ProcessedAtUtc IS NULL`, tuổi message pending cũ nhất theo `CreatedAtUtc` và log worker. Message lỗi/payload không hợp lệ chặn cả batch và giữ pending để điều tra; không tự bỏ qua hay đánh dấu thành công. Sửa nguyên nhân/schema/data qua quy trình vận hành trước khi để service thử lại. Dọn các message đã processed theo retention do đội vận hành quyết định; không xóa pending. Code không tự dọn dữ liệu.
+
+Tín hiệu đánh thức dùng Channel trong bộ nhớ, chỉ gộp yêu cầu kiểm tra chứ không chứa dữ liệu business. Outbox vẫn là nguồn bền vững. Polling tiếp tục hoạt động khi không có tín hiệu, process khởi động lại, consumer khác giữ khóa hoặc thay đổi được commit từ instance khác. Lỗi phát tín hiệu không làm thất bại lệnh ghi đã commit. Tối ưu này giảm thời gian chờ chủ động, không bảo đảm query đọc thấy ngay sau command; độ trễ thực tế còn phụ thuộc database, backlog và retry. Caller commit trực tiếp underlying ADO transaction thay vì API transaction EF không đi qua observer; polling vẫn dự phòng.
 
 Capture chỉ bao phủ EF `SaveChanges` trên write context. Raw SQL, `ExecuteUpdate/Delete`, stored procedure ghi hay ứng dụng khác ghi thẳng DB không tự phát Outbox; cần tích hợp capture tương ứng trước khi sử dụng những đường ghi này. Keys-only đồng bộ trạng thái cuối cùng, không dùng làm audit lịch sử sự kiện. Thay đổi schema/entity cần được triển khai đồng bộ hai phía. Đây là đồng bộ một chiều, Read DB không là nguồn dữ liệu để ghi ngược.
 

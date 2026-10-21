@@ -10,7 +10,7 @@ namespace VeterinaryClinic.Tests.Configuration;
 
 public class ReadModelIntegrationTests
 {
-    // Kiểm tra xuyên suốt capture, projection và ack: thêm/sửa/xóa hội tụ đúng ID, không tự phát Outbox khi ack.
+    // Kiểm tra capture, projection và ack giữ ID, chỉ phát tín hiệu sau ghi business và không tự phát lại khi ack.
     [Fact]
     public async Task CaptureAndProjection_SynchronizeInsertUpdateDeleteAndAcknowledgeWithoutFeedback()
     {
@@ -22,7 +22,8 @@ public class ReadModelIntegrationTests
         var synchronization = Options.Create(new ReadModelSynchronizationOptions { Enabled = true });
         var writeOptions = new DbContextOptionsBuilder<VeterinaryClinicDataContext>().UseSqlite(writeConnection).Options;
         var readOptions = new DbContextOptionsBuilder<VeterinaryClinicReadDataContext>().UseSqlite(readConnection).Options;
-        await using var source = new VeterinaryClinicDataContext(writeOptions, null!, synchronization);
+        var signal = new CountingSignal();
+        await using var source = new VeterinaryClinicDataContext(writeOptions, null!, synchronization, signal);
         await using var replica = new VeterinaryClinicReadDataContext(readOptions);
         await source.Database.EnsureCreatedAsync();
         await replica.Database.EnsureCreatedAsync();
@@ -33,7 +34,9 @@ public class ReadModelIntegrationTests
         // Act: thêm và xác nhận replica có cùng identity và audit.
         source.VcSpecializations.Add(entity);
         await source.SaveChangesAsync();
+        Assert.Equal(1, signal.Notifications);
         Assert.Equal(1, await processor.ProcessBatchAsync());
+        Assert.Equal(1, signal.Notifications);
         var projected = await replica.VcSpecializations.AsNoTracking().SingleAsync();
         Assert.Equal(entity.Id, projected.Id);
         Assert.Equal(entity.Name, projected.Name);
@@ -43,10 +46,13 @@ public class ReadModelIntegrationTests
         entity.Name = "Da liễu";
         source.Update(entity);
         await source.SaveChangesAsync();
+        Assert.Equal(2, signal.Notifications);
         Assert.Equal(1, await processor.ProcessBatchAsync());
+        Assert.Equal(2, signal.Notifications);
         Assert.Equal("Da liễu", await replica.VcSpecializations.AsNoTracking().Select(x => x.Name).SingleAsync());
         source.Remove(entity);
         await source.SaveChangesAsync();
+        Assert.Equal(3, signal.Notifications);
         Assert.Equal(1, await processor.ProcessBatchAsync());
 
         // Assert
@@ -54,6 +60,15 @@ public class ReadModelIntegrationTests
         Assert.Equal(3, await source.ReadModelOutboxMessages.CountAsync());
         Assert.Equal(0, await source.ReadModelOutboxMessages.CountAsync(x => x.ProcessedAtUtc == null));
         Assert.Equal(0, await processor.ProcessBatchAsync());
+        Assert.Equal(3, signal.Notifications);
+    }
+
+    private sealed class CountingSignal : IReadModelSynchronizationSignal
+    {
+        public int Notifications { get; private set; }
+        public void Notify() => Notifications++;
+        public Task WaitAsync(TimeSpan timeout, CancellationToken cancellationToken)
+            => Task.Delay(timeout, cancellationToken);
     }
 
     // SQLite không có sp_getapplock; chỉ thay lease, các thao tác dữ liệu dùng store thật.

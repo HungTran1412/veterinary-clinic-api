@@ -7,6 +7,7 @@ using VeterinaryClinic.Data;
 using VeterinaryClinic.Data.Synchronization;
 using VeterinaryClinic.Infrastructure;
 using VeterinaryClinic.Infrastructure.Synchronization;
+using VeterinaryClinic.Shared;
 using Xunit;
 
 namespace VeterinaryClinic.Tests.Configuration;
@@ -15,6 +16,30 @@ public class DatabaseServiceExtensionsTests
 {
     private const string WriteConnection = "Server=server;Database=clinic_write;Integrated Security=true";
     private const string ReadConnection = "Server=server;Database=clinic_read;Integrated Security=true";
+
+    [Fact]
+    public void SplitConfiguration_SharesWakeupSignalAcrossScopesWithoutConnecting()
+    {
+        // Kiểm tra request ghi và worker có thể dùng cùng singleton tín hiệu mà DI không mở database.
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddSingleton<Func<IContextAccessor>>(() => null!);
+        services.AddClinicDatabases(Build(SplitValues()));
+        using var provider = services.BuildServiceProvider();
+        using var first = provider.CreateScope();
+        using var second = provider.CreateScope();
+
+        var signal = first.ServiceProvider.GetRequiredService<IReadModelSynchronizationSignal>();
+        using var write = first.ServiceProvider.GetRequiredService<VeterinaryClinicDataContext>();
+        using var read = second.ServiceProvider.GetRequiredService<VeterinaryClinicReadDataContext>();
+
+        Assert.Same(signal, provider.GetRequiredService<IReadModelSynchronizationSignal>());
+        Assert.Same(signal, second.ServiceProvider.GetRequiredService<IReadModelSynchronizationSignal>());
+        Assert.Equal(WriteConnection, write.Database.GetConnectionString());
+        Assert.Equal(ReadConnection, read.Database.GetConnectionString());
+        Assert.Equal(System.Data.ConnectionState.Closed, write.Database.GetDbConnection().State);
+        Assert.Equal(System.Data.ConnectionState.Closed, read.Database.GetDbConnection().State);
+    }
 
     // Kiểm tra DI tách đúng hai kết nối, bật capture và đăng ký worker mà không mở DB.
     [Fact]
@@ -56,6 +81,7 @@ public class DatabaseServiceExtensionsTests
         // Assert
         Assert.False(provider.GetRequiredService<IOptions<ReadModelSynchronizationOptions>>().Value.Enabled);
         Assert.DoesNotContain(services, x => x.ImplementationType == typeof(ReadModelSynchronizationWorker));
+        Assert.Null(provider.GetService<IReadModelSynchronizationSignal>());
     }
 
     // Kiểm tra cấu hình sai bị từ chối trước khi mở kết nối hoặc nhận request nghiệp vụ.

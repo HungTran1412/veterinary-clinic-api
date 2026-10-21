@@ -10,7 +10,8 @@ namespace VeterinaryClinic.Data.Synchronization;
 
 internal static class ReadModelOutboxCapture
 {
-    public static int SaveChanges(DbContext context, bool accept, Func<bool, int> persist)
+    public static int SaveChanges(DbContext context, bool accept, Func<bool, int> persist,
+        Action<DbTransaction>? outboxCaptured = null)
     {
         var entries = ChangedBusinessEntries(context);
         if (entries.Length == 0)
@@ -34,9 +35,15 @@ internal static class ReadModelOutboxCapture
                 command.ExecuteNonQuery();
             }
             if (owned != null)
+            {
+                outboxCaptured?.Invoke(transaction.GetDbTransaction());
                 owned.Commit();
+            }
             else
+            {
                 transaction.ReleaseSavepoint(savepoint!);
+                outboxCaptured?.Invoke(transaction.GetDbTransaction());
+            }
 
             if (accept)
                 context.ChangeTracker.AcceptAllChanges();
@@ -54,7 +61,8 @@ internal static class ReadModelOutboxCapture
     }
 
     public static async Task<int> SaveChangesAsync(DbContext context, bool accept,
-        Func<bool, CancellationToken, Task<int>> persist, CancellationToken cancellationToken)
+        Func<bool, CancellationToken, Task<int>> persist, CancellationToken cancellationToken,
+        Action<DbTransaction>? outboxCaptured = null)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var entries = ChangedBusinessEntries(context);
@@ -80,9 +88,15 @@ internal static class ReadModelOutboxCapture
                 await command.ExecuteNonQueryAsync(cancellationToken);
             }
             if (owned != null)
+            {
+                outboxCaptured?.Invoke(transaction.GetDbTransaction());
                 await owned.CommitAsync(cancellationToken);
+            }
             else
+            {
                 await transaction.ReleaseSavepointAsync(savepoint!, cancellationToken);
+                outboxCaptured?.Invoke(transaction.GetDbTransaction());
+            }
 
             if (accept)
                 context.ChangeTracker.AcceptAllChanges();

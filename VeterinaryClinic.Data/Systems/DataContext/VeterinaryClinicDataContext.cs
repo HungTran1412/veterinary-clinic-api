@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Data.Common;
 using VeterinaryClinic.Shared;
 using Microsoft.Extensions.Options;
 using VeterinaryClinic.Data.Synchronization;
@@ -10,12 +11,20 @@ namespace VeterinaryClinic.Data
     {
         private readonly IContextAccessor? _contextAccessor;
         private readonly bool _captureOutbox;
+        private readonly ReadModelOutboxTransactionInterceptor? _outboxTransactionInterceptor;
+        private readonly Action<DbTransaction>? _outboxCaptured;
 
         public VeterinaryClinicDataContext(DbContextOptions<VeterinaryClinicDataContext> options, Func<IContextAccessor> contextAccessorFactory,
-            IOptions<ReadModelSynchronizationOptions>? synchronizationOptions = null) : base(options)
+            IOptions<ReadModelSynchronizationOptions>? synchronizationOptions = null,
+            IReadModelSynchronizationSignal? synchronizationSignal = null) : base(options)
         {
             _contextAccessor = contextAccessorFactory?.Invoke();
             _captureOutbox = synchronizationOptions?.Value.Enabled ?? false;
+            if (_captureOutbox && synchronizationSignal != null)
+            {
+                _outboxTransactionInterceptor = new ReadModelOutboxTransactionInterceptor(synchronizationSignal);
+                _outboxCaptured = _outboxTransactionInterceptor.MarkCaptured;
+            }
         }
 
         public DbSet<ReadModelOutboxMessage> ReadModelOutboxMessages { get; set; } = null!;
@@ -36,6 +45,13 @@ namespace VeterinaryClinic.Data
         public DbSet<VcShiftTemplates> VcShiftTemplates { get; set; }
         public DbSet<VcWorkScheduleRegistrations> VcWorkScheduleRegistrations { get; set; }
         public DbSet<VcBills> VcBills { get; set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            base.OnConfiguring(optionsBuilder);
+            if (_outboxTransactionInterceptor != null)
+                optionsBuilder.AddInterceptors(_outboxTransactionInterceptor);
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -65,7 +81,7 @@ namespace VeterinaryClinic.Data
                 {
                     ApplyAudit();
                     return base.SaveChanges(accept);
-                });
+                }, _outboxCaptured);
             }
 
             ApplyAudit();
@@ -83,7 +99,7 @@ namespace VeterinaryClinic.Data
                 {
                     ApplyAudit();
                     return base.SaveChangesAsync(accept, token);
-                }, cancellationToken);
+                }, cancellationToken, _outboxCaptured);
             }
 
             ApplyAudit();
